@@ -224,9 +224,7 @@ export default function AdvancedMode() {
   const handleNext = () => {
     if (qIdx + 1 >= total) {
       // Save to the dedicated advanced score slot
-      if (addAdvancedScore) {
-        addAdvancedScore(score, total);
-      }
+      addAdvancedScore(score, total);
       setPhase('summary');
     } else {
       setQIdx(i => i + 1);
