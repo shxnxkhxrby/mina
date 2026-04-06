@@ -82,7 +82,9 @@ export default function FeedbackScreen() {
     isAdvancedMode,
   } = useGameStore();
 
-  const section = SECTIONS.find(s => s.id === currentSection);
+  // Use ALL_SECTIONS so Section D is found when currentSection === 'D'
+  const ALL_SECTIONS = [...SECTIONS, SECTION_D];
+  const section = ALL_SECTIONS.find(s => s.id === currentSection);
   if (!section) return null;
 
   const store = section.stores[currentStoreIndex];
