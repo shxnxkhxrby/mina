@@ -1,0 +1,359 @@
+/* ── Minasa: Grammar Quest — Design System ── */
+/* Source: design_system.md */
+
+:root {
+  /* Primary Colors */
+  --olive-brown: #7A6B3D;
+  --golden: #F5C518;
+  --orange-red: #E85D26;
+  --cream: #FFF8E7;
+  --surface: #F0EBD8;
+  --dark-brown: #3D2B1F;
+  /* Semantic */
+  --success: #4CAF50;
+  --success-light: #E8F5E9;
+  --error: #E57373;
+  --error-light: #FFEBEE;
+  --locked: #9E9E9E;
+  /* Extended */
+  --forest: #5B7A3D;
+  --teal: #5B8A7A;
+  --sky: #87CEEB;
+  --mina-pink: #E88DB0;
+  --wood: #A0522D;
+  /* Fonts */
+  --font-title: 'Fredoka One', cursive;
+  --font-char: 'Baloo 2', sans-serif;
+  --font-body: 'Nunito', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  /* Shadow */
+  --shadow: rgba(61,43,31,0.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+html, body, #root {
+  width:100%; height:100%;
+  overflow:hidden;
+  background:#3D2B1F;
+  font-family:var(--font-body);
+  color:var(--dark-brown);
+  user-select:none;
+}
+
+/* Full viewport game shell */
+.game-shell {
+  position:fixed; inset:0;
+  width:100vw; height:100vh;
+  overflow:hidden;
+  background:#3D2B1F;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* 16:9 game canvas with letterboxing */
+.game-canvas {
+  position:relative;
+  width:min(100vw, calc(100vh * 16/9));
+  height:min(100vh, calc(100vw * 9/16));
+  overflow:hidden;
+  background:#FFF8E7;
+}
+
+/* Every scene fills the canvas */
+.scene {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  overflow:hidden;
+}
+
+/* Bunting decoration */
+.bunting {
+  position:absolute; top:0; left:0; right:0; height:clamp(24px,4vh,36px);
+  background: repeating-linear-gradient(90deg,
+    #E85D26 0,#E85D26 18px,#F5C518 18px,#F5C518 36px,
+    #5B7A3D 36px,#5B7A3D 54px,#E88DB0 54px,#E88DB0 72px);
+  clip-path:polygon(0 0,100% 0,100% 55%,97% 100%,94% 55%,91% 100%,88% 55%,85% 100%,82% 55%,79% 100%,76% 55%,73% 100%,70% 55%,67% 100%,64% 55%,61% 100%,58% 55%,55% 100%,52% 55%,49% 100%,46% 55%,43% 100%,40% 55%,37% 100%,34% 55%,31% 100%,28% 55%,25% 100%,22% 55%,19% 100%,16% 55%,13% 100%,10% 55%,7% 100%,4% 55%,1% 100%,0 55%);
+  z-index:20; pointer-events:none;
+}
+
+/* ── Chat Bubble (NPC) — design_system.md spec ── */
+.chat-bubble {
+  background:rgba(255,248,231,0.97);
+  border:2px solid var(--olive-brown);
+  border-radius:16px;
+  padding:14px 18px;
+  box-shadow:0 4px 12px var(--shadow);
+  position:relative;
+  max-width:70%;
+}
+/* Bubble tail pointing DOWN toward character */
+.chat-bubble::after {
+  content:'';
+  position:absolute;
+  bottom:-14px; left:32px;
+  width:0; height:0;
+  border-left:12px solid transparent;
+  border-right:12px solid transparent;
+  border-top:14px solid var(--olive-brown);
+}
+.chat-bubble::before {
+  content:'';
+  position:absolute;
+  bottom:-10px; left:34px;
+  width:0; height:0;
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-top:12px solid rgba(255,248,231,0.97);
+  z-index:1;
+}
+/* Mina's yellow variant */
+.chat-bubble-mina {
+  background:#FFFDE7;
+  border-color:var(--golden);
+}
+.chat-bubble-mina::after { border-top-color:var(--golden); }
+.chat-bubble-mina::before { border-top-color:#FFFDE7; }
+
+.bubble-speaker {
+  font-family:var(--font-char);
+  font-size:clamp(0.7rem,1.4vw,0.9rem);
+  font-weight:600;
+  color:var(--olive-brown);
+  margin-bottom:5px;
+}
+.bubble-text {
+  font-family:var(--font-body);
+  font-size:clamp(0.75rem,1.5vw,1rem);
+  color:var(--dark-brown);
+  line-height:1.6;
+}
+.bubble-continue {
+  font-size:clamp(0.55rem,1vw,0.7rem);
+  color:var(--olive-brown);
+  text-align:right;
+  margin-top:6px;
+  opacity:0.7;
+  animation:blink 1.2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:0.7} 50%{opacity:0.2} }
+
+/* ── Choice Bubbles (Player side) — design_system.md ── */
+.choice-bubble {
+  background:var(--surface);
+  border:2px solid var(--olive-brown);
+  border-radius:16px;
+  padding:10px 18px;
+  cursor:pointer;
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:clamp(0.72rem,1.4vw,0.9rem);
+  color:var(--dark-brown);
+  text-align:left;
+  transition:all 0.2s ease;
+  width:100%;
+}
+.choice-bubble:hover:not(:disabled) {
+  background:#E8D5A8;
+  border-color:var(--olive-brown);
+  transform:translateX(-4px);
+}
+.choice-bubble.correct {
+  background:var(--success-light);
+  border:3px solid var(--success);
+  color:#2E7D32;
+}
+.choice-bubble.wrong {
+  background:var(--error-light);
+  border:3px solid var(--error);
+  color:#C62828;
+}
+.choice-bubble.dimmed {
+  background:#F5F5F5;
+  border:1px solid #BDBDBD;
+  color:#9E9E9E;
+  cursor:default;
+}
+.choice-bubble:disabled { cursor:default; }
+
+/* ── Buttons ── */
+.btn {
+  font-family:var(--font-char);
+  font-weight:700;
+  font-size:clamp(0.8rem,1.6vw,1rem);
+  padding:10px 24px;
+  border:none; border-radius:50px;
+  cursor:pointer;
+  transition:transform 0.1s, filter 0.1s;
+  outline:none; white-space:nowrap;
+}
+.btn:active { transform:scale(0.96) translateY(2px); }
+.btn-primary {
+  background:linear-gradient(135deg,#E85D26,#D44A15);
+  color:white;
+  box-shadow:0 4px 0 #A03010,0 6px 16px rgba(232,93,38,0.35);
+}
+.btn-primary:hover { filter:brightness(1.08); transform:translateY(-2px); }
+.btn-secondary {
+  background:linear-gradient(135deg,#F5C518,#E0AE05);
+  color:var(--olive-brown);
+  box-shadow:0 4px 0 #A07800;
+}
+.btn-secondary:hover { filter:brightness(1.08); transform:translateY(-2px); }
+.btn-success {
+  background:linear-gradient(135deg,#4CAF50,#388E3C);
+  color:white;
+  box-shadow:0 4px 0 #1B5E20;
+}
+.btn-ghost {
+  background:rgba(255,248,231,0.88);
+  color:var(--olive-brown);
+  border:2px solid var(--olive-brown);
+  box-shadow:0 3px 0 var(--olive-brown);
+}
+.btn-ghost:hover { background:white; }
+.btn-sm { font-size:clamp(0.65rem,1.3vw,0.82rem); padding:7px 16px; }
+.btn-lg { font-size:clamp(0.9rem,2vw,1.2rem); padding:12px 32px; }
+
+/* ── Panel / Card ── */
+.panel {
+  background:var(--cream);
+  border:3px solid var(--olive-brown);
+  border-radius:16px;
+  box-shadow:0 4px 20px var(--shadow);
+  padding:18px 24px;
+}
+.panel-title {
+  font-family:var(--font-title);
+  font-size:clamp(1rem,2.5vw,1.6rem);
+  color:var(--olive-brown);
+  text-align:center;
+}
+
+/* ── Store card ── */
+.store-card {
+  background:var(--cream);
+  border:2px solid var(--olive-brown);
+  border-radius:14px;
+  padding:12px;
+  cursor:pointer;
+  transition:transform 0.2s, box-shadow 0.2s;
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+  box-shadow:0 4px 0 var(--olive-brown),0 6px 16px var(--shadow);
+  position:relative;
+}
+.store-card:hover:not(.locked) { transform:translateY(-5px) scale(1.02); }
+.store-card.locked { opacity:0.5; cursor:not-allowed; filter:grayscale(0.4); }
+.store-card.completed { border-color:var(--success); box-shadow:0 4px 0 var(--success); }
+.store-card.completed::after {
+  content:'✓'; position:absolute; top:-10px; right:-10px;
+  width:24px; height:24px; background:var(--success); color:white;
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:12px;
+}
+.store-name {
+  font-family:var(--font-char); font-weight:700;
+  font-size:clamp(0.6rem,1.3vw,0.82rem);
+  color:var(--olive-brown); text-align:center;
+}
+
+/* ── Progress bar ── */
+.progress-bar { width:100%; height:8px; background:#E0E0E0; border-radius:4px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--golden),var(--orange-red)); border-radius:4px; transition:width 0.4s ease; }
+
+/* ── Score badge ── */
+.score-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--golden); border:2px solid var(--olive-brown);
+  border-radius:50px; padding:4px 14px;
+  font-family:var(--font-char); font-weight:700;
+  font-size:clamp(0.75rem,1.5vw,0.9rem); color:var(--olive-brown);
+  box-shadow:0 2px 0 var(--olive-brown);
+}
+
+/* ── Lesson card ── */
+.lesson-rule {
+  background:linear-gradient(135deg,#FFF3C0,#FFE878);
+  border:2px solid var(--golden); border-radius:10px;
+  padding:10px 14px;
+  font-size:clamp(0.7rem,1.4vw,0.85rem);
+  font-family:var(--font-body); color:var(--dark-brown);
+}
+.lesson-formula {
+  background:#1B5E20; color:#E8F5E9; border-radius:8px;
+  padding:8px 14px;
+  font-family:var(--font-mono);
+  font-size:clamp(0.62rem,1.2vw,0.8rem);
+  white-space:pre-line; letter-spacing:0.3px;
+}
+
+/* ── Grammar highlight (transcript) ── */
+.grammar-highlight {
+  background:rgba(245,197,24,0.3);
+  border-bottom:2px solid var(--golden);
+  cursor:pointer; border-radius:3px; padding:0 2px;
+  transition:background 0.15s;
+  font-weight:600;
+}
+.grammar-highlight:hover { background:rgba(245,197,24,0.6); }
+
+/* ── Overlay ── */
+.overlay {
+  position:absolute; inset:0;
+  background:rgba(61,43,31,0.7);
+  display:flex; align-items:center; justify-content:center;
+  z-index:50; backdrop-filter:blur(3px);
+}
+
+/* ── Certificate ── */
+.certificate {
+  background:linear-gradient(135deg,#FFF8E7,#FFF0C0);
+  border:5px double var(--golden); border-radius:16px;
+  text-align:center;
+  box-shadow:0 0 0 6px var(--olive-brown),0 8px 32px var(--shadow);
+}
+
+/* ── Welcome banner ── */
+.welcome-banner {
+  background:linear-gradient(135deg,#E85D26,#C43015);
+  border:3px solid #8B1A00;
+  border-radius:18px; padding:10px 26px;
+  text-align:center;
+  box-shadow:0 4px 0 #8B1A00,0 6px 20px rgba(232,93,38,0.4);
+}
+.welcome-banner-title {
+  font-family:var(--font-title);
+  font-size:clamp(1.4rem,3.5vw,2.4rem);
+  color:white;
+  text-shadow:2px 3px 0 rgba(0,0,0,0.3);
+  line-height:1.15;
+}
+.welcome-banner-sub {
+  font-family:var(--font-body);
+  font-size:clamp(0.58rem,1.1vw,0.75rem);
+  color:rgba(255,255,255,0.88); margin-top:2px;
+}
+
+/* ── Rotate overlay ── */
+.rotate-overlay {
+  position:fixed; inset:0; z-index:9999;
+  background:#3D2B1F;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:20px;
+  color:var(--cream);
+}
+@keyframes rotate-hint { 0%,100%{transform:rotate(0deg)} 50%{transform:rotate(90deg)} }
+
+/* ── Animations ── */
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes pop-in { 0%{opacity:0;transform:scale(0.7)} 80%{transform:scale(1.05)} 100%{opacity:1;transform:scale(1)} }
+@keyframes pulse-glow { 0%,100%{box-shadow:0 0 0 0 rgba(245,197,24,0)} 50%{box-shadow:0 0 0 10px rgba(245,197,24,0.3)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+@keyframes confetti-fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(110px) rotate(360deg);opacity:0} }
+@keyframes slide-in-right { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+.float { animation:float 3s ease-in-out infinite; }
+.pulse-glow { animation:pulse-glow 2s ease-in-out infinite; }
+
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--surface); border-radius:3px; }
+::-webkit-scrollbar-thumb { background:var(--olive-brown); border-radius:3px; }

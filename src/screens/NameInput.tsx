@@ -1,0 +1,139 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { useGameStore } from '../store/gameStore';
+import { ASSETS } from '../data/assets';
+
+export default function NameInput() {
+  const { setPlayerName, goToScene } = useGameStore();
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSubmit = () => {
+    const clean = name.trim().replace(/<[^>]*>/g, '').slice(0, 30);
+    if (!clean) { setError('Please enter your name!'); return; }
+    setPlayerName(clean);
+    goToScene('MINA_INTRO');
+  };
+
+  return (
+    <div className="scene" style={{ background: 'linear-gradient(160deg,#FFF8E7,#F0EBD8 50%,#E8D8B8)' }}>
+      <div className="bunting"/>
+
+      {/* Full centered layout */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(44px,9vh,80px) clamp(20px,5vw,60px) clamp(20px,5vh,50px)',
+      }}>
+        {/* Left: input panel */}
+        <motion.div
+          className="panel"
+          initial={{ opacity: 0, x: -24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 22 }}
+          style={{
+            width: 'clamp(260px, 42vw, 460px)',
+            flexShrink: 0,
+          }}
+        >
+          <div className="panel-title" style={{ marginBottom: '8px' }}>What's your name?</div>
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(0.68rem,1.4vw,0.85rem)',
+            color: '#7A6355',
+            marginBottom: '16px',
+            lineHeight: 1.5,
+          }}>
+            Enter your name to begin your journey through the Minasa Festival!
+          </p>
+
+          <input
+            type="text" value={name}
+            onChange={e => { setName(e.target.value); setError(''); }}
+            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+            placeholder="Your name here..."
+            maxLength={30}
+            style={{
+              width: '100%', padding: '11px 16px', borderRadius: '12px',
+              border: `2px solid ${error ? 'var(--error)' : 'var(--olive-brown)'}`,
+              fontFamily: 'var(--font-body)',
+              fontSize: 'clamp(0.82rem,1.8vw,1rem)',
+              color: 'var(--dark-brown)', background: 'white', outline: 'none',
+              marginBottom: '6px', transition: 'border-color 0.2s',
+            }}
+            autoFocus
+          />
+          {error && (
+            <p style={{ color: 'var(--error)', fontSize: '0.78rem', marginBottom: '8px', fontFamily: 'var(--font-body)' }}>
+              ⚠ {error}
+            </p>
+          )}
+
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '14px' }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => goToScene('MAIN_MENU')}>← Back</button>
+            <motion.button
+              className="btn btn-primary"
+              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+              onClick={handleSubmit}
+            >
+              Start Adventure! 🎉
+            </motion.button>
+          </div>
+        </motion.div>
+
+        {/* Right: Mina mascot — standing full body, NOT in a circle */}
+        <motion.div
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          style={{
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '12px',
+            flexShrink: 0, marginLeft: 'clamp(20px, 4vw, 48px)',
+          }}
+        >
+          {/* Speech bubble ABOVE Mina */}
+          <div style={{
+            background: '#FFFDE7',
+            border: '2px solid var(--golden)',
+            borderRadius: '16px',
+            padding: '10px 16px',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(0.68rem,1.3vw,0.85rem)',
+            color: 'var(--olive-brown)',
+            fontWeight: 600,
+            maxWidth: 'clamp(140px,18vw,200px)',
+            textAlign: 'center',
+            lineHeight: 1.4,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            position: 'relative',
+          }}>
+            "What's your name, adventurer?" 🌸
+            {/* Arrow pointing down */}
+            <div style={{
+              position: 'absolute', bottom: '-10px', left: '50%', transform: 'translateX(-50%)',
+              width: 0, height: 0,
+              borderLeft: '8px solid transparent',
+              borderRight: '8px solid transparent',
+              borderTop: '10px solid var(--golden)',
+            }}/>
+          </div>
+
+          {/* Mina as standing mascot — no circle, just the image */}
+          <img
+            src={ASSETS.minaMascot}
+            alt="Mina"
+            style={{
+              width: 'clamp(100px,18vw,200px)',
+              height: 'auto',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.2))',
+              animation: 'float 3s ease-in-out infinite',
+            }}
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        </motion.div>
+      </div>
+    </div>
+  );
+}
