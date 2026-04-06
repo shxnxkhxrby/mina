@@ -12,7 +12,11 @@ function allStoresComplete(sectionId: SectionId, progress: GameState['sectionPro
 
 const initialProgress: GameState['sectionProgress'] = {};
 
-export const useGameStore = create<GameState>()(
+export const useGameStore = create<GameState & {
+  advancedScore: { total: number; correct: number };
+  advancedSectionProgress: GameState['sectionProgress'];
+  addAdvancedScore: (correct: number, total: number) => void;
+}>()(  
   persist(
     (set, get) => ({
       playerName: '',
@@ -22,6 +26,8 @@ export const useGameStore = create<GameState>()(
       currentQuestionSet: 'A' as 'A' | 'B',
       sectionProgress: initialProgress,
       overallScore: { total: 0, correct: 0 },
+      advancedScore: { total: 0, correct: 0 },
+      advancedSectionProgress: {} as GameState['sectionProgress'],
       firstPlay: true,
       isAdvancedMode: false,
 
@@ -57,6 +63,11 @@ export const useGameStore = create<GameState>()(
         set({ overallScore: { total: prev.total + total, correct: prev.correct + correct } });
       },
 
+      addAdvancedScore: (correct, total) => {
+        const prev = get().advancedScore;
+        set({ advancedScore: { total: prev.total + total, correct: prev.correct + correct } });
+      },
+
       isSectionUnlocked: (id) => {
         if (id === 'A') return true;
         if (id === 'B') return allStoresComplete('A', get().sectionProgress);
@@ -82,6 +93,8 @@ export const useGameStore = create<GameState>()(
         currentQuestionSet: 'A',
         sectionProgress: {},
         overallScore: { total: 0, correct: 0 },
+        advancedScore: { total: 0, correct: 0 },
+        advancedSectionProgress: {},
         firstPlay: true,
         isAdvancedMode: false,
       }),
