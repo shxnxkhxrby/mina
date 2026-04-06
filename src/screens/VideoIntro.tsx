@@ -3,7 +3,7 @@ import { useGameStore } from '../store/gameStore';
 
 // Place your intro video at /videos/intro.mp4 (also supports .webm and .ogg).
 // If no video is found or it fails to load, this screen is skipped automatically.
-const VIDEO_CANDIDATES = ['/videos/intro.mp4', '/videos/intro.webm', '/videos/intro.ogg'];
+const VIDEO_CANDIDATES = ['https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775505066/intro_py5nfs.mp4'];
 
 export default function VideoIntro() {
   const { goToScene } = useGameStore();
