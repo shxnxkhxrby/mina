@@ -25,9 +25,7 @@ import { useGameStore } from '../store/gameStore';
 // ────────────────────────────────────────────────────────────────────────────
 
 const VIDEO_CANDIDATES = [
-  '/videos/section_d_intro.mp4',
-  '/videos/section_d_intro.webm',
-  '/videos/section_d_intro.ogg',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775504921/section_d_intro_b1cokk.mp4'
 ];
 
 export default function SectionDVideoIntro() {
