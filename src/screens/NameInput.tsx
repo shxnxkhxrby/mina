@@ -16,13 +16,12 @@ export default function NameInput() {
   };
 
   return (
-    <div className="scene" style={{ background: 'linear-gradient(160deg,#FFF8E7,#F0EBD8 50%,#E8D8B8)', overflowY: 'auto' }}>
+    <div className="scene" style={{ background: 'linear-gradient(160deg,#FFF8E7,#F0EBD8 50%,#E8D8B8)' }}>
       <div className="bunting"/>
 
       <div style={{
         position: 'absolute', inset: 0,
         display: 'flex',
-        /* Stack vertically on mobile, side by side on larger screens */
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',

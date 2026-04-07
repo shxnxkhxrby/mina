@@ -5,9 +5,15 @@ export default function ProfessionalPlaceholder() {
   const { goToScene } = useGameStore();
   return (
     <div className="scene" style={{
-       background:'linear-gradient(160deg,#FFF8E7,#F0EBD8 50%,#E8D8B8)', overflow:'hidden',
+       background:'linear-gradient(160deg,#FFF8E7,#F0EBD8 50%,#E8D8B8)',
     }}>
       <div className="bunting"/>
+      <div style={{
+        position: 'absolute', inset: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(48px,9vh,80px) clamp(16px,4vw,40px) clamp(16px,4vh,32px)',
+        overflowY: 'auto',
+      }}>
       <motion.div
         className="panel"
         initial={{opacity:0,y:30}} animate={{opacity:1,y:0}}
@@ -54,6 +60,7 @@ export default function ProfessionalPlaceholder() {
           ← Back to Menu
         </motion.button>
       </motion.div>
+      </div>
     </div>
   );
 }
