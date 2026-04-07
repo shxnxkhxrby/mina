@@ -1,9 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { SECTION_D } from '../data/sectionD';
 import { ASSETS } from '../data/assets';
+
+// ── Audio URLs per section, per Mina line index ────────────────────────────
+// Section A: files 12, 13 | Section B: files 14, 15
+// Section C: files 16, 17 | Section D: files 18, 19
+const SECTION_CONGRATS_AUDIO: Record<string, string[]> = {
+  A: [
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/12_cduwtz.m4a',
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/13_ycrq7v.m4a',
+  ],
+  B: [
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/14_p843qm.m4a',
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/15_xd8vmw.m4a',
+  ],
+  C: [
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/16_eibuny.m4a',
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/17_ov5yvd.m4a',
+  ],
+  D: [
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/18_rldz2p.m4a',
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/19_pabkpy.m4a',
+  ],
+};
 
 const SECTION_CONGRATS: Record<string, {
   subline: string;
@@ -74,6 +96,7 @@ export default function FeedbackScreen() {
     currentSection, currentStoreIndex, sectionProgress, goToScene,
     setStoreIndex, setQuestionSet, setSection, isAdvancedMode,
   } = useGameStore();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const ALL_SECTIONS = [...SECTIONS, SECTION_D];
   const section = ALL_SECTIONS.find(s => s.id === currentSection);
@@ -112,7 +135,44 @@ export default function FeedbackScreen() {
   const minaLines = congratsData?.minaLines ?? [];
   const isLastMinaLine = minaLineIdx >= minaLines.length - 1;
 
+  // Play Mina audio when in congrats phase
+  useEffect(() => {
+    if (phase !== 'congrats') return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    const sectionAudio = SECTION_CONGRATS_AUDIO[currentSection ?? 'A'];
+    const src = sectionAudio?.[minaLineIdx];
+    if (!src) return;
+    const audio = new Audio(src);
+    audioRef.current = audio;
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [phase, minaLineIdx, currentSection]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
   const advanceMina = () => {
+    stopAudio();
     if (!isLastMinaLine) setMinaLineIdx(i => i + 1);
     else setPhase('feedback');
   };
@@ -157,28 +217,35 @@ export default function FeedbackScreen() {
             transition={{ type: 'spring', stiffness: 180, damping: 18 }}
             style={{
               display: 'flex', alignItems: 'flex-end', gap: 'clamp(12px,3vw,28px)',
-              width: '100%', maxWidth: '680px',
-              /* Stack vertically on narrow screens */
-              flexWrap: 'wrap',
+              width: '100%', maxWidth: '680px', flexWrap: 'wrap',
             }}
           >
             <div style={{ flex: 1, minWidth: 'min(200px, 100%)' }}>
               <div style={{
-                fontFamily: 'var(--font-title)', fontSize: 'clamp(1.3rem,3.5vw,2.4rem)',
-                color: accentColor, textShadow: '2px 3px 0 rgba(0,0,0,0.12)',
-                marginBottom: '6px', fontWeight: 900,
+                background: 'linear-gradient(180deg,#FFF8D6 0%,#FFEEA0 100%)',
+                border: `4px solid ${scallop}`, borderRadius: '20px',
+                padding: 'clamp(14px,3vh,24px) clamp(14px,3vw,26px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
               }}>
-                {congratsData.subline}
-              </div>
+                <div style={{
+                  fontFamily: 'var(--font-title)',
+                  fontSize: 'clamp(1rem,2.4vw,1.5rem)',
+                  color: accentColor, marginBottom: '10px', fontWeight: 900,
+                }}>
+                  🌸 Mina says:
+                </div>
 
-              <div style={{ background: bgGradient, border: `2.5px solid ${scallop}`, borderRadius: '16px', padding: 'clamp(12px,2.5vh,22px) clamp(14px,2.5vw,22px)' }}>
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={minaLineIdx}
                     initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}
                   >
-                    <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.85rem,2vw,1.25rem)', color: '#2A1800', lineHeight: 1.55, fontWeight: 800, marginBottom: '12px' }}>
+                    <div style={{
+                      fontFamily: 'var(--font-title)',
+                      fontSize: 'clamp(0.85rem,2vw,1.25rem)',
+                      color: '#2A1800', lineHeight: 1.55, fontWeight: 800, marginBottom: '12px',
+                    }}>
                       {minaLines[minaLineIdx]}
                     </div>
                   </motion.div>
@@ -189,11 +256,19 @@ export default function FeedbackScreen() {
                     {minaLines.map((_, i) => (
                       <motion.div key={i}
                         animate={{ scale: i === minaLineIdx ? 1.3 : 1 }}
-                        style={{ width: i === minaLineIdx ? '18px' : '7px', height: '7px', borderRadius: '4px', background: i <= minaLineIdx ? accentColor : 'rgba(180,120,0,0.3)', transition: 'all 0.3s' }}
+                        style={{
+                          width: i === minaLineIdx ? '18px' : '7px', height: '7px',
+                          borderRadius: '4px',
+                          background: i <= minaLineIdx ? accentColor : 'rgba(180,120,0,0.3)',
+                          transition: 'all 0.3s',
+                        }}
                       />
                     ))}
                   </div>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.55rem,1.1vw,0.72rem)', color: accentColor, marginLeft: 'auto', opacity: 0.8 }}>
+                  <span style={{
+                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.55rem,1.1vw,0.72rem)',
+                    color: accentColor, marginLeft: 'auto', opacity: 0.8,
+                  }}>
                     {isLastMinaLine ? 'Click to see results →' : 'Click to continue ▶'}
                   </span>
                 </div>
@@ -207,7 +282,11 @@ export default function FeedbackScreen() {
             >
               <motion.img
                 src={ASSETS.minaMascot} alt="Mina"
-                style={{ width: 'clamp(80px,18vw,200px)', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.2))', display: 'block' }}
+                style={{
+                  width: 'clamp(80px,18vw,200px)', height: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.2))', display: 'block',
+                }}
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -218,8 +297,11 @@ export default function FeedbackScreen() {
 
         <button
           className="btn btn-ghost btn-sm"
-          style={{ position: 'absolute', bottom: 'clamp(16px,3.5vh,32px)', right: 'clamp(16px,3vw,28px)', zIndex: 10, opacity: 0.75, color: accentColor }}
-          onClick={e => { e.stopPropagation(); setPhase('feedback'); }}
+          style={{
+            position: 'absolute', bottom: 'clamp(16px,3.5vh,32px)',
+            right: 'clamp(16px,3vw,28px)', zIndex: 10, opacity: 0.75, color: accentColor,
+          }}
+          onClick={e => { e.stopPropagation(); stopAudio(); setPhase('feedback'); }}
         >
           Skip →
         </button>
@@ -237,9 +319,7 @@ export default function FeedbackScreen() {
         initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 180, damping: 18 }}
         style={{
-          /* Fixed: was clamp(320px,70vw,680px) — 320px min-width can overflow on 320px phones */
-          width: 'clamp(290px,90vw,660px)',
-          maxHeight: '82vh', overflowY: 'auto',
+          width: 'clamp(290px,90vw,660px)', maxHeight: '82vh', overflowY: 'auto',
           border: `3px solid ${sectionAccent}`, position: 'relative', zIndex: 1,
         }}
       >
@@ -297,8 +377,7 @@ export default function FeedbackScreen() {
                   fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.2vw,0.85rem)',
                   background: done ? 'var(--success)' : isCurr ? 'var(--golden)' : 'var(--surface)',
                   border: `2px solid ${done ? 'var(--success)' : isCurr ? 'var(--olive-brown)' : 'rgba(122,107,61,0.3)'}`,
-                  color: done ? 'white' : 'var(--text-dark)',
-                  minWidth: '80px',
+                  color: done ? 'white' : 'var(--text-dark)', minWidth: '80px',
                 }}>
                   {done ? '✓' : isCurr ? '◉' : '○'} {st.npcName}
                 </div>
