@@ -1,14 +1,67 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { TEACHER_DIALOGUES } from '../data/dialogues';
 
+// ── Audio for Teacher's 9 dialogue lines (files 27–35) ────────────────────
+const TEACHER_AUDIO = [
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/27_j7h9zv.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/28_w9z2vq.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563624/29_ehqqkk.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563624/30_rjo7it.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/31_ytdesq.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/32_jeswzg.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/33_evwij9.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563626/34_r6qfin.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563657/35_qtd4eo.m4a',
+];
+
 export default function TeacherIntro() {
   const { goToScene } = useGameStore();
   const [idx, setIdx] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const current = TEACHER_DIALOGUES[idx];
   const isLast = idx === TEACHER_DIALOGUES.length - 1;
-  const advance = () => { if (isLast) goToScene('MINA_INTRO'); else setIdx(i => i+1); };
+
+  // Play audio for each teacher dialogue line
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    const src = TEACHER_AUDIO[idx];
+    if (!src) return;
+    const audio = new Audio(src);
+    audioRef.current = audio;
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [idx]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
+  const advance = () => {
+    stopAudio();
+    if (isLast) goToScene('MINA_INTRO');
+    else setIdx(i => i + 1);
+  };
 
   return (
     <div className="scene" style={{ cursor:'pointer', background:'linear-gradient(180deg,#E8D5A3 0%,#D4B896 40%,#C4A882 100%)' }} onClick={advance}>

@@ -1,7 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTION_D } from '../data/sectionD';
+
+// ── Audio for Mina's closing speech (files 20–26) ─────────────────────────
+const MINA_CLOSING_AUDIO = [
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/22_sx7vkx.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',
+];
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type Phase =
@@ -40,6 +51,7 @@ export default function SectionDScreen() {
   const [minaLineIdx, setMinaLineIdx] = useState(0);
   const [spriteErrors, setSpriteErrors] = useState<Record<number, boolean>>({});
   const [lockedMsg, setLockedMsg] = useState('');
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const prog = sectionProgress['D'] || {};
 
@@ -126,6 +138,10 @@ export default function SectionDScreen() {
   }
 
   function handleMinaNext() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
     if (minaLineIdx + 1 < MINA_LINES.length) {
       setMinaLineIdx(l => l + 1);
     } else {
@@ -140,6 +156,34 @@ export default function SectionDScreen() {
       return () => clearTimeout(t);
     }
   }, [phase]);
+
+  // Play Mina closing audio per line
+  useEffect(() => {
+    if (phase !== 'MINA_CLOSING') return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    const src = MINA_CLOSING_AUDIO[minaLineIdx];
+    if (!src) return;
+    const audio = new Audio(src);
+    audioRef.current = audio;
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [phase, minaLineIdx]);
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // ── Re-check after result to go to next dancer ─────────────────────────────
   // When returning to DANCER_SELECT after a result, we want to auto-advance
@@ -510,7 +554,9 @@ export default function SectionDScreen() {
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               zIndex: 10, padding: 'clamp(60px,10vh,80px) clamp(20px,5vw,60px) 20px',
+              cursor: 'pointer',
             }}
+            onClick={handleMinaNext}
           >
             {/* Mina mascot */}
             <div style={{ marginBottom: '16px' }}>
@@ -556,7 +602,7 @@ export default function SectionDScreen() {
                   }} />
                 ))}
               </div>
-              <button className="btn btn-primary" onClick={handleMinaNext}
+              <button className="btn btn-primary" onClick={e => { e.stopPropagation(); handleMinaNext(); }}
                 style={{ fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}>
                 {minaLineIdx + 1 < MINA_LINES.length ? 'Continue ➜' : '🎓 See Results'}
               </button>

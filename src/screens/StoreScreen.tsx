@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
@@ -21,6 +21,17 @@ const MINA_LINES = [
   "Take a moment to be proud of what you've accomplished today. Every correct answer, every mistake you learned from, and every concept you mastered has helped you grow stronger in grammar.",
   "But remember — this achievement is only the beginning. If you're ready for a greater challenge, you can try Professional Mode and test your skills at a higher level.",
   "Keep going, keep learning, and keep challenging yourself. Your grammar adventure doesn't end here — it's just getting started! I'll see you in your next adventure! ✨",
+];
+
+// ── Audio for Mina's closing speech (files 20–26) ─────────────────────────
+const MINA_CLOSING_AUDIO = [
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/22_sx7vkx.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',
 ];
 
 // ── Floating sparkle particle ─────────────────────────────────────────────
@@ -140,6 +151,7 @@ export default function StoreScreen() {
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
   const [showCursor, setShowCursor] = useState(true);
   const [minaLineIdx, setMinaLineIdx] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
   const [bgIndex, setBgIndex] = useState(0);
@@ -164,6 +176,41 @@ export default function StoreScreen() {
     const t = setInterval(() => setShowCursor(c => !c), 530);
     return () => clearInterval(t);
   }, []);
+
+  // ── Play audio for Mina closing lines ─────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'mina_closing') return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    const src = MINA_CLOSING_AUDIO[minaLineIdx];
+    if (!src) return;
+    const audio = new Audio(src);
+    audioRef.current = audio;
+    audio.play().catch(() => {});
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [phase, minaLineIdx]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
 
   // ── Helpers ────────────────────────────────────────────────────────────
   const isLastSectionDStore =
@@ -207,6 +254,7 @@ export default function StoreScreen() {
   };
 
   const handleMinaNext = () => {
+    stopAudio();
     if (minaLineIdx + 1 < MINA_LINES.length) {
       setMinaLineIdx(l => l + 1);
     } else {
@@ -737,16 +785,20 @@ export default function StoreScreen() {
 
       {/* ══════════════════════════════════════════════════════════════
           MINA CLOSING SPEECH (Section D final store only)
-          — same scalloped bubble UI as the rest of the screen
+          — Audio plays per line, stops on Next click
       ══════════════════════════════════════════════════════════════ */}
       {phase === 'mina_closing' && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.6)',
-          padding: 'clamp(60px,10vh,80px) clamp(20px,5vw,60px) 20px',
-          zIndex: 50,
-        }}>
+        <div
+          style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.6)',
+            padding: 'clamp(60px,10vh,80px) clamp(20px,5vw,60px) 20px',
+            zIndex: 50,
+            cursor: 'pointer',
+          }}
+          onClick={handleMinaNext}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={`mina-${minaLineIdx}`}
@@ -777,7 +829,7 @@ export default function StoreScreen() {
                 <SpeakerBadge label="MINA" gradStart="#8B1A8B" gradEnd="#5B0A6B" />
               </div>
 
-              {/* Scalloped bubble — same component as the rest of the screen */}
+              {/* Scalloped bubble */}
               <ScallopedBubble color="#C060D0">
                 <div style={{
                   fontFamily: 'var(--font-body)',
@@ -813,7 +865,7 @@ export default function StoreScreen() {
                   <motion.button
                     className="btn btn-primary btn-sm"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                    onClick={handleMinaNext}
+                    onClick={e => { e.stopPropagation(); handleMinaNext(); }}
                     style={{ fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
                   >
                     {minaLineIdx + 1 < MINA_LINES.length ? 'Continue ➜' : '🎓 See Results'}
