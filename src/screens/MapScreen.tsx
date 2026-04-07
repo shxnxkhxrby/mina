@@ -138,7 +138,7 @@ export default function MapScreen() {
           background: 'rgba(42,26,14,0.88)', border: '2px solid var(--golden)',
           borderRadius: '50px', padding: '4px 20px',
           fontFamily: 'var(--font-title)', fontSize: 'clamp(0.88rem,2.2vw,1.4rem)',
-          color: 'var(--golden)', whiteSpace: 'nowrap',
+          color: 'var(--golden)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80vw',
         }}>🗺 Bustos, Bulacan — Festival Map</div>
         <div style={{
           fontFamily: 'var(--font-body)', fontSize: 'clamp(0.55rem,1.1vw,0.72rem)',
@@ -195,7 +195,7 @@ export default function MapScreen() {
               animate={unlocked ? { y: [0, -4, 0] } : {}}
               transition={unlocked ? { duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 } : {}}
               style={{
-                width: 'clamp(80px,11vw,130px)',
+                width: 'clamp(68px,9vw,130px)',
                 borderRadius: '14px',
                 overflow: 'hidden',
                 border: `3px solid ${unlocked ? color : '#888'}`,
@@ -209,7 +209,7 @@ export default function MapScreen() {
                 filter: unlocked ? 'none' : 'grayscale(0.8) brightness(0.55)',
               }}
             >
-              <div style={{ height: 'clamp(48px,7vw,88px)', position: 'relative' }}>
+              <div style={{ height: 'clamp(40px,6vw,88px)', position: 'relative' }}>
                 {!bgImage && (
                   <div style={{
                     position: 'absolute', inset: 0,
@@ -243,7 +243,7 @@ export default function MapScreen() {
               }}>
                 <div style={{
                   fontFamily: 'var(--font-title)',
-                  fontSize: 'clamp(0.5rem,1vw,0.68rem)',
+                  fontSize: 'clamp(0.42rem,0.85vw,0.68rem)',
                   color: 'white', fontWeight: 700, lineHeight: 1.2,
                   textShadow: '0 1px 3px rgba(0,0,0,0.4)',
                   whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',

@@ -2,9 +2,13 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { GameState, SceneName, SectionId } from '../types';
 import { SECTIONS } from '../data/sections';
+import { SECTION_D } from '../data/sectionD';
+
+// Merge Section D so allStoresComplete and isStoreUnlocked can find its stores
+const ALL_SECTIONS = [...SECTIONS, SECTION_D];
 
 function allStoresComplete(sectionId: SectionId, progress: GameState['sectionProgress']): boolean {
-  const sec = SECTIONS.find(s => s.id === sectionId);
+  const sec = ALL_SECTIONS.find(s => s.id === sectionId);
   if (!sec) return false;
   const prog = progress[sectionId] || {};
   return sec.stores.every(st => prog[st.id]?.completed);
@@ -14,7 +18,6 @@ const initialProgress: GameState['sectionProgress'] = {};
 
 export const useGameStore = create<GameState & {
   advancedScore: { total: number; correct: number };
-  advancedSectionProgress: GameState['sectionProgress'];
   addAdvancedScore: (correct: number, total: number) => void;
 }>()(  
   persist(
@@ -27,7 +30,6 @@ export const useGameStore = create<GameState & {
       sectionProgress: initialProgress,
       overallScore: { total: 0, correct: 0 },
       advancedScore: { total: 0, correct: 0 },
-      advancedSectionProgress: {} as GameState['sectionProgress'],
       firstPlay: true,
       isAdvancedMode: false,
 
@@ -79,7 +81,7 @@ export const useGameStore = create<GameState & {
       isStoreUnlocked: (sectionId, storeIndex) => {
         if (!get().isSectionUnlocked(sectionId)) return false;
         if (storeIndex === 0) return true;
-        const sec = SECTIONS.find(s => s.id === sectionId);
+        const sec = ALL_SECTIONS.find(s => s.id === sectionId);
         if (!sec) return false;
         const prog = get().sectionProgress[sectionId] || {};
         return prog[sec.stores[storeIndex - 1].id]?.completed === true;
@@ -94,7 +96,6 @@ export const useGameStore = create<GameState & {
         sectionProgress: {},
         overallScore: { total: 0, correct: 0 },
         advancedScore: { total: 0, correct: 0 },
-        advancedSectionProgress: {},
         firstPlay: true,
         isAdvancedMode: false,
       }),

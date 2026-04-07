@@ -49,10 +49,12 @@ export default function SectionDScreen() {
   const question = qSet?.questions[questionIdx];
   const totalQ = qSet?.questions.length ?? 5;
 
-  // ── Unlock logic: dancers unlock sequentially ──────────────────────────────
+  // ── Unlock logic: next dancer unlocks once previous is ATTEMPTED (bestScore recorded)
   function isDancerUnlocked(i: number): boolean {
     if (i === 0) return true;
-    return prog[SECTION_D.stores[i - 1].id]?.completed === true;
+    const prev = prog[SECTION_D.stores[i - 1].id];
+    // Unlocked if previous dancer has been attempted (has a bestScore or completed)
+    return (prev?.completed === true) || (prev?.bestScore !== undefined && prev.bestScore >= 0 && prev.attempts > 0);
   }
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -67,14 +69,20 @@ export default function SectionDScreen() {
     setSessionScore(0);
     setSelected(null);
     setShowFeedback(false);
+    setFinalScore(0);
     setPhase('QUESTION');
   }
 
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
+  const [finalScore, setFinalScore] = useState(0); // the score actually saved to store
+
   function handleChoice(choiceIdx: number) {
     if (showFeedback) return;
+    const correct = question.choices[choiceIdx].isCorrect;
     setSelected(choiceIdx);
     setShowFeedback(true);
-    if (question.choices[choiceIdx].isCorrect) {
+    setLastAnswerCorrect(correct);
+    if (correct) {
       setSessionScore(s => s + 1);
     }
   }
@@ -84,27 +92,34 @@ export default function SectionDScreen() {
       setQuestionIdx(q => q + 1);
       setSelected(null);
       setShowFeedback(false);
+      setLastAnswerCorrect(false);
     } else {
-      // sessionScore was already incremented synchronously in handleChoice
-      // (setState updater runs synchronously in React 18 for event handlers)
-      // so sessionScore here already reflects the last answer's result.
-      completeStore('D', dancer.id, sessionScore);
-      addScore(sessionScore, totalQ);
+      // Bug fix: sessionScore state is stale here (React async batching).
+      // Compute the real final score synchronously using lastAnswerCorrect.
+      const isLastCorrect = lastAnswerCorrect ? 1 : 0;
+      const computedFinalScore = sessionScore + isLastCorrect;
+      setFinalScore(computedFinalScore);
+      completeStore('D', dancer.id, computedFinalScore);
+      addScore(computedFinalScore, totalQ);
       setPhase('DANCER_RESULT');
     }
   }
 
   function handleAfterResult() {
-    // Check if all 3 dancers are done
-    const allDone = SECTION_D.stores.every(
-      (_, i) => i === activeDancerIdx || prog[SECTION_D.stores[i].id]?.completed
-    );
+    // Reset all quiz state for next dancer
+    setQuestionIdx(0);
+    setSessionScore(0);
+    setSelected(null);
+    setShowFeedback(false);
+    setLastAnswerCorrect(false);
+    setFinalScore(0);
+
     const nextIdx = activeDancerIdx + 1;
     if (nextIdx < SECTION_D.stores.length) {
-      setActiveDancerIdx(nextIdx);
+      // More dancers remain - go back to select screen
       setPhase('DANCER_SELECT');
     } else {
-      // All dancers complete → Mina closing
+      // All dancers done → Mina closing speech
       setMinaLineIdx(0);
       setPhase('MINA_CLOSING');
     }
@@ -443,7 +458,7 @@ export default function SectionDScreen() {
               boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
             }}>
               <div style={{ fontSize: 'clamp(2rem,5vw,3.5rem)', marginBottom: '8px' }}>
-                {sessionScore >= 4 ? '🎉' : '💪'}
+                {finalScore >= 4 ? '🎉' : '💪'}
               </div>
               <div style={{
                 fontFamily: 'var(--font-title)',
@@ -457,14 +472,14 @@ export default function SectionDScreen() {
                 fontSize: 'clamp(0.75rem,1.5vw,1rem)',
                 color: '#555', marginBottom: '12px',
               }}>
-                Score: <strong style={{ color: sessionScore >= 4 ? '#28a745' : '#dc3545' }}>
-                  {sessionScore}/{totalQ}
+                Score: <strong style={{ color: finalScore >= 4 ? '#28a745' : '#dc3545' }}>
+                  {finalScore}/{totalQ}
                 </strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
                 {[1,2,3,4,5].map(n => (
                   <span key={n} style={{ fontSize: 'clamp(1rem,2.2vw,1.6rem)' }}>
-                    {n <= sessionScore ? '⭐' : '☆'}
+                    {n <= finalScore ? '⭐' : '☆'}
                   </span>
                 ))}
               </div>
@@ -474,7 +489,7 @@ export default function SectionDScreen() {
                 color: '#666', marginBottom: '16px',
                 background: '#f8f9fa', borderRadius: '10px', padding: '10px 14px',
               }}>
-                {sessionScore >= 4
+                {finalScore >= 4
                   ? `Great job! You've completed ${dancer.npcName}'s challenge.`
                   : `Keep practicing! You need 4/5 to pass. You can try again from the dancer select.`}
               </div>

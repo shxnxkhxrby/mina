@@ -121,7 +121,7 @@ export default function MainMenu() {
           position: 'absolute',
           bottom: 0,
           right: 'clamp(10px,4vw,60px)',
-          width: 'clamp(700px,22vw,260px)',
+          width: 'clamp(100px,22vw,260px)',
           height: 'auto',
           filter: 'drop-shadow(0 6px 20px rgba(0,0,0,0.5))',
           animation: 'float 3s ease-in-out infinite',

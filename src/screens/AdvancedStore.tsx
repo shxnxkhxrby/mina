@@ -7,7 +7,6 @@ import { getLevelTheme } from '../data/levelThemes';
 
 type Phase = 'question' | 'answered' | 'done';
 
-// ── Floating sparkle particle ─────────────────────────────────────────────
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
   return (
     <motion.div
@@ -23,7 +22,6 @@ function Particle({ delay, x, size }: { delay: number; x: string; size: number }
   );
 }
 
-// ── Scalloped speech bubble ───────────────────────────────────────────────
 function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
   return (
     <div style={{ position: 'relative', width: '100%' }}>
@@ -36,8 +34,10 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
         border: `4px solid ${color}`, borderTop: 'none',
         borderRadius: '0 0 20px 20px',
-        padding: 'clamp(14px,3vh,22px) clamp(16px,3vw,28px) clamp(14px,3vh,22px)',
+        padding: 'clamp(12px,2.5vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.5vh,20px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
+        /* Allow scrolling inside bubble if content is tall */
+        maxHeight: '60vh', overflowY: 'auto',
       }}>
         {children}
       </div>
@@ -50,7 +50,6 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
   );
 }
 
-// ── Speaker badge ─────────────────────────────────────────────────────────
 function SpeakerBadge({ label, gradStart, gradEnd }: { label: string; gradStart: string; gradEnd: string }) {
   return (
     <motion.div
@@ -77,13 +76,10 @@ function SpeakerBadge({ label, gradStart, gradEnd }: { label: string; gradStart:
 }
 
 const PARTICLES = [
-  { delay: 0,   x: '8%',  size: 10 },
-  { delay: 0.8, x: '18%', size: 7  },
-  { delay: 1.5, x: '32%', size: 12 },
-  { delay: 0.3, x: '48%', size: 8  },
-  { delay: 2.1, x: '62%', size: 6  },
-  { delay: 1.2, x: '75%', size: 10 },
-  { delay: 0.6, x: '88%', size: 7  },
+  { delay: 0, x: '8%', size: 10 }, { delay: 0.8, x: '18%', size: 7 },
+  { delay: 1.5, x: '32%', size: 12 }, { delay: 0.3, x: '48%', size: 8 },
+  { delay: 2.1, x: '62%', size: 6 }, { delay: 1.2, x: '75%', size: 10 },
+  { delay: 0.6, x: '88%', size: 7 },
 ];
 
 const THEME_BADGE: Record<number, [string, string]> = {
@@ -170,61 +166,6 @@ export default function AdvancedStore() {
 
   const choiceLabels = ['A', 'B', 'C', 'D'];
 
-  // ── Inline render helpers (NOT components — avoids remount on every render) ──
-
-  const renderNpcSprite = () => (
-    <motion.div
-      style={{
-        position: 'absolute', left: 'clamp(-20px,-1vw,0px)', bottom: 0,
-        zIndex: 10, pointerEvents: 'none',
-      }}
-      initial={{ x: -80, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.15 }}
-    >
-      {npcFailed ? (
-        <motion.span
-          style={{
-            display: 'block',
-            fontSize: 'clamp(120px,22vw,280px)', lineHeight: 1,
-            filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.5))',
-          }}
-          animate={{ y: [0, -14, 0] }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-        >{store.emoji}</motion.span>
-      ) : (
-        <motion.img
-          src={npcCandidates[npcIndex]}
-          alt={store.npcName}
-          onError={() => {
-            if (npcIndex + 1 < npcCandidates.length) setNpcIndex(n => n + 1);
-            else setNpcFailed(true);
-          }}
-          style={{
-            width: 'clamp(200px,34vw,440px)', height: 'auto',
-            objectFit: 'contain',
-            filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
-            display: 'block',
-          }}
-          animate={{ y: [0, -14, 0] }}
-          transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      )}
-      <div style={{
-        textAlign: 'center', marginTop: '4px', marginBottom: '8px',
-        fontFamily: 'var(--font-char)', fontWeight: 700,
-        fontSize: 'clamp(0.55rem,1vw,0.72rem)', color: 'white',
-        background: 'rgba(0,0,0,0.55)',
-        border: `1.5px solid ${theme.qBorder}`,
-        padding: '2px 12px', borderRadius: '50px',
-        display: 'inline-block',
-        position: 'relative', left: '50%', transform: 'translateX(-50%)',
-        whiteSpace: 'nowrap',
-      }}>{store.npcName}</div>
-    </motion.div>
-  );
-
-  // ── Choices ───────────────────────────────────────────────────────────────
   const renderChoices = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(5px,1vh,9px)', marginTop: '10px' }}>
       {currentQ.choices.map((choice, i) => {
@@ -260,15 +201,13 @@ export default function AdvancedStore() {
             <span style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               width: 'clamp(22px,3vw,30px)', height: 'clamp(22px,3vw,30px)',
-              background: badgeBg, color: 'white',
-              borderRadius: '7px',
+              background: badgeBg, color: 'white', borderRadius: '7px',
               fontFamily: 'var(--font-char)', fontWeight: 700,
               fontSize: 'clamp(0.6rem,1.1vw,0.78rem)',
               flexShrink: 0, transition: 'background 0.2s',
             }}>{choiceLabels[i]}</span>
             <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.7rem,1.4vw,0.88rem)',
+              fontFamily: 'var(--font-body)', fontSize: 'clamp(0.7rem,1.4vw,0.88rem)',
               color: '#2A1800', lineHeight: 1.4,
             }}>
               {choice.text.replace(/^[A-D]\.\s*/, '')}
@@ -304,7 +243,6 @@ export default function AdvancedStore() {
       background: bgFailed ? (secBg[section.id] || secBg.A) : undefined,
       overflow: 'hidden',
     }}>
-      {/* Background */}
       {!bgFailed && (
         <img
           key={`${currentStoreIndex}-${bgIndex}`}
@@ -313,8 +251,7 @@ export default function AdvancedStore() {
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', objectPosition: 'center top',
-            filter: 'blur(6px) brightness(0.55)',
-            transform: 'scale(1.08)',
+            filter: 'blur(6px) brightness(0.55)', transform: 'scale(1.08)',
           }}
           onError={() => {
             if (bgIndex < bgCandidates.length - 1) setBgIndex(b => b + 1);
@@ -331,18 +268,18 @@ export default function AdvancedStore() {
       {PARTICLES.map((p, i) => <Particle key={i} {...p} />)}
       <div className="bunting" style={{ zIndex: 5 }} />
 
-      {/* ⚡ Advanced badge */}
+      {/* Top bar */}
       <div style={{
         position: 'absolute', top: 'clamp(38px,7vh,60px)', left: '50%', transform: 'translateX(-50%)',
         zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+        maxWidth: '80vw',
       }}>
         <div style={{
           fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,1.6vw,1.1rem)',
           color: 'white', background: 'rgba(0,0,0,0.55)',
           padding: '4px 18px', borderRadius: '50px',
           border: `2px solid ${theme.qBorder}`,
-          whiteSpace: 'nowrap',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+          whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
         }}>
           {store.emoji} {store.name} · {store.npcName}
         </div>
@@ -355,21 +292,82 @@ export default function AdvancedStore() {
       </div>
 
       <button className="btn btn-ghost btn-sm"
-        style={{ position: 'absolute', top: 'clamp(38px,7vh,60px)', left: 'clamp(10px,2vw,18px)', zIndex: 10, opacity: 0.85 }}
+        style={{
+          position: 'absolute', top: 'clamp(38px,7vh,60px)', left: 'clamp(10px,2vw,18px)',
+          zIndex: 100, opacity: 0.95,
+          fontSize: 'clamp(0.7rem,1.4vw,0.9rem)', fontWeight: 700,
+          background: 'rgba(0,0,0,0.45)', border: '2px solid rgba(255,255,255,0.5)',
+          borderRadius: '20px', color: 'white', padding: '4px 14px',
+        }}
         onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>← Back</button>
 
-      {/* NPC anchored bottom-left */}
-      {renderNpcSprite()}
+      {/*
+        NPC sprite — reduced width so it doesn't eat half the screen on mobile.
+        On phones (<480px) it's ~80px wide so the dialogue panel has plenty of room.
+      */}
+      <motion.div
+        style={{
+          position: 'absolute', left: 'clamp(-10px,-0.5vw,0px)', bottom: 0,
+          zIndex: 10, pointerEvents: 'none',
+        }}
+        initial={{ x: -80, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.15 }}
+      >
+        {npcFailed ? (
+          <motion.span
+            style={{
+              display: 'block',
+              /* Reduced: was clamp(120px,22vw,280px) — too large on mobile */
+              fontSize: 'clamp(60px,14vw,180px)', lineHeight: 1,
+              filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.5))',
+            }}
+            animate={{ y: [0, -14, 0] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+          >{store.emoji}</motion.span>
+        ) : (
+          <motion.img
+            src={npcCandidates[npcIndex]}
+            alt={store.npcName}
+            onError={() => {
+              if (npcIndex + 1 < npcCandidates.length) setNpcIndex(n => n + 1);
+              else setNpcFailed(true);
+            }}
+            style={{
+              /* Reduced: was clamp(200px,34vw,440px) — NPC was taking up >half on mobile */
+              width: 'clamp(90px,20vw,320px)', height: 'auto',
+              objectFit: 'contain',
+              filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
+              display: 'block',
+            }}
+            animate={{ y: [0, -14, 0] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        )}
+        <div style={{
+          textAlign: 'center', marginTop: '4px', marginBottom: '8px',
+          fontFamily: 'var(--font-char)', fontWeight: 700,
+          fontSize: 'clamp(0.55rem,1vw,0.72rem)', color: 'white',
+          background: 'rgba(0,0,0,0.55)', border: `1.5px solid ${theme.qBorder}`,
+          padding: '2px 12px', borderRadius: '50px',
+          display: 'inline-block',
+          position: 'relative', left: '50%', transform: 'translateX(-50%)',
+          whiteSpace: 'nowrap',
+        }}>{store.npcName}</div>
+      </motion.div>
 
-      {/* ══════════════════════════════════════════════════════════════
-          QUESTION / ANSWERED PHASE — dialogue panel upper-right
-      ══════════════════════════════════════════════════════════════ */}
+      {/*
+        Dialogue panel — left edge responds to NPC width.
+        Previous: left: clamp(200px,34vw,440px) — on 360px phone that forced the panel
+        to start at 200px leaving only 160px for the panel, which was too narrow.
+        Fixed: left now uses a more mobile-friendly minimum of 110px.
+      */}
       {(phase === 'question' || phase === 'answered') && (
         <div style={{
           position: 'absolute',
           top: 'clamp(64px,13vh,110px)',
-          right: 'clamp(14px,3vw,32px)',
-          left: 'clamp(200px,34vw,440px)',
+          right: 'clamp(12px,2.5vw,28px)',
+          left: 'clamp(110px,22vw,360px)',
           zIndex: 20,
         }}>
           <AnimatePresence mode="wait">
@@ -384,18 +382,14 @@ export default function AdvancedStore() {
               <ScallopedBubble>
                 {currentQ.npcDialogueBefore && (
                   <div style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 'clamp(0.72rem,1.4vw,0.9rem)',
-                    color: '#5A3E00', lineHeight: 1.5,
-                    marginBottom: '8px', fontStyle: 'italic',
+                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.72rem,1.4vw,0.9rem)',
+                    color: '#5A3E00', lineHeight: 1.5, marginBottom: '8px', fontStyle: 'italic',
                   }}>{currentQ.npcDialogueBefore}</div>
                 )}
                 {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
                   <div style={{
-                    fontFamily: 'var(--font-title)',
-                    fontSize: 'clamp(0.82rem,1.8vw,1.1rem)',
-                    color: '#2A1800', fontWeight: 800, lineHeight: 1.4,
-                    marginBottom: '6px',
+                    fontFamily: 'var(--font-title)', fontSize: 'clamp(0.82rem,1.8vw,1.1rem)',
+                    color: '#2A1800', fontWeight: 800, lineHeight: 1.4, marginBottom: '6px',
                   }}>
                     {currentQ.questionText}
                     <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>
@@ -409,9 +403,7 @@ export default function AdvancedStore() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          ANSWER RESULT OVERLAY
-      ══════════════════════════════════════════════════════════════ */}
+      {/* Answer result overlay */}
       <AnimatePresence>
         {phase === 'answered' && (
           <motion.div
@@ -433,40 +425,36 @@ export default function AdvancedStore() {
                   : 'linear-gradient(180deg,#FFF0F0 0%,#F8D7DA 100%)',
                 border: `4px solid ${isCorrect ? '#28A745' : '#DC3545'}`,
                 borderRadius: '22px',
-                padding: 'clamp(22px,4.5vh,42px) clamp(26px,5vw,56px)',
-                width: 'clamp(270px,52vw,500px)', maxWidth: '90vw',
+                padding: 'clamp(18px,3.5vh,38px) clamp(20px,4vw,48px)',
+                width: 'clamp(260px,50vw,480px)', maxWidth: '92vw',
                 textAlign: 'center',
                 boxShadow: `0 14px 52px rgba(0,0,0,0.5), 0 0 0 6px ${isCorrect ? 'rgba(40,167,69,0.12)' : 'rgba(220,53,69,0.12)'}`,
                 position: 'relative', overflow: 'hidden',
               }}
             >
-              {/* Scallop top strip */}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '10px', overflow: 'hidden' }}>
                 <svg viewBox="0 0 400 12" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
                   <path d={Array.from({ length: 20 }, (_, i) => `M${i * 20},12 Q${i * 20 + 10},0 ${i * 20 + 20},12`).join(' ')}
                     fill={isCorrect ? '#28A745' : '#DC3545'} />
                 </svg>
               </div>
-
               <motion.div
                 initial={{ scale: 0 }} animate={{ scale: 1 }}
                 transition={{ delay: 0.1, type: 'spring', stiffness: 400 }}
-                style={{ fontSize: 'clamp(2.4rem,5.5vw,4.2rem)', marginBottom: '8px', lineHeight: 1 }}
+                style={{ fontSize: 'clamp(2.2rem,5vw,4rem)', marginBottom: '8px', lineHeight: 1 }}
               >
                 {isCorrect ? '✅' : '❌'}
               </motion.div>
               <div style={{
-                fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(1.1rem,2.5vw,1.8rem)',
+                fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.3vw,1.7rem)',
                 color: isCorrect ? '#155724' : '#721c24', marginBottom: '10px',
               }}>
                 {isCorrect ? 'Correct! 🎉' : 'Wrong...'}
               </div>
               <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(0.68rem,1.4vw,0.88rem)',
+                fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.4vw,0.88rem)',
                 color: isCorrect ? '#1a5c2e' : '#7a2030',
-                lineHeight: 1.65, marginBottom: '22px',
+                lineHeight: 1.65, marginBottom: '20px',
                 background: isCorrect ? 'rgba(40,167,69,0.08)' : 'rgba(220,53,69,0.08)',
                 borderRadius: '12px', padding: '10px 14px',
               }}>{feedbackText}</div>
@@ -474,7 +462,7 @@ export default function AdvancedStore() {
                 className="btn btn-primary"
                 whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
                 onClick={handleNext}
-                style={{ minWidth: '130px' }}
+                style={{ minWidth: '120px' }}
               >
                 {qIdx + 1 >= totalQ ? 'Finish →' : 'Next →'}
               </motion.button>
@@ -483,14 +471,12 @@ export default function AdvancedStore() {
         )}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════════════════════════
-          DONE OVERLAY
-      ══════════════════════════════════════════════════════════════ */}
+      {/* Done overlay */}
       {phase === 'done' && (
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.6)', padding: 'clamp(16px,4vw,40px)',
+          background: 'rgba(0,0,0,0.6)', padding: 'clamp(14px,3vw,36px)',
           overflowY: 'auto', zIndex: 50,
         }}>
           <motion.div
@@ -499,7 +485,7 @@ export default function AdvancedStore() {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
             style={{
-              width: 'clamp(280px,52vw,520px)', maxWidth: '94vw',
+              width: 'clamp(270px,90vw,500px)', maxWidth: '94vw',
               maxHeight: '88vh', overflowY: 'auto',
               textAlign: 'center', margin: '0 auto',
               border: `3px solid ${badgeGradStart}`,
@@ -513,7 +499,7 @@ export default function AdvancedStore() {
             </div>
 
             <div style={{ paddingTop: '16px' }}>
-              <div style={{ fontSize: 'clamp(2.4rem,5.5vw,3.8rem)', marginBottom: '6px' }}>
+              <div style={{ fontSize: 'clamp(2rem,5vw,3.5rem)', marginBottom: '6px' }}>
                 {score >= 4 ? '🎉' : '😊'}
               </div>
               <div className="panel-title" style={{ marginBottom: '8px' }}>
@@ -528,7 +514,7 @@ export default function AdvancedStore() {
                   <motion.span key={n}
                     initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: n * 0.1, type: 'spring', stiffness: 300 }}
-                    style={{ fontSize: 'clamp(1.3rem,3.2vw,2.2rem)' }}>
+                    style={{ fontSize: 'clamp(1.2rem,3vw,2rem)' }}>
                     {n <= score ? '⭐' : '☆'}
                   </motion.span>
                 ))}

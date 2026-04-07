@@ -169,7 +169,7 @@ export default function MinaIntro() {
           src={ASSETS.minaMascot}
           alt="Mina"
           style={{
-            width: 'clamp(220px, 38vw, 480px)',
+            width: 'clamp(130px,28vw,400px)',
             height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.4))',
@@ -186,7 +186,7 @@ export default function MinaIntro() {
         position: 'absolute',
         top: 'clamp(64px, 13vh, 110px)',
         left: 'clamp(14px, 3vw, 32px)',
-        right: 'clamp(200px, 36vw, 460px)', // always leaves Mina visible
+        right: 'clamp(90px,28vw,380px)', // always leaves Mina visible
         zIndex: 20,
       }}>
         <AnimatePresence mode="wait">

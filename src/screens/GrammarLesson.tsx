@@ -291,7 +291,7 @@ export default function GrammarLesson() {
           src={ASSETS.minaMascot}
           alt="Mina"
           style={{
-            width: 'clamp(100px, 16vw, 200px)',
+            width: 'clamp(70px,12vw,160px)',
             height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.4))',
@@ -309,7 +309,7 @@ export default function GrammarLesson() {
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: 'clamp(320px, 68vw, 820px)',
+        width: 'clamp(280px, 88vw, 820px)',
         zIndex: 20,
       }}>
         <AnimatePresence mode="wait">

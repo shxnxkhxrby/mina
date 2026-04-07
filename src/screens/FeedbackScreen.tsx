@@ -5,7 +5,6 @@ import { SECTIONS } from '../data/sections';
 import { SECTION_D } from '../data/sectionD';
 import { ASSETS } from '../data/assets';
 
-// ── Per-section congrats data ─────────────────────────────────────────────
 const SECTION_CONGRATS: Record<string, {
   subline: string;
   minaLines: string[];
@@ -72,46 +71,30 @@ const TIPS: Record<string, string> = {
 
 export default function FeedbackScreen() {
   const {
-    currentSection,
-    currentStoreIndex,
-    sectionProgress,
-    goToScene,
-    setStoreIndex,
-    setQuestionSet,
-    setSection,
-    isAdvancedMode,
+    currentSection, currentStoreIndex, sectionProgress, goToScene,
+    setStoreIndex, setQuestionSet, setSection, isAdvancedMode,
   } = useGameStore();
 
-  // Use ALL_SECTIONS so Section D is found when currentSection === 'D'
   const ALL_SECTIONS = [...SECTIONS, SECTION_D];
   const section = ALL_SECTIONS.find(s => s.id === currentSection);
   if (!section) return null;
 
   const store = section.stores[currentStoreIndex];
-  if (!store) return null; // guard: storeIndex out of range
+  if (!store) return null;
 
   const prog = sectionProgress[currentSection!] || {};
   const score = prog[store.id]?.bestScore || 0;
   const passed = score >= 4;
   const nextStoreIndex = currentStoreIndex + 1;
   const hasNextStore = nextStoreIndex < section.stores.length;
-
-  // True only when the player just finished the LAST store of THIS section with a pass
   const isSectionComplete = passed && !hasNextStore;
   const isSectionD = currentSection === 'D';
 
-  // True ONLY when:
-  //   • the player is currently in Section C
-  //   • they just completed its last store FOR THE FIRST TIME (Section D not yet started)
-  //   • ALL stores of A, B, and C are now marked completed
-  // We guard with !dFullyDone so replaying C only re-triggers D if D isn't fully complete.
   const dProgress = sectionProgress['D'] || {};
   const dFullyDone = SECTION_D.stores.every(st => dProgress[st.id]?.completed);
 
   const justCompletedC =
-    currentSection === 'C' &&
-    isSectionComplete &&
-    !dFullyDone &&
+    currentSection === 'C' && isSectionComplete && !dFullyDone &&
     ['A', 'B', 'C'].every(id => {
       const sec = SECTIONS.find(s => s.id === id);
       if (!sec) return false;
@@ -134,159 +117,102 @@ export default function FeedbackScreen() {
     else setPhase('feedback');
   };
 
-  // ── Routing after a passed level ──────────────────────────────────────────
   const handleContinue = () => {
     if (hasNextStore) {
-      // More stores remain in this section — go to the next one
       setStoreIndex(nextStoreIndex);
       setQuestionSet('A');
       goToScene(isAdvancedMode ? 'ADVANCED_STORE' : 'STORE');
       return;
     }
-
-    if (isSectionD) {
-      // Finished all of Section D → final score / certificate
-      goToScene('SCORE_SUMMARY');
-      return;
-    }
-
-    if (justCompletedC) {
-      // First-time completion of Section C — unlock and enter Section D.
-      setSection('D' as any);
-      goToScene('SECTION_D_VIDEO');
-      return;
-    }
-
-    // Default for all other cases (replay, A→map, B→map, etc.)
+    if (isSectionD) { goToScene('SCORE_SUMMARY'); return; }
+    if (justCompletedC) { setSection('D' as any); goToScene('SECTION_D_VIDEO'); return; }
     goToScene('MAP');
   };
 
-  // ── Continue-button label (always accurate) ───────────────────────────────
   const getContinueLabel = () => {
-    if (hasNextStore) return `Next: ${section.stores[nextStoreIndex].npcName} →`;
-    if (isSectionD)    return '🏆 See Final Score!';
-    if (justCompletedC) return '🎉 Go to Section D!';
+    if (hasNextStore) return `Next: ${section.stores[nextStoreIndex].name} →`;
+    if (isSectionD) return '🎓 See Final Score';
+    if (justCompletedC) return '🎉 Enter Section D!';
     return '🗺 Back to Map';
   };
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // CONGRATS SCREEN
-  // ════════════════════════════════════════════════════════════════════════════
   if (phase === 'congrats' && congratsData) {
-    const { subline, accentColor, scallop, bgGradient } = congratsData;
-
+    const { accentColor, scallop, bgGradient } = congratsData;
     return (
       <div
         className="scene"
-        style={{ background: bgGradient, overflow: 'hidden', cursor: 'pointer' }}
+        style={{ background: bgGradient, cursor: 'pointer', overflow: 'hidden' }}
         onClick={advanceMina}
       >
-        {/* Confetti */}
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          {Array.from({ length: 28 }).map((_, i) => (
-            <motion.div key={i}
-              style={{
-                position: 'absolute',
-                width: `${Math.random() * 10 + 4}px`,
-                height: `${Math.random() * 10 + 4}px`,
-                borderRadius: Math.random() > 0.5 ? '50%' : '2px',
-                background: ['#FFD700','#FF69B4','#FF6347','#FFFFFF','#00BFFF','#98FB98'][Math.floor(Math.random() * 6)],
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                opacity: 0,
-              }}
-              animate={{ opacity: [0, 1, 0], y: [0, -70, -150], rotate: [0, 180, 360] }}
-              transition={{ duration: 2 + Math.random() * 2.5, delay: Math.random() * 3, repeat: Infinity }}
-            />
-          ))}
-        </div>
+        <div className="bunting" />
 
-        {/* Scallop top */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 'clamp(28px,5vh,48px)', zIndex: 4, pointerEvents: 'none' }}>
-          <svg viewBox="0 0 1200 50" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-            <path d={Array.from({ length: 30 }, (_, i) => `M${i*40},0 Q${i*40+20},50 ${i*40+40},0`).join(' ') + ' L1200,0 L0,0 Z'} fill={scallop} />
-          </svg>
-        </div>
-
-        {/* Scallop bottom */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 'clamp(28px,5vh,48px)', zIndex: 4, pointerEvents: 'none' }}>
-          <svg viewBox="0 0 1200 50" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-            <path d={Array.from({ length: 30 }, (_, i) => `M${i*40},50 Q${i*40+20},0 ${i*40+40},50`).join(' ') + ' L1200,50 L0,50 Z'} fill={scallop} />
-          </svg>
-        </div>
-
-        {/* Central panel */}
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 'clamp(60px,12vh,100px) clamp(16px,4vw,40px)',
-          zIndex: 2,
+          padding: 'clamp(60px,10vh,80px) clamp(14px,4vw,48px) 20px',
+          zIndex: 10,
         }}>
           <motion.div
-            initial={{ scale: 0.88, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+            initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 180, damping: 18 }}
             style={{
-              width: 'clamp(300px,72vw,760px)',
-              background: 'rgba(255,255,255,0.92)',
-              border: `3px solid ${scallop}`,
-              borderRadius: '20px',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.18)',
-              padding: 'clamp(20px,4vh,36px) clamp(20px,4vw,36px)',
+              display: 'flex', alignItems: 'flex-end', gap: 'clamp(12px,3vw,28px)',
+              width: '100%', maxWidth: '680px',
+              /* Stack vertically on narrow screens */
+              flexWrap: 'wrap',
             }}
           >
-            <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-              <div style={{ fontSize: 'clamp(2.5rem,6vw,5rem)', marginBottom: '6px' }}>🏆</div>
-              <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.8vw,1.9rem)', color: accentColor, fontWeight: 900 }}>
-                {subline}
+            <div style={{ flex: 1, minWidth: 'min(200px, 100%)' }}>
+              <div style={{
+                fontFamily: 'var(--font-title)', fontSize: 'clamp(1.3rem,3.5vw,2.4rem)',
+                color: accentColor, textShadow: '2px 3px 0 rgba(0,0,0,0.12)',
+                marginBottom: '6px', fontWeight: 900,
+              }}>
+                {congratsData.subline}
               </div>
-            </div>
 
-            <div style={{ display: 'flex', gap: 'clamp(12px,2.5vw,24px)', alignItems: 'flex-end' }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ background: bgGradient, border: `2.5px solid ${scallop}`, borderRadius: '16px', padding: 'clamp(12px,2.5vh,22px) clamp(14px,2.5vw,22px)' }}>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={minaLineIdx}
-                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}
-                    >
-                      <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.85rem,2vw,1.25rem)', color: '#2A1800', lineHeight: 1.55, fontWeight: 800, marginBottom: '12px' }}>
-                        {minaLines[minaLineIdx]}
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      {minaLines.map((_, i) => (
-                        <motion.div key={i}
-                          animate={{ scale: i === minaLineIdx ? 1.3 : 1 }}
-                          style={{ width: i === minaLineIdx ? '18px' : '7px', height: '7px', borderRadius: '4px', background: i <= minaLineIdx ? accentColor : 'rgba(180,120,0,0.3)', transition: 'all 0.3s' }}
-                        />
-                      ))}
+              <div style={{ background: bgGradient, border: `2.5px solid ${scallop}`, borderRadius: '16px', padding: 'clamp(12px,2.5vh,22px) clamp(14px,2.5vw,22px)' }}>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={minaLineIdx}
+                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }}
+                  >
+                    <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.85rem,2vw,1.25rem)', color: '#2A1800', lineHeight: 1.55, fontWeight: 800, marginBottom: '12px' }}>
+                      {minaLines[minaLineIdx]}
                     </div>
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.55rem,1.1vw,0.72rem)', color: accentColor, marginLeft: 'auto', opacity: 0.8 }}>
-                      {isLastMinaLine ? 'Click to see results →' : 'Click to continue ▶'}
-                    </span>
+                  </motion.div>
+                </AnimatePresence>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    {minaLines.map((_, i) => (
+                      <motion.div key={i}
+                        animate={{ scale: i === minaLineIdx ? 1.3 : 1 }}
+                        style={{ width: i === minaLineIdx ? '18px' : '7px', height: '7px', borderRadius: '4px', background: i <= minaLineIdx ? accentColor : 'rgba(180,120,0,0.3)', transition: 'all 0.3s' }}
+                      />
+                    ))}
                   </div>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.55rem,1.1vw,0.72rem)', color: accentColor, marginLeft: 'auto', opacity: 0.8 }}>
+                    {isLastMinaLine ? 'Click to see results →' : 'Click to continue ▶'}
+                  </span>
                 </div>
               </div>
-
-              <motion.div
-                initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.18 }}
-                style={{ flexShrink: 0, alignSelf: 'flex-end' }}
-              >
-                <motion.img
-                  src={ASSETS.minaMascot} alt="Mina"
-                  style={{ width: 'clamp(90px,20vw,220px)', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.2))', display: 'block' }}
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
-                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-              </motion.div>
             </div>
+
+            <motion.div
+              initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.18 }}
+              style={{ flexShrink: 0, alignSelf: 'flex-end' }}
+            >
+              <motion.img
+                src={ASSETS.minaMascot} alt="Mina"
+                style={{ width: 'clamp(80px,18vw,200px)', height: 'auto', objectFit: 'contain', filter: 'drop-shadow(0 6px 18px rgba(0,0,0,0.2))', display: 'block' }}
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </motion.div>
           </motion.div>
         </div>
 
@@ -301,74 +227,78 @@ export default function FeedbackScreen() {
     );
   }
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // NORMAL FEEDBACK SCREEN
-  // ════════════════════════════════════════════════════════════════════════════
+  // Normal feedback screen
   const sectionAccent = congratsData?.accentColor ?? 'var(--pink-btn)';
 
   return (
-    <div className="scene" style={{ overflowY: 'auto', padding: 'clamp(38px,8vh,68px) clamp(12px,3vw,28px) clamp(14px,3.5vh,36px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="scene" style={{ overflowY: 'auto', padding: 'clamp(38px,8vh,68px) clamp(10px,3vw,24px) clamp(14px,3.5vh,36px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="bunting" />
       <motion.div className="panel"
         initial={{ opacity: 0, scale: 0.88 }} animate={{ opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 180, damping: 18 }}
-        style={{ width: 'clamp(320px,70vw,680px)', maxHeight: '82vh', overflowY: 'auto', border: `3px solid ${sectionAccent}`, position: 'relative', zIndex: 1 }}
+        style={{
+          /* Fixed: was clamp(320px,70vw,680px) — 320px min-width can overflow on 320px phones */
+          width: 'clamp(290px,90vw,660px)',
+          maxHeight: '82vh', overflowY: 'auto',
+          border: `3px solid ${sectionAccent}`, position: 'relative', zIndex: 1,
+        }}
       >
-        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
-          <div style={{ fontSize: 'clamp(2.8rem,6.5vw,5.5rem)', marginBottom: '5px' }}>{passed ? '🎊' : '😊'}</div>
+        <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+          <div style={{ fontSize: 'clamp(2.4rem,6vw,5rem)', marginBottom: '5px' }}>{passed ? '🎊' : '😊'}</div>
           <div className="panel-title" style={{ color: sectionAccent }}>{passed ? 'Stage Complete!' : "Don't Give Up!"}</div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.6vw,1rem)', color: 'var(--text-muted)', marginTop: '3px' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.78rem,1.6vw,1rem)', color: 'var(--text-muted)', marginTop: '3px' }}>
             {store.emoji} {store.name} — {store.npcName}
           </div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-          <div className="score-badge" style={{ fontSize: 'clamp(1.1rem,2.5vw,1.5rem)', padding: '10px 28px' }}>⭐ {score} / 5</div>
+          <div className="score-badge" style={{ fontSize: 'clamp(1rem,2.2vw,1.4rem)', padding: '10px 24px' }}>⭐ {score} / 5</div>
         </div>
 
-        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', marginBottom: '12px' }}>
           {[1,2,3,4,5].map(n => (
             <motion.span key={n}
               initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: n * 0.1, type: 'spring', stiffness: 300 }}
-              style={{ fontSize: 'clamp(1.3rem,3vw,2.1rem)' }}>
+              style={{ fontSize: 'clamp(1.2rem,2.8vw,2rem)' }}>
               {n <= score ? '⭐' : '☆'}
             </motion.span>
           ))}
         </div>
 
-        <div style={{ background: passed ? '#E8F5E9' : '#FFF3E0', border: `2px solid ${passed ? 'var(--success)' : 'var(--golden)'}`, borderRadius: '12px', padding: '10px 14px', marginBottom: '12px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.85rem,1.7vw,1.05rem)', color: 'var(--text-dark)', textAlign: 'center' }}>
+        <div style={{ background: passed ? '#E8F5E9' : '#FFF3E0', border: `2px solid ${passed ? 'var(--success)' : 'var(--golden)'}`, borderRadius: '12px', padding: '10px 14px', marginBottom: '12px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.6vw,1rem)', color: 'var(--text-dark)', textAlign: 'center' }}>
           {passed
             ? `${store.npcName} is proud of you! You passed with ${score}/5. Keep going! 🌟`
             : `${store.npcName} says: "You got ${score}/5. You need 4 to pass. Review the lesson and try the next set!"`}
         </div>
 
         {TIPS[store.id] && (
-          <div style={{ background: 'rgba(245,197,24,0.12)', border: '1.5px solid var(--golden)', borderRadius: '10px', padding: '9px 13px', marginBottom: '14px' }}>
-            <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.8rem,1.6vw,1rem)', color: 'var(--olive-brown)', marginBottom: '3px' }}>
+          <div style={{ background: 'rgba(245,197,24,0.12)', border: '1.5px solid var(--golden)', borderRadius: '10px', padding: '9px 13px', marginBottom: '12px' }}>
+            <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.78rem,1.5vw,0.95rem)', color: 'var(--olive-brown)', marginBottom: '3px' }}>
               💡 Grammar Tip — {store.description}
             </div>
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.78rem,1.5vw,0.95rem)', color: 'var(--text-dark)' }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.75rem,1.4vw,0.92rem)', color: 'var(--text-dark)' }}>
               {TIPS[store.id]}
             </div>
           </div>
         )}
 
-        <div style={{ marginBottom: '14px' }}>
-          <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.8rem,1.6vw,1rem)', color: 'var(--olive-brown)', marginBottom: '6px' }}>
+        <div style={{ marginBottom: '12px' }}>
+          <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.78rem,1.5vw,0.95rem)', color: 'var(--olive-brown)', marginBottom: '6px' }}>
             {section.name} Progress:
           </div>
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
             {section.stores.map((st, i) => {
               const done = prog[st.id]?.completed;
               const isCurr = st.id === store.id;
               return (
                 <div key={i} style={{
-                  flex: 1, borderRadius: '8px', padding: '5px', textAlign: 'center',
-                  fontFamily: 'var(--font-body)', fontSize: 'clamp(0.72rem,1.3vw,0.88rem)',
+                  flex: '1 1 auto', borderRadius: '8px', padding: '5px', textAlign: 'center',
+                  fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.2vw,0.85rem)',
                   background: done ? 'var(--success)' : isCurr ? 'var(--golden)' : 'var(--surface)',
                   border: `2px solid ${done ? 'var(--success)' : isCurr ? 'var(--olive-brown)' : 'rgba(122,107,61,0.3)'}`,
                   color: done ? 'white' : 'var(--text-dark)',
+                  minWidth: '80px',
                 }}>
                   {done ? '✓' : isCurr ? '◉' : '○'} {st.npcName}
                 </div>

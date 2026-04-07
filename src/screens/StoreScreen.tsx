@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { SECTION_D } from '../data/sectionD';
+import { STORE_GREETINGS } from '../data/dialogues';
 
 const ALL_SECTIONS = [...SECTIONS, SECTION_D];
-import { STORE_GREETINGS } from '../data/dialogues';
 import { getLevelBgCandidates, getNpcCandidates, ASSETS } from '../data/assets';
 import { getLevelTheme } from '../data/levelThemes';
 
@@ -241,7 +241,7 @@ export default function StoreScreen() {
         <motion.span
           style={{
             display: 'block',
-            fontSize: 'clamp(120px,22vw,280px)', lineHeight: 1,
+            fontSize: 'clamp(60px,14vw,160px)', lineHeight: 1,
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.5))',
           }}
           animate={{ y: [0, -14, 0] }}
@@ -256,7 +256,7 @@ export default function StoreScreen() {
             else setNpcFailed(true);
           }}
           style={{
-            width: 'clamp(200px,34vw,440px)', height: 'auto',
+            width: 'clamp(80px,22vw,260px)', height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
             display: 'block',
@@ -286,7 +286,7 @@ export default function StoreScreen() {
       position: 'absolute',
       top: 'clamp(64px,13vh,110px)',
       right: 'clamp(14px,2.5vw,28px)',
-      left: 'clamp(180px,30vw,400px)',
+      left: 'clamp(100px,24vw,360px)',
       zIndex: 20,
     }}>
       <AnimatePresence mode="wait">

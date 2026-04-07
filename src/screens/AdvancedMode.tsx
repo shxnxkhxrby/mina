@@ -178,6 +178,7 @@ export default function AdvancedMode() {
   const [isCorrect, setIsCorrect] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [score, setScore] = useState(0);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
   const [results, setResults] = useState<{ correct: boolean; topic: string; qText: string; correctAns: string }[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [npcSpriteErrors, setNpcSpriteErrors] = useState<Record<string, boolean>>({});
@@ -200,6 +201,7 @@ export default function AdvancedMode() {
     setQIdx(0);
     setSelected(null);
     setScore(0);
+    setLastAnswerCorrect(false);
     setResults([]);
     setShowFeedback(false);
   };
@@ -209,6 +211,7 @@ export default function AdvancedMode() {
     setSelected(i);
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
+    setLastAnswerCorrect(correct);
     setFeedbackText(correct ? currentQ.feedbackCorrect : currentQ.feedbackWrong);
     if (correct) setScore(s => s + 1);
     const correctChoice = currentQ.choices.find(c => c.isCorrect)!;
@@ -223,13 +226,16 @@ export default function AdvancedMode() {
 
   const handleNext = () => {
     if (qIdx + 1 >= total) {
-      // Save to the dedicated advanced score slot
-      addAdvancedScore(score, total);
+      // Bug fix: score state is stale here due to async React batching.
+      // Compute final score synchronously using lastAnswerCorrect.
+      const finalScore = score + (lastAnswerCorrect ? 1 : 0);
+      addAdvancedScore(finalScore, total);
       setPhase('summary');
     } else {
       setQIdx(i => i + 1);
       setSelected(null);
       setShowFeedback(false);
+      setLastAnswerCorrect(false);
     }
   };
 
@@ -439,6 +445,7 @@ export default function AdvancedMode() {
           position: 'absolute',
           top: 'clamp(52px,10vh,72px)', bottom: 0, left: 0, right: 0,
           display: 'flex', alignItems: 'stretch',
+          flexWrap: 'wrap',
           padding: 'clamp(10px,2vh,18px) clamp(14px,3vw,28px) clamp(12px,2.5vh,22px)',
           gap: 'clamp(10px,2vw,20px)', overflowY: 'auto',
         }}>
@@ -446,7 +453,7 @@ export default function AdvancedMode() {
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'flex-end', gap: '6px', flexShrink: 0,
-            width: 'clamp(80px,14vw,150px)',
+            width: 'clamp(64px,14vw,150px)',
           }}>
             <div style={{
               height: 'clamp(140px,26vh,240px)',
@@ -659,15 +666,16 @@ export default function AdvancedMode() {
       {/* Two-column body */}
       <div style={{
         flex: 1, display: 'flex', gap: 'clamp(8px,1.8vw,18px)',
+        flexWrap: 'wrap',
         padding: '0 clamp(10px,2vw,22px) clamp(8px,1.5vh,14px)',
-        zIndex: 1, position: 'relative', overflow: 'hidden', minHeight: 0,
+        zIndex: 1, position: 'relative', overflowY: 'auto', minHeight: 0,
       }}>
 
         {/* ── LEFT: Score + Topic Breakdown ── */}
         <motion.div
           initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}
           style={{
-            flex: '0 0 clamp(240px,45%,400px)',
+            flex: '1 1 240px',
             display: 'flex', flexDirection: 'column',
             gap: 'clamp(5px,0.9vh,8px)', overflow: 'hidden',
           }}
@@ -781,7 +789,7 @@ export default function AdvancedMode() {
         <motion.div
           initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
           style={{
-            flex: 1, display: 'flex', flexDirection: 'column',
+            flex: '1 1 240px', display: 'flex', flexDirection: 'column',
             gap: 'clamp(6px,1.1vh,10px)', minWidth: 0, overflow: 'hidden',
           }}
         >
@@ -818,12 +826,12 @@ export default function AdvancedMode() {
 
             <div style={{
               fontFamily: 'var(--font-body)', fontWeight: 700,
-              fontSize: 'clamp(0.36rem,0.7vw,0.52rem)',
-              color: '#F5C518', letterSpacing: '3px', textTransform: 'uppercase' as const,
+              fontSize: 'clamp(0.55rem,0.7vw,0.62rem)',
+              color: '#F5C518', letterSpacing: '2px', textTransform: 'uppercase' as const,
             }}>Certificate of Advanced Mastery</div>
 
             <div style={{
-              fontFamily: 'Georgia,serif', fontSize: 'clamp(0.34rem,0.65vw,0.5rem)',
+              fontFamily: 'Georgia,serif', fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
               color: 'rgba(255,255,255,0.5)', fontStyle: 'italic',
             }}>This is to certify that</div>
 
@@ -836,7 +844,7 @@ export default function AdvancedMode() {
 
             <div style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.34rem,0.65vw,0.5rem)',
+              fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
               color: 'rgba(255,255,255,0.75)', lineHeight: 1.4,
             }}>
               has successfully completed <strong>Minasa: Grammar Quest — Advanced Mode</strong>
@@ -844,7 +852,7 @@ export default function AdvancedMode() {
 
             <div style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.32rem,0.62vw,0.46rem)',
+              fontSize: 'clamp(0.48rem,0.62vw,0.56rem)',
               color: 'rgba(255,255,255,0.4)', lineHeight: 1.4,
             }}>
               Exploring the Minasa Festival in Bustos, Bulacan<br />
@@ -855,7 +863,7 @@ export default function AdvancedMode() {
             <div style={{
               background: 'linear-gradient(135deg,#3A4DB8,#F5C518)',
               color: 'white', fontFamily: 'var(--font-title)', fontWeight: 700,
-              fontSize: 'clamp(0.34rem,0.65vw,0.5rem)',
+              fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
               padding: 'clamp(2px,0.4vh,5px) clamp(8px,1.5vw,16px)',
               borderRadius: '50px',
               boxShadow: '0 3px 8px rgba(245,197,24,0.35)',
@@ -868,7 +876,7 @@ export default function AdvancedMode() {
 
             <div style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.3rem,0.56vw,0.42rem)',
+              fontSize: 'clamp(0.46rem,0.56vw,0.52rem)',
               color: 'rgba(255,255,255,0.3)',
             }}>
               {today} · EL306 Language Learning Materials

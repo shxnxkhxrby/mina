@@ -154,7 +154,22 @@ export default function AdvancedSectionView() {
         </div>
       </div>
 
-      {/* ── Store cards ── */}
+      {/* ── Store cards — horizontal scrollable row on mobile ── */}
+      <div style={{
+        position: 'absolute',
+        bottom: 'clamp(48px,9vh,80px)',
+        left: 0, right: 0,
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        gap: 'clamp(10px,2vw,24px)',
+        padding: '0 clamp(10px,2vw,20px)',
+        overflowX: 'auto',
+        overflowY: 'visible',
+        zIndex: 10,
+        paddingBottom: '16px',
+      }}>
       {section.stores.map((store, i) => {
         const unlocked = isStoreUnlocked(section.id, i);
         const completed = prog[store.id]?.completed;
@@ -166,10 +181,7 @@ export default function AdvancedSectionView() {
           <motion.div
             key={store.id}
             style={{
-              position: 'absolute',
-              bottom: positions[i].bottom,
-              left: positions[i].left,
-              transform: 'translateX(-50%)',
+              flexShrink: 0,
               zIndex: 10,
               cursor: unlocked ? 'pointer' : 'not-allowed',
             }}
@@ -332,6 +344,7 @@ export default function AdvancedSectionView() {
           </motion.div>
         );
       })}
+      </div>
 
       {/* Locked message toast */}
       <AnimatePresence>
