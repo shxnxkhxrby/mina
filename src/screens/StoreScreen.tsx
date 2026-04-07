@@ -9,10 +9,8 @@ const ALL_SECTIONS = [...SECTIONS, SECTION_D];
 import { getLevelBgCandidates, getNpcCandidates, ASSETS } from '../data/assets';
 import { getLevelTheme } from '../data/levelThemes';
 
-// ── Phase now includes MINA_CLOSING (only active for Section D last store) ──
 type Phase = 'greeting' | 'intro' | 'question' | 'answered' | 'done' | 'mina_closing';
 
-// ── Mina closing speech — shown after Section D's final store ─────────────
 const MINA_LINES = [
   "Congratulations! 🎉 You have completed learning the three major grammar areas: subject-verb agreement, prepositions of time and manner, and perfect tenses.",
   "Throughout your adventure, you explored different challenges, made careful choices, and applied important grammar rules in real situations.",
@@ -23,7 +21,6 @@ const MINA_LINES = [
   "Keep going, keep learning, and keep challenging yourself. Your grammar adventure doesn't end here — it's just getting started! I'll see you in your next adventure! ✨",
 ];
 
-// ── Audio for Mina's closing speech (files 20–26) ─────────────────────────
 const MINA_CLOSING_AUDIO = [
   'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a',
   'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a',
@@ -34,7 +31,6 @@ const MINA_CLOSING_AUDIO = [
   'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',
 ];
 
-// ── Floating sparkle particle ─────────────────────────────────────────────
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
   return (
     <motion.div
@@ -50,17 +46,16 @@ function Particle({ delay, x, size }: { delay: number; x: string; size: number }
   );
 }
 
-// ── Scalloped speech bubble ───────────────────────────────────────────────
+const SCALLOP_PATH = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
+
 function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      {/* Top scallop */}
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ')} fill={color} />
+          <path d={SCALLOP_PATH} fill={color} />
         </svg>
       </div>
-      {/* Bubble body */}
       <div style={{
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
         border: `4px solid ${color}`, borderTop: 'none',
@@ -70,17 +65,15 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
       }}>
         {children}
       </div>
-      {/* Bottom scallop */}
       <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2, transform: 'rotate(180deg)' }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ')} fill={color} />
+          <path d={SCALLOP_PATH} fill={color} />
         </svg>
       </div>
     </div>
   );
 }
 
-// ── Speaker badge ─────────────────────────────────────────────────────────
 function SpeakerBadge({ label, gradStart, gradEnd }: { label: string; gradStart: string; gradEnd: string }) {
   return (
     <motion.div
@@ -140,12 +133,13 @@ export default function StoreScreen() {
   const theme = getLevelTheme(currentStoreIndex);
   const [badgeGradStart, badgeGradEnd] = THEME_BADGE[currentStoreIndex] ?? THEME_BADGE[0];
 
-  // ── State ──────────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<Phase>(greetings.length > 0 ? 'greeting' : 'intro');
   const [greetIdx, setGreetIdx] = useState(0);
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
+  // scoreRef avoids stale-closure bugs when calling completeStore/addScore at finish
+  const scoreRef = useRef(0);
+  const [scoreDisplay, setScoreDisplay] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
   const [isCorrect, setIsCorrect] = useState(false);
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
@@ -177,7 +171,7 @@ export default function StoreScreen() {
     return () => clearInterval(t);
   }, []);
 
-  // ── Play audio for Mina closing lines ─────────────────────────────────
+  // Mina closing audio
   useEffect(() => {
     if (phase !== 'mina_closing') return;
     if (audioRef.current) {
@@ -198,10 +192,8 @@ export default function StoreScreen() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+      audioRef.current?.pause();
+      audioRef.current = null;
     };
   }, []);
 
@@ -212,7 +204,6 @@ export default function StoreScreen() {
     }
   };
 
-  // ── Helpers ────────────────────────────────────────────────────────────
   const isLastSectionDStore =
     currentSection === 'D' &&
     currentStoreIndex === section.stores.length - 1;
@@ -228,7 +219,10 @@ export default function StoreScreen() {
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
     setFeedbackText(correct ? currentQ.feedbackCorrect : currentQ.feedbackWrong);
-    if (correct) setScore(s => s + 1);
+    if (correct) {
+      scoreRef.current += 1;
+      setScoreDisplay(scoreRef.current);
+    }
     const correctChoice = currentQ.choices.find(c => c.isCorrect)!;
     setResults(r => [...r, { correct, correctAns: correctChoice.text }]);
     setPhase('answered');
@@ -238,13 +232,13 @@ export default function StoreScreen() {
     if (qIdx + 1 >= totalQ) { setPhase('done'); return; }
     setQIdx(i => i + 1);
     setSelected(null); setFeedbackText('');
+    setIsCorrect(false);
     setPhase('question');
   };
 
   const handleFinish = () => {
-    completeStore(section.id, store.id, score);
-    addScore(score, totalQ);
-    // Section D's last store → show Mina's closing speech before SCORE_SUMMARY
+    completeStore(section.id, store.id, scoreRef.current);
+    addScore(scoreRef.current, totalQ);
     if (isLastSectionDStore) {
       setMinaLineIdx(0);
       setPhase('mina_closing');
@@ -265,15 +259,15 @@ export default function StoreScreen() {
   const handleRetry = () => {
     const next = currentQuestionSet === 'A' ? 'B' : 'A';
     setQuestionSet(next);
-    setQIdx(0); setSelected(null); setScore(0);
+    setQIdx(0); setSelected(null);
+    scoreRef.current = 0; setScoreDisplay(0);
     setFeedbackText(''); setResults([]);
+    setIsCorrect(false);
     setGreetIdx(0);
     setPhase(greetings.length > 0 ? 'greeting' : 'intro');
   };
 
   const choiceLabels = ['A', 'B', 'C', 'D'];
-
-  // ── Inline render helpers ──────────────────────────────────────────────
 
   const renderNpcSprite = () => (
     <motion.div
@@ -313,7 +307,6 @@ export default function StoreScreen() {
           transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
         />
       )}
-      {/* Name tag */}
       <div style={{
         textAlign: 'center', marginTop: '4px', marginBottom: '8px',
         fontFamily: 'var(--font-char)', fontWeight: 700,
@@ -420,13 +413,10 @@ export default function StoreScreen() {
       <div style={{
         fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.2vw,0.82rem)',
         color: '#8A6000', marginLeft: 'auto',
-      }}>Q {qIdx + 1}/{totalQ} · ⭐ {score}</div>
+      }}>Q {qIdx + 1}/{totalQ} · ⭐ {scoreDisplay}</div>
     </div>
   );
 
-  // ════════════════════════════════════════════════════════════════════════
-  // RENDER
-  // ════════════════════════════════════════════════════════════════════════
   return (
     <div className="scene" style={{
       position: 'relative',
@@ -434,7 +424,7 @@ export default function StoreScreen() {
       overflow: 'hidden',
     }}>
 
-      {/* ── Background ── */}
+      {/* Background */}
       {!bgFailed && (
         <img
           key={`${currentStoreIndex}-${bgIndex}`}
@@ -453,14 +443,12 @@ export default function StoreScreen() {
         />
       )}
 
-      {/* Warm overlay */}
       <div style={{
         position: 'absolute', inset: 0,
         background: 'linear-gradient(to bottom, rgba(255,248,220,0.78) 0%, rgba(30,18,0,0.32) 100%)',
         pointerEvents: 'none', zIndex: 1,
       }} />
 
-      {/* Floating particles */}
       {PARTICLES.map((p, i) => <Particle key={i} {...p} />)}
       <div className="bunting" style={{ zIndex: 5 }} />
 
@@ -489,12 +477,10 @@ export default function StoreScreen() {
         }}
         onClick={e => { e.stopPropagation(); goToScene('SECTION_VIEW'); }}>← Back</button>
 
-      {/* ── NPC anchored bottom-left ── */}
+      {/* NPC sprite — hidden during Mina closing */}
       {phase !== 'mina_closing' && renderNpcSprite()}
 
-      {/* ══════════════════════════════════════════════════════════════
-          GREETING PHASE
-      ══════════════════════════════════════════════════════════════ */}
+      {/* GREETING PHASE */}
       {phase === 'greeting' && (
         <div style={{ position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 15 }} onClick={advanceGreeting}>
           {renderDialoguePanel(
@@ -534,9 +520,7 @@ export default function StoreScreen() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          INTRO PHASE
-      ══════════════════════════════════════════════════════════════ */}
+      {/* INTRO PHASE */}
       {phase === 'intro' && renderDialoguePanel(
         <>
           <SpeakerBadge label={store.npcName} gradStart={badgeGradStart} gradEnd={badgeGradEnd} />
@@ -561,9 +545,7 @@ export default function StoreScreen() {
         'intro'
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          QUESTION / ANSWERED PHASE
-      ══════════════════════════════════════════════════════════════ */}
+      {/* QUESTION / ANSWERED PHASE */}
       {(phase === 'question' || phase === 'answered') && renderDialoguePanel(
         <>
           <SpeakerBadge label={store.npcName} gradStart={badgeGradStart} gradEnd={badgeGradEnd} />
@@ -594,9 +576,7 @@ export default function StoreScreen() {
         qIdx
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          ANSWER RESULT OVERLAY
-      ══════════════════════════════════════════════════════════════ */}
+      {/* ANSWER RESULT OVERLAY */}
       <AnimatePresence>
         {phase === 'answered' && (
           <motion.div
@@ -625,7 +605,6 @@ export default function StoreScreen() {
                 position: 'relative', overflow: 'hidden',
               }}
             >
-              {/* Decorative scallop top strip */}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '10px', overflow: 'hidden' }}>
                 <svg viewBox="0 0 400 12" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
                   <path d={Array.from({ length: 20 }, (_, i) => `M${i * 20},12 Q${i * 20 + 10},0 ${i * 20 + 20},12`).join(' ')}
@@ -668,9 +647,7 @@ export default function StoreScreen() {
         )}
       </AnimatePresence>
 
-      {/* ══════════════════════════════════════════════════════════════
-          DONE OVERLAY
-      ══════════════════════════════════════════════════════════════ */}
+      {/* DONE OVERLAY */}
       {phase === 'done' && (
         <div style={{
           position: 'absolute', inset: 0,
@@ -691,7 +668,6 @@ export default function StoreScreen() {
               position: 'relative', overflow: 'hidden',
             }}
           >
-            {/* Scallop top accent */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '12px', overflow: 'hidden' }}>
               <svg viewBox="0 0 520 14" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
                 <path d={Array.from({ length: 26 }, (_, i) => `M${i * 20},14 Q${i * 20 + 10},0 ${i * 20 + 20},14`).join(' ')} fill={badgeGradStart} />
@@ -700,28 +676,26 @@ export default function StoreScreen() {
 
             <div style={{ paddingTop: '16px' }}>
               <div style={{ fontSize: 'clamp(2.4rem,5.5vw,3.8rem)', marginBottom: '6px' }}>
-                {score >= 4 ? '🎉' : '😊'}
+                {scoreRef.current >= 4 ? '🎉' : '😊'}
               </div>
               <div className="panel-title" style={{ marginBottom: '8px' }}>
-                {score >= 4 ? 'Excellent Work!' : 'Good Try!'}
+                {scoreRef.current >= 4 ? 'Excellent Work!' : 'Good Try!'}
               </div>
               <div className="score-badge" style={{ margin: '0 auto 14px' }}>
-                Score: {score} / {totalQ}
+                Score: {scoreRef.current} / {totalQ}
               </div>
 
-              {/* Stars */}
               <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
                 {[1, 2, 3, 4, 5].map(n => (
                   <motion.span key={n}
                     initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: n * 0.1, type: 'spring', stiffness: 300 }}
                     style={{ fontSize: 'clamp(1.3rem,3.2vw,2.2rem)' }}>
-                    {n <= score ? '⭐' : '☆'}
+                    {n <= scoreRef.current ? '⭐' : '☆'}
                   </motion.span>
                 ))}
               </div>
 
-              {/* Results list */}
               <div style={{
                 background: 'var(--surface)', borderRadius: '12px',
                 padding: 'clamp(8px,1.5vh,12px) clamp(10px,2vw,14px)',
@@ -757,13 +731,13 @@ export default function StoreScreen() {
                 fontFamily: 'var(--font-body)', fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
                 color: '#7A6355', marginBottom: '16px', lineHeight: 1.5,
               }}>
-                {score >= 4
+                {scoreRef.current >= 4
                   ? `${store.npcName} is impressed! You may proceed! 🌟`
                   : `${store.npcName} says: "Let's try again with new questions!" 💪`}
               </p>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {score >= 4 ? (
+                {scoreRef.current >= 4 ? (
                   <motion.button className="btn btn-success"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                     onClick={handleFinish}>✅ Continue →</motion.button>
@@ -783,10 +757,7 @@ export default function StoreScreen() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════════════════════
-          MINA CLOSING SPEECH (Section D final store only)
-          — Audio plays per line, stops on Next click
-      ══════════════════════════════════════════════════════════════ */}
+      {/* MINA CLOSING SPEECH */}
       {phase === 'mina_closing' && (
         <div
           style={{
@@ -809,7 +780,6 @@ export default function StoreScreen() {
                 alignItems: 'center', width: '100%', maxWidth: '580px',
               }}
             >
-              {/* Mina mascot */}
               <div style={{ marginBottom: '16px' }}>
                 <img
                   src={(ASSETS as Record<string, string>).minaMascot ?? ''}
@@ -824,12 +794,10 @@ export default function StoreScreen() {
                 />
               </div>
 
-              {/* Speaker badge */}
               <div style={{ alignSelf: 'flex-start', marginBottom: '4px' }}>
                 <SpeakerBadge label="MINA" gradStart="#8B1A8B" gradEnd="#5B0A6B" />
               </div>
 
-              {/* Scalloped bubble */}
               <ScallopedBubble color="#C060D0">
                 <div style={{
                   fontFamily: 'var(--font-body)',
@@ -841,7 +809,6 @@ export default function StoreScreen() {
                   <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: '#8B1A8B' }}>▌</span>
                 </div>
 
-                {/* Progress dots */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '16px' }}>
                   <div style={{ display: 'flex', gap: '5px' }}>
                     {MINA_LINES.map((_, i) => (
@@ -876,7 +843,6 @@ export default function StoreScreen() {
           </AnimatePresence>
         </div>
       )}
-
     </div>
   );
 }

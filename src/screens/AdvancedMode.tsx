@@ -6,12 +6,10 @@ import type { Question } from '../types';
 import { getLevelTheme } from '../data/levelThemes';
 import { getNpcCandidates } from '../data/assets';
 
-// Sprite image for each store: /imgs/levels/{sectionId}/level{n}.png
 function getNpcSpriteSrc(sectionId: string, storeIndex: number): string {
   return `/imgs/levels/${sectionId}/level${storeIndex + 1}.png`;
 }
 
-// ─── Flatten all questions from all sections/stores (Set A only) ────────────
 interface FlatQuestion extends Question {
   sectionId: string;
   sectionName: string;
@@ -50,14 +48,12 @@ function buildAllQuestions(): FlatQuestion[] {
   return all;
 }
 
-// ─── Compact rule tag per grammar topic ─────────────────────────────────────
 const TOPIC_TAG: Record<string, string> = {
   'Perfect Tenses': '⏳ Perfect Tenses',
   'Subject-Verb Agreement': '🔗 SVA',
   'Prepositions of Time and Manner': '📍 Prepositions',
 };
 
-// ─── Certificate PNG export ──────────────────────────────────────────────────
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -165,8 +161,9 @@ async function exportAdvancedCertificate(
   }, 'image/png');
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
 type Phase = 'menu' | 'quiz' | 'summary';
+
+type QuizResult = { correct: boolean; topic: string; qText: string; correctAns: string };
 
 export default function AdvancedMode() {
   const { goToScene, playerName, addAdvancedScore } = useGameStore();
@@ -177,9 +174,10 @@ export default function AdvancedMode() {
   const [selected, setSelected] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
-  const [score, setScore] = useState(0);
-  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
-  const [results, setResults] = useState<{ correct: boolean; topic: string; qText: string; correctAns: string }[]>([]);
+  // scoreRef is used for synchronous score tracking to avoid stale-closure bugs
+  const scoreRef = useRef(0);
+  const [scoreDisplay, setScoreDisplay] = useState(0);
+  const [results, setResults] = useState<QuizResult[]>([]);
   const [showFeedback, setShowFeedback] = useState(false);
   const [npcSpriteErrors, setNpcSpriteErrors] = useState<Record<string, boolean>>({});
   const [npcIndexMap, setNpcIndexMap] = useState<Record<string, number>>({});
@@ -200,10 +198,11 @@ export default function AdvancedMode() {
     setPhase('quiz');
     setQIdx(0);
     setSelected(null);
-    setScore(0);
-    setLastAnswerCorrect(false);
+    scoreRef.current = 0;
+    setScoreDisplay(0);
     setResults([]);
     setShowFeedback(false);
+    setIsCorrect(false);
   };
 
   const handleAnswer = (i: number) => {
@@ -211,9 +210,11 @@ export default function AdvancedMode() {
     setSelected(i);
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
-    setLastAnswerCorrect(correct);
     setFeedbackText(correct ? currentQ.feedbackCorrect : currentQ.feedbackWrong);
-    if (correct) setScore(s => s + 1);
+    if (correct) {
+      scoreRef.current += 1;
+      setScoreDisplay(scoreRef.current);
+    }
     const correctChoice = currentQ.choices.find(c => c.isCorrect)!;
     setResults(r => [...r, {
       correct,
@@ -226,23 +227,20 @@ export default function AdvancedMode() {
 
   const handleNext = () => {
     if (qIdx + 1 >= total) {
-      // Bug fix: score state is stale here due to async React batching.
-      // Compute final score synchronously using lastAnswerCorrect.
-      const finalScore = score + (lastAnswerCorrect ? 1 : 0);
-      addAdvancedScore(finalScore, total);
+      // Use scoreRef.current for accurate final score (no stale-closure risk)
+      addAdvancedScore(scoreRef.current, total);
       setPhase('summary');
     } else {
       setQIdx(i => i + 1);
       setSelected(null);
       setShowFeedback(false);
-      setLastAnswerCorrect(false);
+      setIsCorrect(false);
     }
   };
 
   const choiceLabels = ['A', 'B', 'C', 'D'];
   const progressPct = total > 0 ? ((qIdx + (selected !== null ? 1 : 0)) / total) * 100 : 0;
 
-  // Group results by topic for summary
   const byTopic = useMemo(() => {
     const map: Record<string, { correct: number; total: number }> = {};
     for (const r of results) {
@@ -325,7 +323,6 @@ export default function AdvancedMode() {
               Jump straight into all <strong style={{ color: '#F5C518' }}>{total} questions</strong> across every grammar topic — no instructions, no hints, no guides.
               Your score and progress are tracked <strong style={{ color: '#F5C518' }}>separately</strong> from Story Mode.
             </p>
-            {/* Topic breakdown */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px', textAlign: 'left' }}>
               {SECTIONS.map((sec, i) => {
                 const qCount = sec.stores.reduce((n, st) => n + (st.questionSets.find(qs => qs.id === 'A')?.questions.length || 0), 0);
@@ -396,7 +393,6 @@ export default function AdvancedMode() {
     return (
       <div className="scene" style={{ background: bg }}>
         <div className="bunting" />
-        {/* Header strip */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
           height: 'clamp(52px,10vh,72px)',
@@ -419,7 +415,7 @@ export default function AdvancedMode() {
               color: 'rgba(255,255,255,0.9)', marginBottom: '3px',
             }}>
               <span>Q {qIdx + 1} of {total}</span>
-              <span>⭐ {score} correct</span>
+              <span>⭐ {scoreDisplay} correct</span>
             </div>
             <div style={{ height: '5px', background: 'rgba(255,255,255,0.25)', borderRadius: '3px', overflow: 'hidden' }}>
               <motion.div
@@ -440,7 +436,6 @@ export default function AdvancedMode() {
           </div>
         </div>
 
-        {/* Main content */}
         <div style={{
           position: 'absolute',
           top: 'clamp(52px,10vh,72px)', bottom: 0, left: 0, right: 0,
@@ -449,7 +444,7 @@ export default function AdvancedMode() {
           padding: 'clamp(10px,2vh,18px) clamp(14px,3vw,28px) clamp(12px,2.5vh,22px)',
           gap: 'clamp(10px,2vw,20px)', overflowY: 'auto',
         }}>
-          {/* Left: NPC */}
+          {/* Left: NPC + inline feedback */}
           <div style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'flex-end', gap: '6px', flexShrink: 0,
@@ -495,7 +490,6 @@ export default function AdvancedMode() {
               textAlign: 'center', whiteSpace: 'nowrap',
             }}>{currentQ.npcName}</div>
 
-            {/* Inline feedback */}
             <AnimatePresence>
               {showFeedback && (
                 <motion.div
@@ -571,7 +565,6 @@ export default function AdvancedMode() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Choices */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(5px,1vh,8px)' }}>
               {currentQ.choices.map((choice, i) => {
                 let cls = 'choice-bubble';
@@ -608,7 +601,8 @@ export default function AdvancedMode() {
   }
 
   // ── SUMMARY ───────────────────────────────────────────────────────────────
-  const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+  const finalScore = scoreRef.current;
+  const pct = total > 0 ? Math.round((finalScore / total) * 100) : 0;
   const grade = pct >= 90 ? { label: 'Outstanding!', emoji: '🏆', color: '#FFD700' }
     : pct >= 75 ? { label: 'Excellent!', emoji: '🌟', color: '#4CAF50' }
     : pct >= 60 ? { label: 'Good Job!', emoji: '👍', color: '#2196F3' }
@@ -619,7 +613,7 @@ export default function AdvancedMode() {
   const handleDownload = async () => {
     setDownloading(true);
     try {
-      await exportAdvancedCertificate(playerName || 'Student', score, total, pct, grade.label.replace('!',''), today);
+      await exportAdvancedCertificate(playerName || 'Student', finalScore, total, pct, grade.label.replace('!',''), today);
     } finally {
       setDownloading(false);
     }
@@ -639,7 +633,6 @@ export default function AdvancedMode() {
     <div className="scene" style={{ background: 'linear-gradient(160deg,#0D0D1A 0%,#1A1A2E 40%,#16213E 100%)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
       <div className="bunting" />
 
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }}
         style={{
@@ -663,7 +656,6 @@ export default function AdvancedMode() {
         </div>
       </motion.div>
 
-      {/* Two-column body */}
       <div style={{
         flex: 1, display: 'flex', gap: 'clamp(8px,1.8vw,18px)',
         flexWrap: 'wrap',
@@ -671,7 +663,7 @@ export default function AdvancedMode() {
         zIndex: 1, position: 'relative', overflowY: 'auto', minHeight: 0,
       }}>
 
-        {/* ── LEFT: Score + Topic Breakdown ── */}
+        {/* LEFT: Score + Topic Breakdown */}
         <motion.div
           initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}
           style={{
@@ -680,7 +672,6 @@ export default function AdvancedMode() {
             gap: 'clamp(5px,0.9vh,8px)', overflow: 'hidden',
           }}
         >
-          {/* Big score card */}
           <div style={{
             background: 'rgba(15,15,35,0.96)',
             border: `2.5px solid ${grade.color}66`,
@@ -700,7 +691,7 @@ export default function AdvancedMode() {
                   {pct}%
                 </div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.48rem,0.9vw,0.62rem)', color: 'rgba(255,255,255,0.5)' }}>
-                  {score}/{total} correct
+                  {finalScore}/{total} correct
                 </div>
               </div>
               <div>
@@ -712,12 +703,11 @@ export default function AdvancedMode() {
               <motion.div
                 initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                 transition={{ delay: 0.5, duration: 1, ease: 'easeOut' }}
-                style={{ height: '100%', background: `linear-gradient(90deg, #3A4DB8, #F5C518)`, borderRadius: '3px' }}
+                style={{ height: '100%', background: 'linear-gradient(90deg, #3A4DB8, #F5C518)', borderRadius: '3px' }}
               />
             </div>
           </div>
 
-          {/* Per-topic breakdown */}
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'clamp(4px,0.8vh,7px)' }}>
             <div style={{
               fontFamily: 'var(--font-accent)', fontWeight: 700,
@@ -761,7 +751,6 @@ export default function AdvancedMode() {
               );
             })}
 
-            {/* Weak areas */}
             {Object.entries(byTopic).some(([, s]) => s.correct / s.total < 0.6) && (
               <div style={{
                 background: 'rgba(255,152,0,0.1)', border: '1px solid rgba(255,152,0,0.3)',
@@ -785,7 +774,7 @@ export default function AdvancedMode() {
           </div>
         </motion.div>
 
-        {/* ── RIGHT: Certificate + Buttons ── */}
+        {/* RIGHT: Certificate + Buttons */}
         <motion.div
           initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
           style={{
@@ -793,7 +782,6 @@ export default function AdvancedMode() {
             gap: 'clamp(6px,1.1vh,10px)', minWidth: 0, overflow: 'hidden',
           }}
         >
-          {/* Certificate preview — fixed height, no overflow */}
           <div
             ref={certRef}
             style={{
@@ -810,7 +798,6 @@ export default function AdvancedMode() {
               justifyContent: 'center', gap: 'clamp(2px,0.4vh,5px)',
             }}
           >
-            {/* Corner marks */}
             {(['tl','tr','bl','br'] as const).map(c => (
               <span key={c} style={{
                 position: 'absolute',
@@ -821,27 +808,22 @@ export default function AdvancedMode() {
             ))}
 
             <div style={{ width: '82%', height: '1px', flexShrink: 0, background: 'linear-gradient(90deg,transparent,#F5C518 15%,#F5C518 85%,transparent)' }} />
-
             <div style={{ fontSize: 'clamp(1.2rem,2.8vw,2.2rem)', lineHeight: 1, flexShrink: 0 }}>⚡</div>
-
             <div style={{
               fontFamily: 'var(--font-body)', fontWeight: 700,
               fontSize: 'clamp(0.55rem,0.7vw,0.62rem)',
               color: '#F5C518', letterSpacing: '2px', textTransform: 'uppercase' as const,
             }}>Certificate of Advanced Mastery</div>
-
             <div style={{
               fontFamily: 'Georgia,serif', fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
               color: 'rgba(255,255,255,0.5)', fontStyle: 'italic',
             }}>This is to certify that</div>
-
             <div style={{
               fontFamily: 'var(--font-title)',
               fontSize: 'clamp(0.85rem,2.2vw,1.8rem)',
               color: '#E8547A', lineHeight: 1.1,
               wordBreak: 'break-word' as const, maxWidth: '90%',
             }}>{playerName || 'Student'}</div>
-
             <div style={{
               fontFamily: 'var(--font-body)',
               fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
@@ -849,7 +831,6 @@ export default function AdvancedMode() {
             }}>
               has successfully completed <strong>Minasa: Grammar Quest — Advanced Mode</strong>
             </div>
-
             <div style={{
               fontFamily: 'var(--font-body)',
               fontSize: 'clamp(0.48rem,0.62vw,0.56rem)',
@@ -858,8 +839,6 @@ export default function AdvancedMode() {
               Exploring the Minasa Festival in Bustos, Bulacan<br />
               Perfect Tenses · Subject-Verb Agreement · Prepositions
             </div>
-
-            {/* Score badge */}
             <div style={{
               background: 'linear-gradient(135deg,#3A4DB8,#F5C518)',
               color: 'white', fontFamily: 'var(--font-title)', fontWeight: 700,
@@ -869,11 +848,9 @@ export default function AdvancedMode() {
               boxShadow: '0 3px 8px rgba(245,197,24,0.35)',
               flexShrink: 0,
             }}>
-              ⚡ {score}/{total} · {pct}% · {grade.label.replace('!', '')}
+              ⚡ {finalScore}/{total} · {pct}% · {grade.label.replace('!', '')}
             </div>
-
             <div style={{ width: '82%', height: '1px', flexShrink: 0, background: 'linear-gradient(90deg,transparent,#F5C518 15%,#F5C518 85%,transparent)' }} />
-
             <div style={{
               fontFamily: 'var(--font-body)',
               fontSize: 'clamp(0.46rem,0.56vw,0.52rem)',
@@ -883,7 +860,6 @@ export default function AdvancedMode() {
             </div>
           </div>
 
-          {/* Buttons */}
           <div style={{
             display: 'flex', gap: 'clamp(4px,0.8vw,8px)',
             flexWrap: 'wrap', justifyContent: 'center', flexShrink: 0,

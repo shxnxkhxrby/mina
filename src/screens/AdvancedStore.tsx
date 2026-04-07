@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
@@ -23,11 +23,12 @@ function Particle({ delay, x, size }: { delay: number; x: string; size: number }
 }
 
 function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
+  const scallop = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ')} fill={color} />
+          <path d={scallop} fill={color} />
         </svg>
       </div>
       <div style={{
@@ -36,14 +37,13 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
         borderRadius: '0 0 20px 20px',
         padding: 'clamp(12px,2.5vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.5vh,20px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
-        /* Allow scrolling inside bubble if content is tall */
         maxHeight: '60vh', overflowY: 'auto',
       }}>
         {children}
       </div>
       <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2, transform: 'rotate(180deg)' }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ')} fill={color} />
+          <path d={scallop} fill={color} />
         </svg>
       </div>
     </div>
@@ -97,14 +97,19 @@ export default function AdvancedStore() {
   const section = SECTIONS.find(s => s.id === currentSection);
   if (!section) return null;
   const store = section.stores[currentStoreIndex];
-  const qSet = store.questionSets.find(qs => qs.id === currentQuestionSet)!;
+  if (!store) return null;
+  const qSet = store.questionSets.find(qs => qs.id === currentQuestionSet) ?? store.questionSets[0];
+  if (!qSet) return null;
+
   const theme = getLevelTheme(currentStoreIndex);
   const [badgeGradStart, badgeGradEnd] = THEME_BADGE[currentStoreIndex] ?? THEME_BADGE[0];
 
   const [phase, setPhase] = useState<Phase>('question');
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
+  // Use ref for accurate score to avoid stale-closure bugs at finish time
+  const scoreRef = useRef(0);
+  const [scoreDisplay, setScoreDisplay] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
   const [isCorrect, setIsCorrect] = useState(false);
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
@@ -137,7 +142,10 @@ export default function AdvancedStore() {
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
     setFeedbackText(correct ? currentQ.feedbackCorrect : currentQ.feedbackWrong);
-    if (correct) setScore(s => s + 1);
+    if (correct) {
+      scoreRef.current += 1;
+      setScoreDisplay(scoreRef.current);
+    }
     const correctChoice = currentQ.choices.find(c => c.isCorrect)!;
     setResults(r => [...r, { correct, correctAns: correctChoice.text }]);
     setPhase('answered');
@@ -151,16 +159,18 @@ export default function AdvancedStore() {
   };
 
   const handleFinish = () => {
-    completeStore(section.id, store.id, score);
-    addScore(score, totalQ);
+    completeStore(section.id, store.id, scoreRef.current);
+    addScore(scoreRef.current, totalQ);
     goToScene('FEEDBACK');
   };
 
   const handleRetry = () => {
     const next = currentQuestionSet === 'A' ? 'B' : 'A';
     setQuestionSet(next);
-    setQIdx(0); setSelected(null); setScore(0);
+    setQIdx(0); setSelected(null);
+    scoreRef.current = 0; setScoreDisplay(0);
     setFeedbackText(''); setResults([]);
+    setIsCorrect(false);
     setPhase('question');
   };
 
@@ -233,7 +243,7 @@ export default function AdvancedStore() {
       <div style={{
         fontFamily: 'var(--font-body)', fontSize: 'clamp(0.5rem,0.95vw,0.64rem)',
         color: '#8A6000', marginLeft: 'auto',
-      }}>Q {qIdx + 1}/{totalQ} · ⭐ {score}</div>
+      }}>Q {qIdx + 1}/{totalQ} · ⭐ {scoreDisplay}</div>
     </div>
   );
 
@@ -301,10 +311,7 @@ export default function AdvancedStore() {
         }}
         onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>← Back</button>
 
-      {/*
-        NPC sprite — reduced width so it doesn't eat half the screen on mobile.
-        On phones (<480px) it's ~80px wide so the dialogue panel has plenty of room.
-      */}
+      {/* NPC sprite */}
       <motion.div
         style={{
           position: 'absolute', left: 'clamp(-10px,-0.5vw,0px)', bottom: 0,
@@ -318,7 +325,6 @@ export default function AdvancedStore() {
           <motion.span
             style={{
               display: 'block',
-              /* Reduced: was clamp(120px,22vw,280px) — too large on mobile */
               fontSize: 'clamp(60px,14vw,180px)', lineHeight: 1,
               filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.5))',
             }}
@@ -334,7 +340,6 @@ export default function AdvancedStore() {
               else setNpcFailed(true);
             }}
             style={{
-              /* Reduced: was clamp(200px,34vw,440px) — NPC was taking up >half on mobile */
               width: 'clamp(90px,20vw,320px)', height: 'auto',
               objectFit: 'contain',
               filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
@@ -356,12 +361,7 @@ export default function AdvancedStore() {
         }}>{store.npcName}</div>
       </motion.div>
 
-      {/*
-        Dialogue panel — left edge responds to NPC width.
-        Previous: left: clamp(200px,34vw,440px) — on 360px phone that forced the panel
-        to start at 200px leaving only 160px for the panel, which was too narrow.
-        Fixed: left now uses a more mobile-friendly minimum of 110px.
-      */}
+      {/* Dialogue panel */}
       {(phase === 'question' || phase === 'answered') && (
         <div style={{
           position: 'absolute',
@@ -500,13 +500,13 @@ export default function AdvancedStore() {
 
             <div style={{ paddingTop: '16px' }}>
               <div style={{ fontSize: 'clamp(2rem,5vw,3.5rem)', marginBottom: '6px' }}>
-                {score >= 4 ? '🎉' : '😊'}
+                {scoreRef.current >= 4 ? '🎉' : '😊'}
               </div>
               <div className="panel-title" style={{ marginBottom: '8px' }}>
-                {score >= 4 ? 'Excellent Work!' : 'Good Try!'}
+                {scoreRef.current >= 4 ? 'Excellent Work!' : 'Good Try!'}
               </div>
               <div className="score-badge" style={{ margin: '0 auto 14px' }}>
-                Score: {score} / {totalQ}
+                Score: {scoreRef.current} / {totalQ}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
@@ -515,7 +515,7 @@ export default function AdvancedStore() {
                     initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: n * 0.1, type: 'spring', stiffness: 300 }}
                     style={{ fontSize: 'clamp(1.2rem,3vw,2rem)' }}>
-                    {n <= score ? '⭐' : '☆'}
+                    {n <= scoreRef.current ? '⭐' : '☆'}
                   </motion.span>
                 ))}
               </div>
@@ -555,13 +555,13 @@ export default function AdvancedStore() {
                 fontFamily: 'var(--font-body)', fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
                 color: '#7A6355', marginBottom: '16px', lineHeight: 1.5,
               }}>
-                {score >= 4
+                {scoreRef.current >= 4
                   ? `${store.npcName} is impressed! You may proceed! 🌟`
                   : `${store.npcName} says: "Let's try again with new questions!" 💪`}
               </p>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {score >= 4 ? (
+                {scoreRef.current >= 4 ? (
                   <motion.button className="btn btn-success"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                     onClick={handleFinish}>✅ Continue →</motion.button>
