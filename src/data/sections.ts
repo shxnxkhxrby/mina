@@ -7,13 +7,21 @@ export const SECTIONS: Section[] = [
     grammarTopic: 'Perfect Tenses', emoji: '🏪', color: '#E85D26',
     lesson: {
       topic: 'Perfect Tenses',
-      intro: "Hi there! Before you visit the Minasa shops, let me teach you about Perfect Tenses!",
-      rule: "Perfect tenses use a form of 'have' + past participle to show completed actions or actions connected to another time.",
-      formula: "PAST PERFECT: had + past participle\n→ action completed BEFORE another past event\n\nPRESENT PERFECT: have/has + past participle\n→ started in the past, relevant NOW\n\nFUTURE PERFECT: will have + past participle\n→ completed BEFORE a future event",
+      // Voice 6 (file 8): preamble
+      intro: "Hey there again. Before you talk to the shop owners, let's review the perfect tenses — past, present, and future — using examples from the Minasa Festival and Bustos.",
+      // Voice 7 (file 7): Past Perfect rule
+      rule: "The past perfect tense shows that one action was completed before another action in the past. The formula is: had + past participle.",
+      // Voice 9 (file 10): Present Perfect rule
+      rule2: "The present perfect tense connects the past to the present. The formula is: have or has + past participle.",
+      // Voice 11 (file 12): Future Perfect rule
+      rule3: "The future perfect tense shows that an action will be completed before a certain time in the future. The formula is: will have + past participle.",
+      // Voice 13 (file 14): Summary
+      summary: "So remember: Past perfect tense uses had + past participle — completed before another past action. Present perfect tense uses have or has + past participle — started before, continues now. And future perfect tense uses will have + past participle — completed before a future time.",
+      formula: "PAST PERFECT: had + past participle\n→ completed BEFORE another past event\n\nPRESENT PERFECT: have/has + past participle\n→ started in the past, relevant NOW\n\nFUTURE PERFECT: will have + past participle\n→ completed BEFORE a future event",
       examples: [
-        "Before the festival became popular, our ancestors had already created special recipes. (Past Perfect)",
-        "I have used fresh coconut for many years. (Present Perfect)",
-        "By tomorrow, I will have completed all preparations. (Future Perfect)"
+        "The bakers had prepared the Minasa cookies before the festival parade started. (Past Perfect — the baking was finished first, before the parade began.)",
+        "Many visitors have enjoyed the sweet Minasa cookies during the festival. (Present Perfect — people started enjoying them before, and it is still true now.)",
+        "By the end of the Minasa festival, the shop owners will have sold hundreds of cookies. (Future Perfect — the selling will already be finished before the festival ends.)"
       ]
     },
     stores: [
@@ -81,13 +89,20 @@ export const SECTIONS: Section[] = [
     grammarTopic: 'Subject-Verb Agreement', emoji: '🏬', color: '#5B7A3D',
     lesson: {
       topic: 'Subject-Verb Agreement',
-      intro: "Hi there! Now it is time for you to buy the ingredients to make Minasa. But first, let me teach you one important rule for subject-verb agreement!",
-      rule: "When a compound subject contains both a singular and plural noun joined by 'or' or 'nor', the verb agrees with the part CLOSEST to the verb (Proximity Rule). When a phrase comes between the subject and verb, the verb still agrees with the MAIN subject.",
-      formula: "RULE 3 (Proximity):\nEither/Neither + or/nor → verb agrees with NEAREST subject\n\nRULE 4 (Quantifiers):\neach, every, everyone, anybody, nobody → SINGULAR verb\nboth, few, many, several → PLURAL verb\n\nRULE 5 (Noncount/Plural-only):\nnoncount nouns (rice, flour, advice, information) → SINGULAR\nplural-only nouns (goods, proceeds, valuables) → PLURAL",
+      // Voice 15 (file 16): Rule 1
+      intro: "Here are the three rules you need to remember.",
+      rule: "First, when a compound subject contains both a singular and a plural noun or pronoun joined by or or nor, the verb should agree with the part of the subject that is closer to the verb. This is also called the Rule of Proximity. When a phrase comes between the subject and the verb, remember that the verb still agrees with the subject, not the noun or pronoun in the phrase following the subject of the sentence.",
+      // Voice 16 (file 17): Rule 2
+      rule2: "Next, the words and phrases each, either, everyone, everybody, anybody, someone, and no one are singular and require a singular verb. The words and phrases both, few, many, and several are plural and require a plural verb.",
+      // Voice 17 (file 18): Rule 3
+      rule3: "Lastly, non-count nouns take a singular verb. Some countable nouns in English, such as earnings, goods, odds, surroundings, proceeds, contents, and valuables, only have a plural form and take a plural verb.",
+      // Voice 18 (file 19): "Great! Now choose a shop"
+      summary: "Great! Now that you understand the rules, choose a shop and apply what you've learned.",
+      formula: "RULE 1 — PROXIMITY (or/nor):\nVerb agrees with the NEAREST subject\n\nRULE 2 — QUANTIFIERS:\neach, either, everyone, anybody, someone, no one → SINGULAR verb\nboth, few, many, several → PLURAL verb\n\nRULE 3 — NONCOUNT / PLURAL-ONLY:\nnon-count nouns (rice, flour, advice) → SINGULAR verb\nplural-only nouns (goods, proceeds, valuables) → PLURAL verb",
       examples: [
-        "Either the coconut or the flour is on the table. ('flour' is nearest → singular 'is')",
-        "Each of the cows is healthy. ('each' = always singular)",
-        "The information about the eggs is on the board. ('information' = noncount → singular)"
+        "Either the coconut or the flour is on the table. ('flour' is nearest → singular 'is') — Rule of Proximity",
+        "Each of the shop owners is eager to help. ('each' is always singular → 'is') — Quantifier Rule",
+        "The proceeds from the Minasa festival are donated to the community. ('proceeds' is plural-only → 'are') — Noncount/Plural-only Rule"
       ]
     },
     stores: [
@@ -155,15 +170,21 @@ export const SECTIONS: Section[] = [
     grammarTopic: 'Prepositions of Time & Manner', emoji: '🛵', color: '#2E75B6',
     lesson: {
       topic: 'Prepositions of Time & Manner',
-      intro: "Hi! Before you start conversing with the riders, let's review prepositions of time and manner.",
-      rule: "Prepositions of TIME tell us WHEN something happens. Prepositions of MANNER tell us HOW something happens.",
-      formula: "TIME PREPOSITIONS:\nat → exact time (at 5:30 AM)\non → days or dates (on Sunday)\nin → months or years (in January)\n\nMANNER PREPOSITIONS:\nby → mode of action (by bike)\nwith → companionship or means (with friends / with determination)\nin → way or style (in a fast manner)",
+      // Voice 20 (file 21): Intro — prepositions of time
+      intro: "Hi! Before you start conversing with the riders, let's review prepositions of time and manner. Prepositions of time tell us when something happens. At is used for exact time. On is for days or dates. And in is for months or years.",
+      rule: "Prepositions of TIME tell us WHEN something happens:\nat → exact time (at 5:30 AM)\non → days or dates (on Sunday)\nin → months or years (in January)",
+      // Voice 22 (file 23): Manner prepositions
+      rule2: "Prepositions of MANNER tell us HOW something happens:\nby → mode of action (by bike)\nwith → companionship or means (with friends / with determination)\nin → way or style (in a fast manner)",
+      // Voice 24 (file 25): "Now that you understand prepositions..."
+      summary: "Now that you understand prepositions of time and manner, you're ready to converse with the riders. Listen carefully and choose the correct responses.",
+      formula: "TIME PREPOSITIONS:\nat → exact time (at 5:30 AM)\non → days or dates (on Sunday)\nin → months or years (in January)\n\nMANNER PREPOSITIONS:\nby → mode of action (by bike)\nwith → companionship or means (with friends)\nin → way or style (in a fast manner)",
       examples: [
         "The ride started at 5:30 AM. (at = exact time)",
         "The event was held on Sunday. (on = day)",
         "The Minasa Festival is celebrated in January. (in = month)",
         "The riders traveled by bike. (by = mode of travel)",
-        "She joined the ride with her friends. (with = companionship)"
+        "She joined the ride with her friends. (with = companionship)",
+        "He finished the race with determination. (with = means/attitude)"
       ]
     },
     stores: [
