@@ -4,17 +4,6 @@ import { useGameStore } from '../store/gameStore';
 import { MINA_INTRO_DIALOGUES } from '../data/dialogues';
 import { ASSETS } from '../data/assets';
 
-// ── Audio URLs for each Mina intro line (1-indexed filenames) ──────────────
-// Voice 1 → dialogue 0, Voice 2 → dialogue 1, Voice 3 → dialogue 2,
-// Voice 4 → dialogue 3, Voice 5 → dialogue 4
-const MINA_INTRO_AUDIO = [
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/1_j6gnjf.m4a',  // Voice 1
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/2_yqasnm.m4a',  // Voice 2
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/4_z2aae9.m4a',  // Voice 3
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/3_pdexki.m4a',  // Voice 4
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/6_l06ibr.m4a',  // Voice 5 — "Ready? Let's begin!"
-];
-
 // ── Floating particle ──────────────────────────────────────────────────────
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
   return (
@@ -80,14 +69,14 @@ export default function MinaIntro() {
     return () => clearInterval(t);
   }, []);
 
-  // Play audio for the current line, stop previous
+  // Play audio for the current line — read directly from the dialogue data
+  // so the URL always matches the text, with no separate array to keep in sync.
   useEffect(() => {
-    // Stop any currently playing audio
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-    const src = MINA_INTRO_AUDIO[idx];
+    const src = MINA_INTRO_DIALOGUES[idx].audio;
     if (!src) return;
     const audio = new Audio(src);
     audioRef.current = audio;
