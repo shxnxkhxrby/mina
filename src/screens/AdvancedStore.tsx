@@ -22,28 +22,29 @@ function Particle({ delay, x, size }: { delay: number; x: string; size: number }
   );
 }
 
+const SCALLOP = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
+
 function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
-  const scallop = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={scallop} fill={color} />
+          <path d={SCALLOP} fill={color} />
         </svg>
       </div>
       <div style={{
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
         border: `4px solid ${color}`, borderTop: 'none',
         borderRadius: '0 0 20px 20px',
-        padding: 'clamp(12px,2.5vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.5vh,20px)',
+        padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.2vh,20px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
-        maxHeight: '60vh', overflowY: 'auto',
+        maxHeight: '55vh', overflowY: 'auto',
       }}>
         {children}
       </div>
       <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2, transform: 'rotate(180deg)' }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={scallop} fill={color} />
+          <path d={SCALLOP} fill={color} />
         </svg>
       </div>
     </div>
@@ -107,7 +108,6 @@ export default function AdvancedStore() {
   const [phase, setPhase] = useState<Phase>('question');
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
-  // Use ref for accurate score to avoid stale-closure bugs at finish time
   const scoreRef = useRef(0);
   const [scoreDisplay, setScoreDisplay] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
@@ -142,10 +142,7 @@ export default function AdvancedStore() {
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
     setFeedbackText(correct ? currentQ.feedbackCorrect : currentQ.feedbackWrong);
-    if (correct) {
-      scoreRef.current += 1;
-      setScoreDisplay(scoreRef.current);
-    }
+    if (correct) { scoreRef.current += 1; setScoreDisplay(scoreRef.current); }
     const correctChoice = currentQ.choices.find(c => c.isCorrect)!;
     setResults(r => [...r, { correct, correctAns: correctChoice.text }]);
     setPhase('answered');
@@ -248,8 +245,8 @@ export default function AdvancedStore() {
   );
 
   return (
-    <div className="scene" style={{
-      position: 'relative',
+    <div style={{
+      position: 'fixed', inset: 0, width: '100%', height: '100%',
       background: bgFailed ? (secBg[section.id] || secBg.A) : undefined,
       overflow: 'hidden',
     }}>
@@ -282,14 +279,15 @@ export default function AdvancedStore() {
       <div style={{
         position: 'absolute', top: 'clamp(38px,7vh,60px)', left: '50%', transform: 'translateX(-50%)',
         zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-        maxWidth: '80vw',
+        maxWidth: '60vw',
       }}>
         <div style={{
-          fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,1.6vw,1.1rem)',
+          fontFamily: 'var(--font-title)', fontSize: 'clamp(0.72rem,1.5vw,1rem)',
           color: 'white', background: 'rgba(0,0,0,0.55)',
           padding: '4px 18px', borderRadius: '50px',
           border: `2px solid ${theme.qBorder}`,
           whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+          overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
         }}>
           {store.emoji} {store.name} · {store.npcName}
         </div>
@@ -297,7 +295,7 @@ export default function AdvancedStore() {
           background: 'rgba(232,93,38,0.92)', border: '2px solid #FFD700',
           borderRadius: '20px', padding: '2px 10px',
           fontFamily: 'var(--font-char)', fontWeight: 700,
-          fontSize: 'clamp(0.48rem,0.9vw,0.62rem)', color: 'white', letterSpacing: '1px',
+          fontSize: 'clamp(0.44rem,0.85vw,0.58rem)', color: 'white', letterSpacing: '1px',
         }}>⚡ ADVANCED MODE</div>
       </div>
 
@@ -311,10 +309,10 @@ export default function AdvancedStore() {
         }}
         onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>← Back</button>
 
-      {/* NPC sprite */}
+      {/* NPC sprite — bigger */}
       <motion.div
         style={{
-          position: 'absolute', left: 'clamp(-10px,-0.5vw,0px)', bottom: 0,
+          position: 'absolute', left: 0, bottom: 0,
           zIndex: 10, pointerEvents: 'none',
         }}
         initial={{ x: -80, opacity: 0 }}
@@ -325,7 +323,7 @@ export default function AdvancedStore() {
           <motion.span
             style={{
               display: 'block',
-              fontSize: 'clamp(60px,14vw,180px)', lineHeight: 1,
+              fontSize: 'clamp(80px,18vw,200px)', lineHeight: 1,
               filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.5))',
             }}
             animate={{ y: [0, -14, 0] }}
@@ -340,7 +338,7 @@ export default function AdvancedStore() {
               else setNpcFailed(true);
             }}
             style={{
-              width: 'clamp(90px,20vw,320px)', height: 'auto',
+              width: 'clamp(120px,26vw,320px)', height: 'auto',
               objectFit: 'contain',
               filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
               display: 'block',
@@ -365,9 +363,9 @@ export default function AdvancedStore() {
       {(phase === 'question' || phase === 'answered') && (
         <div style={{
           position: 'absolute',
-          top: 'clamp(64px,13vh,110px)',
+          top: 'clamp(62px,12vh,100px)',
           right: 'clamp(12px,2.5vw,28px)',
-          left: 'clamp(110px,22vw,360px)',
+          left: 'clamp(130px,28vw,360px)',
           zIndex: 20,
         }}>
           <AnimatePresence mode="wait">
@@ -461,8 +459,7 @@ export default function AdvancedStore() {
               <motion.button
                 className="btn btn-primary"
                 whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
-                onClick={handleNext}
-                style={{ minWidth: '120px' }}
+                onClick={handleNext} style={{ minWidth: '120px' }}
               >
                 {qIdx + 1 >= totalQ ? 'Finish →' : 'Next →'}
               </motion.button>

@@ -12,11 +12,11 @@ import { getLevelTheme } from '../data/levelThemes';
 type Phase = 'greeting' | 'intro' | 'question' | 'answered' | 'done' | 'mina_closing';
 
 const MINA_LINES = [
-  "Congratulations! 🎉 You have completed learning the three major grammar areas: subject-verb agreement, prepositions of time and manner, and perfect tenses. That is not a small achievement—it’s a big step forward in your journey as a learner.",
+  "Congratulations! 🎉 You have completed learning the three major grammar areas: subject-verb agreement, prepositions of time and manner, and perfect tenses. That is not a small achievement—it's a big step forward in your journey as a learner.",
   "Throughout your adventure, you explored different challenges, made careful choices, and applied important grammar rules in real situations. You didn't just answer questions — you understood how grammar works and how it brings clarity and meaning to communication.",
   "You showed discipline in following rules, creativity in expressing ideas, and unity in connecting different concepts together. These are the same qualities that make both great performers and great communicators.",
   "Take a moment to be proud of what you've accomplished today. Every correct answer, every mistake you learned from, and every concept you mastered has helped you grow stronger in grammar.",
-  "But remember—this achievement is only the beginning. There is still more to discover, more to practice, and more to master. Each new lesson will build on what you’ve learned and take you even further.",
+  "But remember—this achievement is only the beginning. There is still more to discover, more to practice, and more to master. Each new lesson will build on what you've learned and take you even further.",
   "If you're ready for a greater challenge, you can try Mastery Checkpoint and test your skills at the higher level. It will push you to think deeper and apply everything you've learned in more complex situations.",
   "Keep going, keep learning, and keep challenging yourself. Your grammar adventure doesn't end here — it's just getting started! I'll see you in your next adventure! ✨"
 ];
@@ -60,8 +60,9 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
         border: `4px solid ${color}`, borderTop: 'none',
         borderRadius: '0 0 20px 20px',
-        padding: 'clamp(14px,3vh,22px) clamp(16px,3vw,28px) clamp(14px,3vh,22px)',
+        padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.2vh,20px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
+        maxHeight: '55vh', overflowY: 'auto',
       }}>
         {children}
       </div>
@@ -91,7 +92,7 @@ function SpeakerBadge({ label, gradStart, gradEnd }: { label: string; gradStart:
       }}
     >
       <span style={{
-        fontFamily: 'var(--font-title)', fontSize: 'clamp(0.88rem,1.9vw,1.2rem)',
+        fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,1.6vw,1rem)',
         color: 'white', fontWeight: 900, letterSpacing: '2px',
         textShadow: '1px 2px 0 rgba(0,0,0,0.3)',
       }}>{label}</span>
@@ -100,13 +101,10 @@ function SpeakerBadge({ label, gradStart, gradEnd }: { label: string; gradStart:
 }
 
 const PARTICLES = [
-  { delay: 0,   x: '8%',  size: 10 },
-  { delay: 0.8, x: '18%', size: 7  },
-  { delay: 1.5, x: '32%', size: 12 },
-  { delay: 0.3, x: '48%', size: 8  },
-  { delay: 2.1, x: '62%', size: 6  },
-  { delay: 1.2, x: '75%', size: 10 },
-  { delay: 0.6, x: '88%', size: 7  },
+  { delay: 0, x: '8%', size: 10 }, { delay: 0.8, x: '18%', size: 7 },
+  { delay: 1.5, x: '32%', size: 12 }, { delay: 0.3, x: '48%', size: 8 },
+  { delay: 2.1, x: '62%', size: 6 }, { delay: 1.2, x: '75%', size: 10 },
+  { delay: 0.6, x: '88%', size: 7 },
 ];
 
 const THEME_BADGE: Record<number, [string, string]> = {
@@ -125,8 +123,7 @@ export default function StoreScreen() {
   if (!section) return null;
   const store = section.stores[currentStoreIndex];
   if (!store) return null;
-  const qSet = store.questionSets.find(qs => qs.id === currentQuestionSet)
-    ?? store.questionSets[0];
+  const qSet = store.questionSets.find(qs => qs.id === currentQuestionSet) ?? store.questionSets[0];
   if (!qSet) return null;
 
   const greetings = STORE_GREETINGS[store.id]?.lines || [];
@@ -137,7 +134,6 @@ export default function StoreScreen() {
   const [greetIdx, setGreetIdx] = useState(0);
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
-  // scoreRef avoids stale-closure bugs when calling completeStore/addScore at finish
   const scoreRef = useRef(0);
   const [scoreDisplay, setScoreDisplay] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
@@ -165,48 +161,31 @@ export default function StoreScreen() {
   const totalQ = qSet.questions.length;
   const currentGreet = greetings[greetIdx];
 
-  // Blinking cursor
   useEffect(() => {
     const t = setInterval(() => setShowCursor(c => !c), 530);
     return () => clearInterval(t);
   }, []);
 
-  // Mina closing audio
   useEffect(() => {
     if (phase !== 'mina_closing') return;
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
     const src = MINA_CLOSING_AUDIO[minaLineIdx];
     if (!src) return;
     const audio = new Audio(src);
     audioRef.current = audio;
     audio.play().catch(() => {});
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
+    return () => { audio.pause(); audio.currentTime = 0; };
   }, [phase, minaLineIdx]);
 
-  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
+    return () => { audioRef.current?.pause(); audioRef.current = null; };
   }, []);
 
   const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
   };
 
-  const isLastSectionDStore =
-    currentSection === 'D' &&
-    currentStoreIndex === section.stores.length - 1;
+  const isLastSectionDStore = currentSection === 'D' && currentStoreIndex === section.stores.length - 1;
 
   const advanceGreeting = () => {
     if (greetIdx + 1 < greetings.length) setGreetIdx(i => i + 1);
@@ -219,10 +198,7 @@ export default function StoreScreen() {
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
     setFeedbackText(correct ? currentQ.feedbackCorrect : currentQ.feedbackWrong);
-    if (correct) {
-      scoreRef.current += 1;
-      setScoreDisplay(scoreRef.current);
-    }
+    if (correct) { scoreRef.current += 1; setScoreDisplay(scoreRef.current); }
     const correctChoice = currentQ.choices.find(c => c.isCorrect)!;
     setResults(r => [...r, { correct, correctAns: correctChoice.text }]);
     setPhase('answered');
@@ -232,28 +208,20 @@ export default function StoreScreen() {
     if (qIdx + 1 >= totalQ) { setPhase('done'); return; }
     setQIdx(i => i + 1);
     setSelected(null); setFeedbackText('');
-    setIsCorrect(false);
-    setPhase('question');
+    setIsCorrect(false); setPhase('question');
   };
 
   const handleFinish = () => {
     completeStore(section.id, store.id, scoreRef.current);
     addScore(scoreRef.current, totalQ);
-    if (isLastSectionDStore) {
-      setMinaLineIdx(0);
-      setPhase('mina_closing');
-    } else {
-      goToScene('FEEDBACK');
-    }
+    if (isLastSectionDStore) { setMinaLineIdx(0); setPhase('mina_closing'); }
+    else goToScene('FEEDBACK');
   };
 
   const handleMinaNext = () => {
     stopAudio();
-    if (minaLineIdx + 1 < MINA_LINES.length) {
-      setMinaLineIdx(l => l + 1);
-    } else {
-      goToScene('SCORE_SUMMARY');
-    }
+    if (minaLineIdx + 1 < MINA_LINES.length) setMinaLineIdx(l => l + 1);
+    else goToScene('SCORE_SUMMARY');
   };
 
   const handleRetry = () => {
@@ -262,8 +230,7 @@ export default function StoreScreen() {
     setQIdx(0); setSelected(null);
     scoreRef.current = 0; setScoreDisplay(0);
     setFeedbackText(''); setResults([]);
-    setIsCorrect(false);
-    setGreetIdx(0);
+    setIsCorrect(false); setGreetIdx(0);
     setPhase(greetings.length > 0 ? 'greeting' : 'intro');
   };
 
@@ -272,7 +239,8 @@ export default function StoreScreen() {
   const renderNpcSprite = () => (
     <motion.div
       style={{
-        position: 'absolute', left: 'clamp(-20px,-1vw,0px)', bottom: 0,
+        position: 'absolute',
+        left: 0, bottom: 0,
         zIndex: 10, pointerEvents: 'none',
       }}
       initial={{ x: -80, opacity: 0 }}
@@ -283,7 +251,7 @@ export default function StoreScreen() {
         <motion.span
           style={{
             display: 'block',
-            fontSize: 'clamp(60px,14vw,160px)', lineHeight: 1,
+            fontSize: 'clamp(80px,18vw,200px)', lineHeight: 1,
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.5))',
           }}
           animate={{ y: [0, -14, 0] }}
@@ -298,7 +266,7 @@ export default function StoreScreen() {
             else setNpcFailed(true);
           }}
           style={{
-            width: 'clamp(80px,22vw,260px)', height: 'auto',
+            width: 'clamp(120px,26vw,320px)', height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
             display: 'block',
@@ -310,8 +278,7 @@ export default function StoreScreen() {
       <div style={{
         textAlign: 'center', marginTop: '4px', marginBottom: '8px',
         fontFamily: 'var(--font-char)', fontWeight: 700,
-        fontSize: 'clamp(0.75rem,1.3vw,0.92rem)',
-        color: 'white',
+        fontSize: 'clamp(0.6rem,1.1vw,0.78rem)', color: 'white',
         background: 'rgba(0,0,0,0.55)',
         border: `1.5px solid ${theme.qBorder}`,
         padding: '2px 12px', borderRadius: '50px',
@@ -322,12 +289,13 @@ export default function StoreScreen() {
     </motion.div>
   );
 
+  // Dialogue panel — positioned to the right of NPC sprite
   const renderDialoguePanel = (children: React.ReactNode, phaseKey: string | number) => (
     <div style={{
       position: 'absolute',
-      top: 'clamp(64px,13vh,110px)',
-      right: 'clamp(14px,2.5vw,28px)',
-      left: 'clamp(100px,24vw,360px)',
+      top: 'clamp(62px,12vh,100px)',
+      right: 'clamp(12px,2.5vw,28px)',
+      left: 'clamp(130px,28vw,360px)',
       zIndex: 20,
     }}>
       <AnimatePresence mode="wait">
@@ -369,7 +337,7 @@ export default function StoreScreen() {
               gap: 'clamp(8px,1.5vw,12px)',
               background: bg, border: `2px solid ${border}`,
               borderRadius: '11px',
-              padding: 'clamp(10px,1.8vh,15px) clamp(12px,2.2vw,20px)',
+              padding: 'clamp(8px,1.4vh,13px) clamp(10px,1.8vw,16px)',
               cursor: selected !== null ? 'default' : 'pointer',
               textAlign: 'left', width: '100%',
               transition: 'background 0.2s, border-color 0.2s',
@@ -379,15 +347,13 @@ export default function StoreScreen() {
             <span style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               width: 'clamp(22px,3vw,30px)', height: 'clamp(22px,3vw,30px)',
-              background: badgeBg, color: 'white',
-              borderRadius: '7px',
+              background: badgeBg, color: 'white', borderRadius: '7px',
               fontFamily: 'var(--font-char)', fontWeight: 700,
-              fontSize: 'clamp(0.75rem,1.3vw,0.92rem)',
+              fontSize: 'clamp(0.62rem,1.1vw,0.82rem)',
               flexShrink: 0, transition: 'background 0.2s',
             }}>{choiceLabels[i]}</span>
             <span style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.85rem,1.7vw,1.05rem)',
+              fontFamily: 'var(--font-body)', fontSize: 'clamp(0.72rem,1.4vw,0.92rem)',
               color: '#2A1800', lineHeight: 1.4,
             }}>
               {choice.text.replace(/^[A-D]\.\s*/, '')}
@@ -411,19 +377,18 @@ export default function StoreScreen() {
         ))}
       </div>
       <div style={{
-        fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.2vw,0.82rem)',
+        fontFamily: 'var(--font-body)', fontSize: 'clamp(0.62rem,1.1vw,0.78rem)',
         color: '#8A6000', marginLeft: 'auto',
       }}>Q {qIdx + 1}/{totalQ} · ⭐ {scoreDisplay}</div>
     </div>
   );
 
   return (
-    <div className="scene" style={{
-      position: 'relative',
+    <div style={{
+      position: 'fixed', inset: 0, width: '100%', height: '100%',
       background: bgFailed ? (secBg[section.id] || secBg.A) : undefined,
       overflow: 'hidden',
     }}>
-
       {/* Background */}
       {!bgFailed && (
         <img
@@ -433,8 +398,7 @@ export default function StoreScreen() {
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', objectPosition: 'center top',
-            filter: 'blur(6px) brightness(0.55)',
-            transform: 'scale(1.08)',
+            filter: 'blur(6px) brightness(0.55)', transform: 'scale(1.08)',
           }}
           onError={() => {
             if (bgIndex < bgCandidates.length - 1) setBgIndex(b => b + 1);
@@ -442,7 +406,6 @@ export default function StoreScreen() {
           }}
         />
       )}
-
       <div style={{
         position: 'absolute', inset: 0,
         background: 'linear-gradient(to bottom, rgba(255,248,220,0.78) 0%, rgba(30,18,0,0.32) 100%)',
@@ -455,12 +418,13 @@ export default function StoreScreen() {
       {/* Top bar */}
       <div style={{
         position: 'absolute', top: 'clamp(38px,7vh,60px)', left: '50%', transform: 'translateX(-50%)',
-        fontFamily: 'var(--font-title)', fontSize: 'clamp(0.95rem,1.9vw,1.3rem)',
+        fontFamily: 'var(--font-title)', fontSize: 'clamp(0.8rem,1.7vw,1.1rem)',
         color: 'white', background: 'rgba(0,0,0,0.55)',
         padding: '4px 18px', borderRadius: '50px',
         border: `2px solid ${theme.qBorder}`,
         whiteSpace: 'nowrap', zIndex: 10,
         boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
+        maxWidth: '60vw', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>
         {store.emoji} {store.name} · {store.npcName}
       </div>
@@ -477,7 +441,7 @@ export default function StoreScreen() {
         }}
         onClick={e => { e.stopPropagation(); goToScene('SECTION_VIEW'); }}>← Back</button>
 
-      {/* NPC sprite — hidden during Mina closing */}
+      {/* NPC sprite */}
       {phase !== 'mina_closing' && renderNpcSprite()}
 
       {/* GREETING PHASE */}
@@ -489,7 +453,7 @@ export default function StoreScreen() {
               <ScallopedBubble>
                 <div style={{
                   fontFamily: 'var(--font-title)',
-                  fontSize: 'clamp(1.05rem,2.5vw,1.55rem)',
+                  fontSize: 'clamp(0.9rem,2.2vw,1.35rem)',
                   color: '#2A1800', lineHeight: 1.55, fontWeight: 800,
                 }}>
                   {currentGreet?.text}
@@ -507,7 +471,7 @@ export default function StoreScreen() {
                     ))}
                   </div>
                   <div style={{
-                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.52rem,1vw,0.7rem)',
+                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.54rem,1vw,0.72rem)',
                     color: '#8A6000', marginLeft: 'auto',
                   }}>
                     {greetIdx + 1 < greetings.length ? 'Click to continue ▶' : 'Click to start →'}
@@ -527,7 +491,7 @@ export default function StoreScreen() {
           <ScallopedBubble>
             <div style={{
               fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.88rem,2vw,1.2rem)',
+              fontSize: 'clamp(0.82rem,1.9vw,1.15rem)',
               color: '#2A1800', lineHeight: 1.55, fontWeight: 800, marginBottom: '12px',
             }}>
               Ready for <strong style={{ color: badgeGradStart }}>{totalQ} questions</strong> about <strong>{store.description}</strong>?
@@ -553,7 +517,7 @@ export default function StoreScreen() {
             {currentQ.npcDialogueBefore && (
               <div style={{
                 fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(0.88rem,1.7vw,1.08rem)',
+                fontSize: 'clamp(0.78rem,1.6vw,1rem)',
                 color: '#5A3E00', lineHeight: 1.5,
                 marginBottom: '8px', fontStyle: 'italic',
               }}>{currentQ.npcDialogueBefore}</div>
@@ -561,7 +525,7 @@ export default function StoreScreen() {
             {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
               <div style={{
                 fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(1rem,2.1vw,1.3rem)',
+                fontSize: 'clamp(0.88rem,1.9vw,1.2rem)',
                 color: '#2A1800', fontWeight: 800, lineHeight: 1.4,
                 marginBottom: '6px',
               }}>
@@ -598,8 +562,8 @@ export default function StoreScreen() {
                   : 'linear-gradient(180deg,#FFF0F0 0%,#F8D7DA 100%)',
                 border: `4px solid ${isCorrect ? '#28A745' : '#DC3545'}`,
                 borderRadius: '22px',
-                padding: 'clamp(22px,4.5vh,42px) clamp(26px,5vw,56px)',
-                width: 'clamp(270px,52vw,500px)', maxWidth: '90vw',
+                padding: 'clamp(20px,4vh,40px) clamp(24px,5vw,54px)',
+                width: 'clamp(270px,52vw,500px)', maxWidth: '92vw',
                 textAlign: 'center',
                 boxShadow: `0 14px 52px rgba(0,0,0,0.5), 0 0 0 6px ${isCorrect ? 'rgba(40,167,69,0.12)' : 'rgba(220,53,69,0.12)'}`,
                 position: 'relative', overflow: 'hidden',
@@ -611,24 +575,21 @@ export default function StoreScreen() {
                     fill={isCorrect ? '#28A745' : '#DC3545'} />
                 </svg>
               </div>
-
               <motion.div
                 initial={{ scale: 0 }} animate={{ scale: 1 }}
                 transition={{ delay: 0.1, type: 'spring', stiffness: 400 }}
-                style={{ fontSize: 'clamp(2.4rem,5.5vw,4.2rem)', marginBottom: '8px', lineHeight: 1 }}
+                style={{ fontSize: 'clamp(2.2rem,5vw,4rem)', marginBottom: '8px', lineHeight: 1 }}
               >
                 {isCorrect ? '✅' : '❌'}
               </motion.div>
               <div style={{
-                fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(1.1rem,2.5vw,1.8rem)',
+                fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.3vw,1.7rem)',
                 color: isCorrect ? '#155724' : '#721c24', marginBottom: '10px',
               }}>
                 {isCorrect ? 'Correct! 🎉' : 'Wrong...'}
               </div>
               <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(0.68rem,1.4vw,0.88rem)',
+                fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.4vw,0.88rem)',
                 color: isCorrect ? '#1a5c2e' : '#7a2030',
                 lineHeight: 1.65, marginBottom: '22px',
                 background: isCorrect ? 'rgba(40,167,69,0.08)' : 'rgba(220,53,69,0.08)',
@@ -637,8 +598,7 @@ export default function StoreScreen() {
               <motion.button
                 className="btn btn-primary"
                 whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
-                onClick={handleNext}
-                style={{ minWidth: '130px' }}
+                onClick={handleNext} style={{ minWidth: '130px' }}
               >
                 {qIdx + 1 >= totalQ ? 'Finish →' : 'Next →'}
               </motion.button>
@@ -675,7 +635,7 @@ export default function StoreScreen() {
             </div>
 
             <div style={{ paddingTop: '16px' }}>
-              <div style={{ fontSize: 'clamp(2.4rem,5.5vw,3.8rem)', marginBottom: '6px' }}>
+              <div style={{ fontSize: 'clamp(2.2rem,5vw,3.5rem)', marginBottom: '6px' }}>
                 {scoreRef.current >= 4 ? '🎉' : '😊'}
               </div>
               <div className="panel-title" style={{ marginBottom: '8px' }}>
@@ -690,7 +650,7 @@ export default function StoreScreen() {
                   <motion.span key={n}
                     initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: n * 0.1, type: 'spring', stiffness: 300 }}
-                    style={{ fontSize: 'clamp(1.3rem,3.2vw,2.2rem)' }}>
+                    style={{ fontSize: 'clamp(1.2rem,3vw,2rem)' }}>
                     {n <= scoreRef.current ? '⭐' : '☆'}
                   </motion.span>
                 ))}
@@ -765,8 +725,7 @@ export default function StoreScreen() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: 'rgba(0,0,0,0.6)',
             padding: 'clamp(60px,10vh,80px) clamp(20px,5vw,60px) 20px',
-            zIndex: 50,
-            cursor: 'pointer',
+            zIndex: 50, cursor: 'pointer',
           }}
           onClick={handleMinaNext}
         >
@@ -785,8 +744,8 @@ export default function StoreScreen() {
                   src={(ASSETS as Record<string, string>).minaMascot ?? ''}
                   alt="Mina"
                   style={{
-                    width: 'clamp(64px,12vw,110px)',
-                    height: 'clamp(64px,12vw,110px)',
+                    width: 'clamp(72px,14vw,120px)',
+                    height: 'clamp(72px,14vw,120px)',
                     objectFit: 'contain',
                     filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
                   }}
@@ -802,8 +761,7 @@ export default function StoreScreen() {
                 <div style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: 'clamp(0.72rem,1.5vw,0.95rem)',
-                  color: '#2A1800',
-                  lineHeight: 1.7, marginBottom: '20px',
+                  color: '#2A1800', lineHeight: 1.7, marginBottom: '20px',
                 }}>
                   {MINA_LINES[minaLineIdx]}
                   <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: '#8B1A8B' }}>▌</span>
@@ -833,7 +791,6 @@ export default function StoreScreen() {
                     className="btn btn-primary btn-sm"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                     onClick={e => { e.stopPropagation(); handleMinaNext(); }}
-                    style={{ fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
                   >
                     {minaLineIdx + 1 < MINA_LINES.length ? 'Continue ➜' : '🎓 See Results'}
                   </motion.button>

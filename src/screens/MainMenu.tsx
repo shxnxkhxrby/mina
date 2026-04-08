@@ -7,13 +7,23 @@ export default function MainMenu() {
 
   const startAdvanced = () => {
     setAdvancedMode(true);
-    // Go straight to MAP — MapScreen will then route to ADVANCED_SECTION_VIEW
-    // skipping all intros, lessons, stories, and guides
     goToScene('MAP');
   };
 
   return (
-    <div className="scene">
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       {/* Festival background */}
       <div style={{
         position: 'absolute',
@@ -25,22 +35,20 @@ export default function MainMenu() {
         filter: 'blur(5px) brightness(0.4)',
       }}/>
 
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'rgba(0,0,0,0.45)',
-      }}/>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)' }}/>
 
       <div className="bunting"/>
 
+      {/* Content */}
       <div style={{
-        position: 'absolute', inset: 0,
+        position: 'relative',
+        zIndex: 10,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 'clamp(16px,3vh,28px)',
-        padding: 'clamp(60px,11vh,100px) clamp(20px,4vw,40px) clamp(80px,12vh,120px)',
-        zIndex: 10,
+        gap: 'clamp(14px,2.8vh,26px)',
+        padding: 'clamp(60px,11vh,100px) clamp(20px,5vw,48px) clamp(80px,13vh,130px)',
+        width: '100%',
       }}>
         <motion.div
           initial={{ opacity: 0, y: -24 }}
@@ -61,7 +69,7 @@ export default function MainMenu() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'stretch',
-            gap: 'clamp(10px,1.8vh,14px)',
+            gap: 'clamp(10px,1.6vh,14px)',
             width: 'clamp(220px,30vw,340px)',
           }}
         >
@@ -111,6 +119,7 @@ export default function MainMenu() {
         </div>
       </div>
 
+      {/* Mina mascot — bottom right, big */}
       <motion.img
         src={ASSETS.minaMascot}
         alt="Mina"
@@ -121,7 +130,7 @@ export default function MainMenu() {
           position: 'absolute',
           bottom: 0,
           right: 'clamp(10px,4vw,60px)',
-          width: 'clamp(100px,22vw,260px)',
+          width: 'clamp(110px,24vw,280px)',
           height: 'auto',
           filter: 'drop-shadow(0 6px 20px rgba(0,0,0,0.5))',
           animation: 'float 3s ease-in-out infinite',
