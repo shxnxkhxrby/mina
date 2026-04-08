@@ -658,9 +658,6 @@ export default function SectionDScreen() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             style={{
               position: 'absolute', inset: 0,
-              // Bug fix #7: position:relative creates a stacking context so the
-              // bg img's zIndex stays contained and never escapes behind the scene.
-              position: 'relative',
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               zIndex: 10, padding: 'clamp(60px,10vh,80px) clamp(20px,5vw,60px) 20px',
