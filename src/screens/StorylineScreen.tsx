@@ -4,11 +4,11 @@ import { useGameStore } from '../store/gameStore';
 import { ASSETS } from '../data/assets';
 
 // ── Mina audio for Chapter 2 slides only (slides index 0, 1, 2 of chapter 2)
-// File 6 = Mina slide 1, File 7 = Mina slide 2, File 8 = Mina slide 3
+// Playback order follows the URL list sequence: slot 0=file6, slot 1=file8, slot 2=file7
 const MINA_CHAPTER2_AUDIO = [
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/6_l06ibr.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/7_mehoew.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/8_xtlyka.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/6_l06ibr.m4a',   // Ch2 slide 0
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/8_xtlyka.m4a',   // Ch2 slide 1
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/7_mehoew.m4a',   // Ch2 slide 2
 ];
 
 const CHAPTERS = [

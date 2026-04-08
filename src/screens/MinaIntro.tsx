@@ -5,12 +5,14 @@ import { MINA_INTRO_DIALOGUES } from '../data/dialogues';
 import { ASSETS } from '../data/assets';
 
 // ── Audio URLs for each Mina intro line (1-indexed filenames) ──────────────
+// Voice 1 → dialogue 0, Voice 2 → dialogue 1, Voice 3 → dialogue 2,
+// Voice 4 → dialogue 3, Voice 5 → dialogue 4
 const MINA_INTRO_AUDIO = [
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/1_j6gnjf.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/2_yqasnm.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/3_pdexki.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/4_z2aae9.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/5_tswr61.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/1_j6gnjf.m4a',  // Voice 1
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/2_yqasnm.m4a',  // Voice 2
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/4_z2aae9.m4a',  // Voice 3
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/3_pdexki.m4a',  // Voice 4
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/6_l06ibr.m4a',  // Voice 5 — "Ready? Let's begin!"
 ];
 
 // ── Floating particle ──────────────────────────────────────────────────────
