@@ -32,26 +32,26 @@ import { ASSETS } from '../data/assets';
 
 const GRAMMAR_LESSON_AUDIO: Record<string, string[]> = {
   A: [
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/8_xtlyka.m4a',  // Page 0 — Preamble (Voice 6)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/6_l06ibr.m4a',  // Page 0 — Preamble (Voice 6)
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/7_mehoew.m4a',  // Page 1 — Past Perfect rule (Voice 7)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/9_spph6a.m4a',  // Page 2 — Past Perfect example (Voice 8)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/10_ldciim.m4a', // Page 3 — Present Perfect rule (Voice 9)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/11_ktrb9e.m4a', // Page 4 — Present Perfect example (Voice 10)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/12_cduwtz.m4a', // Page 5 — Future Perfect rule (Voice 11)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/13_ycrq7v.m4a', // Page 6 — Future Perfect example (Voice 12)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/14_p843qm.m4a', // Page 7 — Summary (Voice 13)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/8_xtlyka.m4a',  // Page 2 — Past Perfect example (Voice 8)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/9_spph6a.m4a',  // Page 3 — Present Perfect rule (Voice 9)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/10_ldciim.m4a', // Page 4 — Present Perfect example (Voice 10)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/11_ktrb9e.m4a', // Page 5 — Future Perfect rule (Voice 11)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/12_cduwtz.m4a', // Page 6 — Future Perfect example (Voice 12)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/13_ycrq7v.m4a', // Page 7 — Summary (Voice 13)
   ],
   B: [
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/16_eibuny.m4a', // Page 0 — SVA Rule 1: Proximity (Voice 15)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/17_ov5yvd.m4a', // Page 1 — SVA Rule 2: Quantifiers (Voice 16)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/18_rldz2p.m4a', // Page 2 — SVA Rule 3: Noncount/Plural-only (Voice 17)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/15_xd8vmw.m4a', // Page 0 — SVA Rule 1: Proximity (Voice 15)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/16_eibuny.m4a', // Page 1 — SVA Rule 2: Quantifiers (Voice 16)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/17_ov5yvd.m4a', // Page 2 — SVA Rule 3: Noncount/Plural-only (Voice 17)
   ],
   C: [
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a', // Page 0 — Prepositions of Time intro + rule (Voice 20)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/22_sx7vkx.m4a', // Page 1 — Prepositions of Time examples (Voice 21)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a', // Page 2 — Prepositions of Manner rule (Voice 22)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a', // Page 3 — Prepositions of Manner examples (Voice 23)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a', // Page 4 — Ready to converse (Voice 24)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a', // Page 0 — Prepositions of Time intro + rule (Voice 20)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a', // Page 1 — Prepositions of Time examples (Voice 21)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/22_sx7vkx.m4a', // Page 2 — Prepositions of Manner rule (Voice 22)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a', // Page 3 — Prepositions of Manner examples (Voice 23)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a', // Page 4 — Ready to converse (Voice 24)
   ],
 };
 
@@ -108,19 +108,17 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
   const pages: LessonPage[] = [];
 
   if (sectionId === 'A') {
-    // Page 0 — Preamble (Voice 6 / file 8)
+    // Page 0 — Preamble (Voice 6 / file 8_xtlyka)
+    // Mina speaks the intro — just show the narration text, no big topic title.
     pages.push({
       badge: '📚 PERFECT TENSES',
       badgeColor: ['#FF7A1A', '#E85D10'],
       title: 'Introduction',
       render: (_lesson, showCursor) => (
         <>
-          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.3rem,3.2vw,2.1rem)', color: '#2A1800', fontWeight: 900, lineHeight: 1.35, marginBottom: '10px' }}>
-            {_lesson.topic}
-            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#E85D10' }}>▌</span>
-          </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.9rem,2vw,1.15rem)', color: '#6B4A00', fontStyle: 'italic', lineHeight: 1.6 }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.95rem,2.1vw,1.2rem)', color: '#4A2800', lineHeight: 1.75, fontStyle: 'italic' }}>
             {_lesson.intro}
+            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#E85D10', fontStyle: 'normal' }}>▌</span>
           </div>
         </>
       ),
@@ -276,14 +274,15 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
 
   } else if (sectionId === 'B') {
     // Page 0 — Rule 1: Proximity (Voice 15 / file 16)
+    // Starts directly with the rule — no topic title header.
     pages.push({
       badge: '📚 RULE 1',
       badgeColor: ['#FF7A1A', '#E85D10'],
       title: 'Rule of Proximity',
       render: (_lesson, showCursor) => (
         <>
-          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.2rem,2.8vw,1.7rem)', color: '#2A1800', fontWeight: 900, lineHeight: 1.35, marginBottom: '10px' }}>
-            {_lesson.topic}
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Rule 1: Proximity &amp; Intervening Phrases
             <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#E85D10' }}>▌</span>
           </div>
           <div style={{ background: 'rgba(232,93,16,0.08)', border: '2.5px solid #E85D10', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#2A1800', lineHeight: 1.6 }}>
@@ -340,18 +339,17 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
 
   } else if (sectionId === 'C') {
     // Page 0 — Prepositions of Time intro + rule (Voice 20 / file 21_ht1kj7)
+    // Voice 20: "Hi! Before you start conversing with the riders, let's review prepositions of time..."
+    // No topic title — starts with Mina's intro speech, then immediately the AT/ON/IN rule.
     pages.push({
       badge: '📚 PREPOSITIONS',
       badgeColor: ['#2980B9', '#1F618D'],
       title: 'Prepositions of Time',
       render: (_lesson, showCursor) => (
         <>
-          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.2rem,2.8vw,1.7rem)', color: '#2A1800', fontWeight: 900, lineHeight: 1.35, marginBottom: '10px' }}>
-            {_lesson.topic}
-            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2980B9' }}>▌</span>
-          </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#6B4A00', fontStyle: 'italic', marginBottom: '10px', lineHeight: 1.5 }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.9rem,2vw,1.12rem)', color: '#4A2800', fontStyle: 'italic', marginBottom: '10px', lineHeight: 1.65 }}>
             {_lesson.intro}
+            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2980B9', fontStyle: 'normal' }}>▌</span>
           </div>
           <div style={{ background: 'rgba(41,128,185,0.08)', border: '2.5px solid #2980B9', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#2A1800', lineHeight: 1.6 }}>
             <strong style={{ color: '#2980B9' }}>📖 Rule:</strong> {_lesson.rule}
@@ -362,17 +360,21 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
 
     // Page 1 — Prepositions of Time EXAMPLES (Voice 21 / file 22_sx7vkx)
     pages.push({
-      badge: '📚 PREPOSITIONS',
+      badge: '📚 PREPOSITIONS OF TIME',
       badgeColor: ['#2980B9', '#1F618D'],
       title: 'Prepositions of Time — Examples',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Prepositions of Time — Examples
+            Examples
             <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2980B9' }}>▌</span>
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
-            💬 {_lesson.examples[0]} &nbsp;|&nbsp; 💬 {_lesson.examples[1]} &nbsp;|&nbsp; 💬 {_lesson.examples[2]}
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px' }}>
+            {[_lesson.examples[0], _lesson.examples[1], _lesson.examples[2]].filter(Boolean).map((ex: string, i: number) => (
+              <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.85rem,1.8vw,1.05rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '7px 12px' }}>
+                💬 {ex}
+              </div>
+            ))}
           </div>
         </>
       ),
@@ -380,7 +382,7 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
 
     // Page 2 — Prepositions of Manner RULE (Voice 22 / file 23_oxr6hf)
     pages.push({
-      badge: '✏️ MANNER',
+      badge: '✏️ PREPOSITIONS OF MANNER',
       badgeColor: ['#3A9E5C', '#217A42'],
       title: 'Prepositions of Manner',
       render: (_lesson, showCursor) => (
@@ -389,8 +391,11 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
             Prepositions of Manner
             <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3A9E5C' }}>▌</span>
           </div>
-          <div style={{ background: 'rgba(58,158,92,0.08)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#2A1800', lineHeight: 1.6 }}>
+          <div style={{ background: 'rgba(58,158,92,0.08)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
             <strong style={{ color: '#3A9E5C' }}>📖 Rule:</strong> {_lesson.rule2}
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, #E8F8EE 0%, #C8F0D8 100%)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.9rem,2vw,1.15rem)', fontWeight: 700, color: '#1A5C30', whiteSpace: 'pre-line' as const, textAlign: 'center' as const }}>
+            {_lesson.formula}
           </div>
         </>
       ),
