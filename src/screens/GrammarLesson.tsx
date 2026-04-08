@@ -253,17 +253,21 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
     });
 
     // Page 7 — Summary (Voice 13 / file 14_p843qm)
+    // Shows the summary narration text first, then the compact formula reference box.
     pages.push({
       badge: '✅ SUMMARY',
       badgeColor: ['#8E44AD', '#6C3483'],
       title: 'Summary',
       render: (_lesson, showCursor) => (
         <>
-          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '12px' }}>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
             Remember All Three!
             <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#8E44AD' }}>▌</span>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #F5EEF8 0%, #E8DAEF 100%)', border: '2.5px solid #8E44AD', borderRadius: '14px', padding: '14px 18px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.88rem,1.8vw,1.1rem)', fontWeight: 700, color: '#4A235A', whiteSpace: 'pre-line' as const, lineHeight: 1.7 }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#4A2800', lineHeight: 1.65, marginBottom: '10px' }}>
+            {_lesson.summary}
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, #F5EEF8 0%, #E8DAEF 100%)', border: '2.5px solid #8E44AD', borderRadius: '14px', padding: '12px 16px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.82rem,1.65vw,1rem)', fontWeight: 700, color: '#4A235A', whiteSpace: 'pre-line' as const, lineHeight: 1.8 }}>
             {_lesson.formula}
           </div>
         </>
@@ -415,20 +419,19 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
     });
 
     // Page 4 — Ready to practice (Voice 24 / file 25_xf1dkb)
+    // Shows only the "ready to converse" closing text from _lesson.summary (Voice 24).
+    // No formula reference card here — that belongs in the lesson pages, not the closing.
     pages.push({
-      badge: '💡 QUICK REFERENCE',
+      badge: '🚀 READY TO PRACTICE',
       badgeColor: ['#8E44AD', '#6C3483'],
-      title: 'See It in Action',
+      title: "You're Ready!",
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '12px' }}>
-            Quick Reference
+            You&apos;re Ready to Practice!
             <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#8E44AD' }}>▌</span>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #F5EEF8 0%, #E8DAEF 100%)', border: '2.5px solid #8E44AD', borderRadius: '14px', padding: '14px 18px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.88rem,1.8vw,1.08rem)', fontWeight: 700, color: '#4A235A', whiteSpace: 'pre-line' as const, lineHeight: 1.7, marginBottom: '10px' }}>
-            {_lesson.formula}
-          </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.9rem,2vw,1.12rem)', color: '#4A2800', lineHeight: 1.7, background: 'linear-gradient(135deg, #F5EEF8 0%, #E8DAEF 100%)', border: '2.5px solid #8E44AD', borderRadius: '14px', padding: '14px 18px' }}>
             {_lesson.summary}
           </div>
         </>

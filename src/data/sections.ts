@@ -15,9 +15,10 @@ export const SECTIONS: Section[] = [
       rule2: "The present perfect tense connects the past to the present. The formula is: have or has + past participle.",
       // Voice 11 (file 12): Future Perfect rule
       rule3: "The future perfect tense shows that an action will be completed before a certain time in the future. The formula is: will have + past participle.",
-      // Voice 13 (file 14): Summary
+      // Voice 13 (file 14): Summary — shown on the final lesson page after all three tenses
       summary: "So remember: Past perfect tense uses had + past participle — completed before another past action. Present perfect tense uses have or has + past participle — started before, continues now. And future perfect tense uses will have + past participle — completed before a future time.",
-      formula: "PAST PERFECT: had + past participle\n→ completed BEFORE another past event\n\nPRESENT PERFECT: have/has + past participle\n→ started in the past, relevant NOW\n\nFUTURE PERFECT: will have + past participle\n→ completed BEFORE a future event",
+      // formula is a compact reference card used in the Summary page visual box
+      formula: "PAST PERFECT:   had + past participle\nPRESENT PERFECT:   have / has + past participle\nFUTURE PERFECT:   will have + past participle",
       examples: [
         "The bakers had prepared the Minasa cookies before the festival parade started. (Past Perfect — the baking was finished first, before the parade began.)",
         "Many visitors have enjoyed the sweet Minasa cookies during the festival. (Present Perfect — people started enjoying them before, and it is still true now.)",
