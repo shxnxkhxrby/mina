@@ -35,9 +35,8 @@ export default function SectionDVideoIntro() {
   const [videoFailed, setVideoFailed] = useState(false);
   const [muted, setMuted] = useState(false); // start unmuted; fallback to muted if autoplay blocked
 
-  // After video (or skip/fail) go to SECTION_VIEW.
-  // The App router renders SectionDScreen when currentSection === 'D' and scene === 'SECTION_VIEW'.
-  const nextScene = 'SECTION_VIEW';
+  // After video (or skip/fail) go to CUTSCENE — the Section D dancer quiz screen.
+  const nextScene = 'CUTSCENE';
 
   // Attempt unmuted autoplay; if browser blocks it, retry muted so video still plays.
   useEffect(() => {

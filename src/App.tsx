@@ -10,7 +10,7 @@ import MapScreen from './screens/MapScreen';
 import SectionView from './screens/SectionView';
 import StoreScreen from './screens/StoreScreen';
 import FeedbackScreen from './screens/FeedbackScreen';
-import CutsceneScreen from './screens/CutsceneScreen';
+import CutsceneScreen from './screens/CutsceneScreen'; // = SectionDScreen (dancer quiz)
 import ScoreSummary from './screens/ScoreSummary';
 import ProfessionalPlaceholder from './screens/ProfessionalPlaceholder';
 import AdvancedSectionView from './screens/AdvancedSectionView';
