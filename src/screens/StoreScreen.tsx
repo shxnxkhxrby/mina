@@ -305,7 +305,6 @@ export default function StoreScreen() {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
-      overflowY: 'auto',
     }}>
       <AnimatePresence mode="wait">
         <motion.div
@@ -506,32 +505,35 @@ export default function StoreScreen() {
 
       {/* QUESTION / ANSWERED PHASE */}
       {(phase === 'question' || phase === 'answered') && renderDialoguePanel(
-        <>
-          <SpeakerBadge label={store.npcName} gradStart={badgeGradStart} gradEnd={badgeGradEnd} />
-          <ScallopedBubble>
-            {currentQ.npcDialogueBefore && (
-              <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(0.78rem,1.6vw,1rem)',
-                color: '#5A3E00', lineHeight: 1.5,
-                marginBottom: '8px', fontStyle: 'italic',
-              }}>{currentQ.npcDialogueBefore}</div>
-            )}
-            {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
-              <div style={{
-                fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(0.8rem,1.7vw,1.1rem)',
-                color: '#2A1800', fontWeight: 800, lineHeight: 1.4,
-                marginBottom: '4px',
-              }}>
-                {currentQ.questionText}
-                <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>
-              </div>
-            )}
-            {renderChoices()}
-            {renderProgressStrip()}
-          </ScallopedBubble>
-        </>,
+        <div style={{
+          background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
+          border: '3px solid #F5C84A',
+          borderRadius: '18px',
+          padding: 'clamp(14px,2.5vh,24px) clamp(14px,2.5vw,26px)',
+          boxShadow: '0 6px 28px rgba(180,120,0,0.2)',
+        }}>
+          {currentQ.npcDialogueBefore && (
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 'clamp(0.82rem,1.6vw,1rem)',
+              color: '#5A3E00', lineHeight: 1.5,
+              marginBottom: '8px', fontStyle: 'italic',
+            }}>{currentQ.npcDialogueBefore}</div>
+          )}
+          {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
+            <div style={{
+              fontFamily: 'var(--font-title)',
+              fontSize: 'clamp(0.9rem,1.8vw,1.15rem)',
+              color: '#2A1800', fontWeight: 800, lineHeight: 1.4,
+              marginBottom: '10px',
+            }}>
+              {currentQ.questionText}
+              <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>
+            </div>
+          )}
+          {renderChoices()}
+          {renderProgressStrip()}
+        </div>,
         qIdx
       )}
 
