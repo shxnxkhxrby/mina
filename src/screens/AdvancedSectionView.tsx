@@ -175,7 +175,7 @@ export default function AdvancedSectionView() {
             >
               <div
                 style={{
-                  width: 'clamp(120px,20vw,200px)',
+                  width: 'clamp(150px,22vw,240px)',
                   background: completed
                     ? 'rgba(255,248,220,0.97)'
                     : unlocked
@@ -222,8 +222,8 @@ export default function AdvancedSectionView() {
                 {/* Sprite / emoji — larger */}
                 <div
                   style={{
-                    width: 'clamp(70px,13vw,110px)',
-                    height: 'clamp(70px,13vw,110px)',
+                    width: 'clamp(100px,18vw,160px)',
+                    height: 'clamp(100px,18vw,160px)',
                     borderRadius: '14px', overflow: 'hidden',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: showEmoji ? 'transparent' : 'rgba(0,0,0,0.04)',

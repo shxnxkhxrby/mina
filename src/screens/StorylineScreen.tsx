@@ -250,7 +250,7 @@ export default function StorylineScreen() {
               src={ASSETS.minaMascot}
               alt="Mina"
               style={{
-                width: 'clamp(90px,16vw,180px)', height: 'auto',
+                width: 'clamp(130px,22vw,240px)', height: 'auto',
                 objectFit: 'contain',
                 filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.5))',
                 animation: 'float 3s ease-in-out infinite',

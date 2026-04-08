@@ -25,7 +25,7 @@ function ScallopedBubble({ children }: { children: React.ReactNode }) {
   const scallopTop = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
   const scallopBottom = Array.from({ length: 60 }, (_, i) => `M${i * 20},0 Q${i * 20 + 10},24 ${i * 20 + 20},0`).join(' ');
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div style={{ position: 'relative', width: '100%', borderRadius: '0 0 20px 20px', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
           <path d={scallopTop} fill="#F5C84A" />
@@ -33,9 +33,9 @@ function ScallopedBubble({ children }: { children: React.ReactNode }) {
       </div>
       <div style={{
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
-        border: '4px solid #F5C84A', borderTop: 'none',
-        borderRadius: '0 0 20px 20px',
-        padding: 'clamp(14px,3vh,24px) clamp(16px,4vw,32px) clamp(14px,3vh,24px)',
+        border: '4px solid #F5C84A', borderTop: 'none', borderBottom: 'none',
+        borderRadius: 0,
+        padding: 'clamp(14px,3vh,24px) clamp(16px,4vw,32px) clamp(22px,4vh,36px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
       }}>
         {children}
@@ -156,7 +156,7 @@ export default function MinaIntro() {
           src={ASSETS.minaMascot}
           alt="Mina"
           style={{
-            width: 'clamp(180px,32vw,420px)', height: 'auto',
+            width: 'clamp(220px,40vw,500px)', height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.4))', display: 'block',
           }}

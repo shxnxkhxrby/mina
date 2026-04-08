@@ -53,7 +53,7 @@ const SCALLOP_BOTTOM_PATH = Array.from({ length: 60 }, (_, i) => `M${i * 20},0 Q
 
 function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div style={{ position: 'relative', width: '100%', borderRadius: '0 0 20px 20px', overflow: 'hidden' }}>
       {/* Top scallop — peaks pointing up into the badge area */}
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
@@ -62,9 +62,9 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
       </div>
       <div style={{
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
-        border: `4px solid ${color}`, borderTop: 'none',
-        borderRadius: '0 0 20px 20px',
-        padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.2vh,20px)',
+        border: `4px solid ${color}`, borderTop: 'none', borderBottom: 'none',
+        borderRadius: 0,
+        padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(22px,3.5vh,32px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
       }}>
         {children}
@@ -270,7 +270,7 @@ export default function StoreScreen() {
             else setNpcFailed(true);
           }}
           style={{
-            width: 'clamp(120px,26vw,320px)', height: 'auto',
+            width: 'clamp(160px,32vw,380px)', height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
             display: 'block',
@@ -299,7 +299,7 @@ export default function StoreScreen() {
       position: 'absolute',
       top: 'clamp(48px,9vh,80px)',
       right: 'clamp(12px,2.5vw,28px)',
-      left: 'clamp(130px,28vw,360px)',
+      left: 'clamp(110px,22vw,300px)',
       bottom: 'clamp(16px,3vh,32px)',
       zIndex: 20,
       display: 'flex',
