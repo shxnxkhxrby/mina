@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { MINA_INTRO_DIALOGUES } from '../data/dialogues';
 import { ASSETS } from '../data/assets';
+import { useMinaBg } from '../hooks/useMinaBg';
 
 // ── Floating particle ──────────────────────────────────────────────────────
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
@@ -61,6 +62,8 @@ export default function MinaIntro() {
   const [idx, setIdx] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const minaBg = useMinaBg();
+  const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
   const current = MINA_INTRO_DIALOGUES[idx];
   const isLast = idx === MINA_INTRO_DIALOGUES.length - 1;
@@ -123,17 +126,16 @@ export default function MinaIntro() {
       onClick={advance}
     >
       <img
-        src="/imgs/mina-bg.png"
+        src={minaBg.candidates[bgSrcIdx]}
         alt=""
         style={{
           position: 'absolute', inset: 0, width: '100%', height: '100%',
-          objectFit: 'cover', objectPosition: 'center top', zIndex: 0,
+          objectFit: 'cover', objectPosition: 'center top',
+          filter: 'blur(8px) brightness(0.45) saturate(0.7)',
+          transform: 'scale(1.04)', zIndex: 0,
         }}
-        onError={e => {
-          const img = e.target as HTMLImageElement;
-          if (img.src.endsWith('.png')) img.src = '/imgs/mina-bg.jpg';
-          else if (img.src.endsWith('.jpg')) img.src = '/imgs/mina-bg.webp';
-          else img.style.display = 'none';
+        onError={() => {
+          if (bgSrcIdx + 1 < minaBg.candidates.length) setBgSrcIdx(i => i + 1);
         }}
       />
       <div style={{

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTION_D } from '../data/sectionD';
 import { ASSETS } from '../data/assets';
+import { useMinaBg } from '../hooks/useMinaBg';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 type Phase =
@@ -49,6 +50,8 @@ export default function SectionDScreen() {
   const [spriteErrors, setSpriteErrors] = useState<Record<number, boolean>>({});
   const [lockedMsg, setLockedMsg] = useState('');
   const [bgImgFailed, setBgImgFailed] = useState(false);
+  const minaBg = useMinaBg();
+  const [minaBgSrcIdx, setMinaBgSrcIdx] = useState(0);
 
   const prog = sectionProgress['D'] || {};
 
@@ -601,6 +604,20 @@ export default function SectionDScreen() {
               zIndex: 10, padding: 'clamp(60px,10vh,80px) clamp(20px,5vw,60px) 20px',
             }}
           >
+            {/* Mina cycling background */}
+            <img
+              src={minaBg.candidates[minaBgSrcIdx]}
+              alt=""
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                objectFit: 'cover', objectPosition: 'center top',
+                filter: 'blur(8px) brightness(0.45) saturate(0.7)',
+                transform: 'scale(1.04)', zIndex: -1,
+              }}
+              onError={() => {
+                if (minaBgSrcIdx + 1 < minaBg.candidates.length) setMinaBgSrcIdx(i => i + 1);
+              }}
+            />
             <div style={{ marginBottom: '16px' }}>
               <img
                 src={ASSETS.minaMascot}

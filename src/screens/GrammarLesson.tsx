@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { ASSETS } from '../data/assets';
+import { useMinaBg } from '../hooks/useMinaBg';
 
 const GRAMMAR_LESSON_AUDIO: Record<string, string[]> = {
   A: [
@@ -394,6 +395,8 @@ export default function GrammarLesson() {
   const [page, setPage] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const minaBg = useMinaBg();
+  const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
   const section = SECTIONS.find(s => s.id === currentSection);
   if (!section || !currentSection) return null;
@@ -450,15 +453,17 @@ export default function GrammarLesson() {
       onClick={advance}
     >
       <img
-        src={ASSETS.map}
+        src={minaBg.candidates[bgSrcIdx]}
         alt=""
         style={{
           position: 'absolute', inset: 0, width: '100%', height: '100%',
-          objectFit: 'cover',
-          filter: 'blur(6px) brightness(0.48) saturate(0.7)',
+          objectFit: 'cover', objectPosition: 'center top',
+          filter: 'blur(8px) brightness(0.45) saturate(0.7)',
           transform: 'scale(1.04)', zIndex: 0,
         }}
-        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+        onError={() => {
+          if (bgSrcIdx + 1 < minaBg.candidates.length) setBgSrcIdx(i => i + 1);
+        }}
       />
       <div style={{
         position: 'absolute', inset: 0,

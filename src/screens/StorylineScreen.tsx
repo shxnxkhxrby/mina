@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { ASSETS } from '../data/assets';
+import { useMinaBg } from '../hooks/useMinaBg';
 
 // ── Mina audio for Chapter 2 slides only (slides index 0, 1, 2 of chapter 2)
 // Playback order follows the URL list sequence: slot 0=file6, slot 1=file8, slot 2=file7
@@ -99,6 +100,8 @@ export default function StorylineScreen() {
   const [slideIdx, setSlideIdx] = useState(0);
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const minaBg = useMinaBg();
+  const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
   const chapter = CHAPTERS[chapterIdx];
   const slide = chapter.slides[slideIdx];
@@ -175,6 +178,22 @@ export default function StorylineScreen() {
       style={{ cursor: showSkipConfirm ? 'default' : 'pointer', background: chapter.bg }}
       onClick={showSkipConfirm ? undefined : advance}
     >
+      {/* Mina background image — shown only on Chapter 2 */}
+      {chapterIdx === 1 && (
+        <img
+          src={minaBg.candidates[bgSrcIdx]}
+          alt=""
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center top',
+            filter: 'blur(8px) brightness(0.45) saturate(0.7)',
+            transform: 'scale(1.04)', zIndex: 0,
+          }}
+          onError={() => {
+            if (bgSrcIdx + 1 < minaBg.candidates.length) setBgSrcIdx(i => i + 1);
+          }}
+        />
+      )}
       <div className="bunting" />
 
       <div style={{

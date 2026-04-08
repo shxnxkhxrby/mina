@@ -4,6 +4,7 @@ import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { SECTION_D } from '../data/sectionD';
 import { ASSETS } from '../data/assets';
+import { useMinaBg } from '../hooks/useMinaBg';
 
 // ── One audio file per section completion ─────────────────────────────────
 // A → Voice 14: "Amazing work! You've explored the Minasa Festival..."
@@ -80,6 +81,8 @@ export default function FeedbackScreen() {
   } = useGameStore();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const minaBg = useMinaBg();
+  const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
   const ALL_SECTIONS = [...SECTIONS, SECTION_D];
   const section = ALL_SECTIONS.find(s => s.id === currentSection);
@@ -183,6 +186,20 @@ export default function FeedbackScreen() {
         style={{ background: bgGradient, cursor: 'pointer', overflow: 'hidden' }}
         onClick={handleCongratsClick}
       >
+        {/* Mina cycling background */}
+        <img
+          src={minaBg.candidates[bgSrcIdx]}
+          alt=""
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center top',
+            filter: 'blur(8px) brightness(0.45) saturate(0.7)',
+            transform: 'scale(1.04)', zIndex: 0,
+          }}
+          onError={() => {
+            if (bgSrcIdx + 1 < minaBg.candidates.length) setBgSrcIdx(i => i + 1);
+          }}
+        />
         <div className="bunting" />
 
         <div style={{
