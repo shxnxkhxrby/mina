@@ -61,6 +61,9 @@ export default function SectionDScreen() {
   const question = qSet?.questions[questionIdx];
   const totalQ = qSet?.questions.length ?? 5;
 
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
+  const [finalScore, setFinalScore] = useState(0); // the score actually saved to store
+
   // ── Unlock logic: next dancer unlocks once previous is ATTEMPTED (bestScore recorded)
   function isDancerUnlocked(i: number): boolean {
     if (i === 0) return true;
@@ -82,11 +85,9 @@ export default function SectionDScreen() {
     setSelected(null);
     setShowFeedback(false);
     setFinalScore(0);
+    setLastAnswerCorrect(false);
     setPhase('QUESTION');
   }
-
-  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
-  const [finalScore, setFinalScore] = useState(0); // the score actually saved to store
 
   function handleChoice(choiceIdx: number) {
     if (showFeedback) return;
@@ -341,7 +342,7 @@ export default function SectionDScreen() {
         )}
 
         {/* ── QUESTION ── */}
-        {phase === 'QUESTION' && question && (
+        {phase === 'QUESTION' && (
           <motion.div key={`q-${activeDancerIdx}-${questionIdx}`}
             initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
             style={{
@@ -352,134 +353,154 @@ export default function SectionDScreen() {
               zIndex: 5,
             }}
           >
-            {/* Progress bar */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px',
-            }}>
-              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
-                {dancer.npcName}
-              </span>
-              <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '3px' }}>
+            {(!question || !dancer) ? (
+              /* Fallback — prevents blank screen if question data is missing */
+              <div style={{
+                background: 'rgba(255,255,255,0.95)', borderRadius: '16px',
+                padding: '32px 40px', textAlign: 'center', maxWidth: '400px',
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>⚠️</div>
                 <div style={{
-                  width: `${((questionIdx) / totalQ) * 100}%`,
-                  height: '100%', background: '#F5C84A', borderRadius: '3px',
-                  transition: 'width 0.4s',
-                }} />
+                  fontFamily: 'var(--font-title)', color: 'var(--olive-brown)',
+                  fontSize: 'clamp(0.85rem,1.8vw,1.1rem)', marginBottom: '16px',
+                }}>
+                  Could not load questions. Please try again.
+                </div>
+                <button className="btn btn-ghost" onClick={() => setPhase('DANCER_SELECT')}>
+                  ← Back to Dancers
+                </button>
               </div>
-              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
-                {questionIdx + 1}/{totalQ}
-              </span>
-            </div>
+            ) : (
+              <>
+                {/* Progress bar */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
+                    {dancer.npcName}
+                  </span>
+                  <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '3px' }}>
+                    <div style={{
+                      width: `${(questionIdx / totalQ) * 100}%`,
+                      height: '100%', background: '#F5C84A', borderRadius: '3px',
+                      transition: 'width 0.4s',
+                    }} />
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
+                    {questionIdx + 1}/{totalQ}
+                  </span>
+                </div>
 
-            {/* NPC dialogue bubble */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(4px)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              borderRadius: '14px', padding: 'clamp(8px,1.5vh,14px) clamp(12px,2vw,20px)',
-              fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.62rem,1.3vw,0.8rem)',
-              color: 'white', marginBottom: '10px',
-              lineHeight: 1.5,
-            }}>
-              <span style={{ fontWeight: 700, color: '#FFD700' }}>{dancer.npcName}: </span>
-              {question.npcDialogueBefore}
-            </div>
+                {/* NPC dialogue bubble */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  background: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '14px', padding: 'clamp(8px,1.5vh,14px) clamp(12px,2vw,20px)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(0.62rem,1.3vw,0.8rem)',
+                  color: 'white', marginBottom: '10px', lineHeight: 1.5,
+                }}>
+                  <span style={{ fontWeight: 700, color: '#FFD700' }}>{dancer.npcName}: </span>
+                  {question.npcDialogueBefore}
+                </div>
 
-            {/* Question */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              background: 'rgba(255,255,255,0.95)',
-              borderRadius: '14px', padding: 'clamp(10px,1.8vh,18px) clamp(12px,2vw,20px)',
-              fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.72rem,1.5vw,0.95rem)',
-              color: 'var(--olive-brown)',
-              marginBottom: '10px', textAlign: 'center',
-            }}>
-              {question.questionText}
-            </div>
+                {/* Question */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '14px', padding: 'clamp(10px,1.8vh,18px) clamp(12px,2vw,20px)',
+                  fontFamily: 'var(--font-title)',
+                  fontSize: 'clamp(0.72rem,1.5vw,0.95rem)',
+                  color: 'var(--olive-brown)',
+                  marginBottom: '10px', textAlign: 'center',
+                }}>
+                  {question.questionText}
+                </div>
 
-            {/* Choices */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              display: 'flex', flexDirection: 'column', gap: '8px',
-            }}>
-              {question.choices.map((choice, ci) => {
-                let bg = 'rgba(255,255,255,0.92)';
-                let border = '2px solid transparent';
-                if (showFeedback) {
-                  if (choice.isCorrect) { bg = '#d4edda'; border = '2px solid #28a745'; }
-                  else if (ci === selected && !choice.isCorrect) { bg = '#f8d7da'; border = '2px solid #dc3545'; }
-                } else if (ci === selected) {
-                  border = '2px solid #B060D0';
-                }
-                return (
-                  <motion.button key={ci}
-                    onClick={() => handleChoice(ci)}
-                    whileHover={!showFeedback ? { scale: 1.02 } : {}}
-                    whileTap={!showFeedback ? { scale: 0.98 } : {}}
-                    style={{
-                      background: bg, border, borderRadius: '10px',
-                      padding: 'clamp(8px,1.4vh,13px) clamp(12px,2vw,18px)',
-                      fontFamily: 'var(--font-body)',
-                      fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
-                      color: '#333', cursor: showFeedback ? 'default' : 'pointer',
-                      textAlign: 'left', transition: 'all 0.2s',
-                    }}
+                {/* Choices */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  display: 'flex', flexDirection: 'column', gap: '8px',
+                }}>
+                  {question.choices.map((choice, ci) => {
+                    let bg = 'rgba(255,255,255,0.92)';
+                    let border = '2px solid transparent';
+                    if (showFeedback) {
+                      if (choice.isCorrect) { bg = '#d4edda'; border = '2px solid #28a745'; }
+                      else if (ci === selected && !choice.isCorrect) { bg = '#f8d7da'; border = '2px solid #dc3545'; }
+                    } else if (ci === selected) {
+                      border = '2px solid #B060D0';
+                    }
+                    return (
+                      <motion.button key={ci}
+                        onClick={() => handleChoice(ci)}
+                        whileHover={!showFeedback ? { scale: 1.02 } : {}}
+                        whileTap={!showFeedback ? { scale: 0.98 } : {}}
+                        style={{
+                          background: bg, border, borderRadius: '10px',
+                          padding: 'clamp(8px,1.4vh,13px) clamp(12px,2vw,18px)',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
+                          color: '#333', cursor: showFeedback ? 'default' : 'pointer',
+                          textAlign: 'left', transition: 'all 0.2s',
+                        }}
+                      >
+                        {choice.text}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                {/* Feedback */}
+                <AnimatePresence>
+                  {showFeedback && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                      style={{
+                        width: '100%', maxWidth: '560px',
+                        marginTop: '10px',
+                        background: question.choices[selected!]?.isCorrect
+                          ? 'rgba(40,167,69,0.92)' : 'rgba(220,53,69,0.92)',
+                        borderRadius: '12px',
+                        padding: 'clamp(8px,1.4vh,14px) clamp(12px,2vw,18px)',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
+                        color: 'white', lineHeight: 1.5,
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, marginBottom: '2px' }}>
+                        {question.choices[selected!]?.isCorrect ? '✅ Correct!' : '❌ Not quite!'}
+                      </div>
+                      <div>
+                        {question.choices[selected!]?.isCorrect
+                          ? question.feedbackCorrect
+                          : question.feedbackWrong}
+                      </div>
+                      <div style={{
+                        marginTop: '4px', fontSize: 'clamp(0.55rem,1.1vw,0.7rem)',
+                        opacity: 0.9, fontStyle: 'italic',
+                      }}>
+                        📖 {question.grammarRule}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Next button */}
+                {showFeedback && (
+                  <motion.button
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    onClick={handleNext}
+                    className="btn btn-primary"
+                    style={{ marginTop: '12px', fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
                   >
-                    {choice.text}
+                    {questionIdx + 1 < totalQ ? 'Next ➜' : 'Finish 🎉'}
                   </motion.button>
-                );
-              })}
-            </div>
-
-            {/* Feedback */}
-            <AnimatePresence>
-              {showFeedback && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{
-                    width: '100%', maxWidth: '560px',
-                    marginTop: '10px',
-                    background: question.choices[selected!]?.isCorrect
-                      ? 'rgba(40,167,69,0.92)' : 'rgba(220,53,69,0.92)',
-                    borderRadius: '12px',
-                    padding: 'clamp(8px,1.4vh,14px) clamp(12px,2vw,18px)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
-                    color: 'white', lineHeight: 1.5,
-                  }}
-                >
-                  <div style={{ fontWeight: 700, marginBottom: '2px' }}>
-                    {question.choices[selected!]?.isCorrect ? '✅ Correct!' : '❌ Not quite!'}
-                  </div>
-                  <div>
-                    {question.choices[selected!]?.isCorrect
-                      ? question.feedbackCorrect
-                      : question.feedbackWrong}
-                  </div>
-                  <div style={{
-                    marginTop: '4px', fontSize: 'clamp(0.55rem,1.1vw,0.7rem)',
-                    opacity: 0.9, fontStyle: 'italic',
-                  }}>
-                    📖 {question.grammarRule}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Next button */}
-            {showFeedback && (
-              <motion.button
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                onClick={handleNext}
-                className="btn btn-primary"
-                style={{ marginTop: '12px', fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
-              >
-                {questionIdx + 1 < totalQ ? 'Next ➜' : 'Finish 🎉'}
-              </motion.button>
+                )}
+              </>
             )}
           </motion.div>
         )}

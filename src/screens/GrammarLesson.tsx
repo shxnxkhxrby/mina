@@ -28,6 +28,11 @@ const GRAMMAR_LESSON_AUDIO: Record<string, string[]> = {
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a',
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a',
   ],
+  // Section D: Voice 26 (intro to Grammar Street Dance Challenge) + Voice 27 (transition to dancers)
+  D: [
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/27_j7h9zv.m4a',
+  ],
 };
 
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
@@ -332,6 +337,66 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
         </>
       ),
     });
+  } else if (sectionId === 'D') {
+    // ── Section D: Mixed Grammar Review ──────────────────────────────────────
+    // Voice 26: Welcome to Grammar Street Dance Challenge + review overview
+    pages.push({
+      badge: '🎉 GRAMMAR STREET DANCE CHALLENGE', badgeColor: ['#8B1A8B', '#B060D0'], title: 'Welcome!',
+      render: (_lesson, showCursor) => (
+        <>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Welcome to the Grammar Street Dance Challenge!<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#8B1A8B' }}>▌</span>
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#4A2800', lineHeight: 1.7, background: 'linear-gradient(135deg,#F9EEF9,#F0D8F0)', border: '2.5px solid #B060D0', borderRadius: '12px', padding: '12px 16px', marginBottom: '10px' }}>
+            Before our dancers show their moves, let's review today's grammar focus. This challenge combines everything you've learned!
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px' }}>
+            {([
+              { icon: '⏱', label: 'Perfect Tenses', desc: 'Past perfect (had danced) · Present perfect (have danced) · Future perfect (will have danced)', color: '#C0392B' },
+              { icon: '👥', label: 'Subject-Verb Agreement', desc: 'Proximity rule · Indefinite pronouns (each, everyone) · Noncount & plural-only nouns', color: '#2980B9' },
+              { icon: '📍', label: 'Prepositions of Time & Manner', desc: 'at midnight · in the morning · on Sunday · with passion · by bike', color: '#3A9E5C' },
+            ] as const).map((item, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.85)', borderRadius: '10px', padding: '8px 12px', display: 'flex', gap: '10px', alignItems: 'flex-start', border: `2px solid ${item.color}33` }}>
+                <span style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', flexShrink: 0 }}>{item.icon}</span>
+                <div>
+                  <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.68rem,1.3vw,0.88rem)', color: item.color }}>{item.label}</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.56rem,1.05vw,0.7rem)', color: '#6A5000', lineHeight: 1.5 }}>{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      ),
+    });
+    // Voice 27: Transition — meet the dancers
+    pages.push({
+      badge: '💃 MEET THE DANCERS', badgeColor: ['#B060D0', '#8B1A8B'], title: 'The Dancers',
+      render: (_lesson, showCursor) => (
+        <>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Now let's see how our dancers perform!<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#B060D0' }}>▌</span>
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#4A2800', lineHeight: 1.7, marginBottom: '12px' }}>
+            Three schools are competing in the Grammar Street Dance Challenge. Each dancer will test you on a mix of grammar rules — prepositions, subject-verb agreement, and perfect tenses!
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
+            {([
+              { name: 'Christine', school: 'Aguinaldo J. Santos National High School', theme: '🎯 Discipline', color: '#C0392B' },
+              { name: 'Kathleen', school: 'Alexis G. Santos National High School', theme: '🎨 Creativity', color: '#2980B9' },
+              { name: 'Christian', school: 'Dr. Pablito Mendoza Sr. High School', theme: '🤝 Unity', color: '#3A9E5C' },
+            ] as const).map((d, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.9)', borderRadius: '10px', padding: '9px 13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', border: `2px solid ${d.color}33` }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.72rem,1.4vw,0.92rem)', color: d.color }}>{d.name}</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.54rem,1vw,0.7rem)', color: '#7A6000', lineHeight: 1.4 }}>{d.school}</div>
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.58rem,1.1vw,0.76rem)', background: `${d.color}18`, color: d.color, borderRadius: '20px', padding: '3px 10px', fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap' as const }}>{d.theme}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      ),
+    });
   } else {
     pages.push({
       badge: '📚 LESSON', badgeColor: ['#FF7A1A', '#E85D10'], title: 'Grammar Rule',
@@ -399,8 +464,10 @@ export default function GrammarLesson() {
   const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
   const section = SECTIONS.find(s => s.id === currentSection);
-  if (!section || !currentSection) return null;
-  const lesson = section.lesson;
+  // Section D has no entry in SECTIONS — use an empty dummy so lesson pages can render from static content
+  const lesson = section?.lesson ?? {};
+  if (!currentSection) return null;
+  if (currentSection !== 'D' && !section) return null;
 
   const LESSON_PAGES = buildLessonPages(lesson, currentSection as string);
   const isLast = page === LESSON_PAGES.length - 1;
