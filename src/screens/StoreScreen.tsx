@@ -12,23 +12,23 @@ import { getLevelTheme } from '../data/levelThemes';
 type Phase = 'greeting' | 'intro' | 'question' | 'answered' | 'done' | 'mina_closing';
 
 const MINA_LINES = [
-  "Congratulations! 🎉 You have completed learning the three major grammar areas: subject-verb agreement, prepositions of time and manner, and perfect tenses.",
-  "Throughout your adventure, you explored different challenges, made careful choices, and applied important grammar rules in real situations.",
-  "You didn't just answer questions — you understood how grammar works and how it brings clarity and meaning to communication.",
-  "You showed discipline in following rules, creativity in expressing ideas, and unity in connecting different concepts together.",
+  "Congratulations! 🎉 You have completed learning the three major grammar areas: subject-verb agreement, prepositions of time and manner, and perfect tenses. That is not a small achievement—it’s a big step forward in your journey as a learner.",
+  "Throughout your adventure, you explored different challenges, made careful choices, and applied important grammar rules in real situations. You didn't just answer questions — you understood how grammar works and how it brings clarity and meaning to communication.",
+  "You showed discipline in following rules, creativity in expressing ideas, and unity in connecting different concepts together. These are the same qualities that make both great performers and great communicators.",
   "Take a moment to be proud of what you've accomplished today. Every correct answer, every mistake you learned from, and every concept you mastered has helped you grow stronger in grammar.",
-  "But remember — this achievement is only the beginning. If you're ready for a greater challenge, you can try Professional Mode and test your skills at a higher level.",
-  "Keep going, keep learning, and keep challenging yourself. Your grammar adventure doesn't end here — it's just getting started! I'll see you in your next adventure! ✨",
+  "But remember—this achievement is only the beginning. There is still more to discover, more to practice, and more to master. Each new lesson will build on what you’ve learned and take you even further.",
+  "If you're ready for a greater challenge, you can try Mastery Checkpoint and test your skills at the higher level. It will push you to think deeper and apply everything you've learned in more complex situations.",
+  "Keep going, keep learning, and keep challenging yourself. Your grammar adventure doesn't end here — it's just getting started! I'll see you in your next adventure! ✨"
 ];
 
 const MINA_CLOSING_AUDIO = [
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/22_sx7vkx.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a',
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563624/29_ehqqkk.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563624/30_rjo7it.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/31_ytdesq.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/32_jeswzg.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/33_evwij9.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563626/34_r6qfin.m4a',
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563657/35_qtd4eo.m4a',
 ];
 
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {

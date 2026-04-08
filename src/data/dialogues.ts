@@ -75,10 +75,10 @@ export const STORE_GREETINGS: Record<string, { lines: {speaker:string; text:stri
 // Section-complete audio (plays after each section's last store is finished)
 // Voice 14 (file 15) = Section A complete; Voice 19 (file 20) = B; Voice 25 (file 26) = C; Voice 28 (file 29) = D
 export const SECTION_COMPLETE_AUDIO: Record<string, string> = {
-  A: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/15_xd8vmw.m4a',  // Voice 14: "Amazing work! You've explored the Minasa festival and mastered all three perfect tenses."
-  B: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a',  // Voice 19: "Fantastic work! You've mastered subject-verb agreement."
-  C: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',  // Voice 25: "Great job! You applied prepositions of time and manner correctly."
-  D: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/29_ehqqkk.m4a',  // Voice 28: "Brilliant! You applied prepositions, subject-verb agreement, and perfect tenses correctly."
+  A: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/14_p843qm.m4a',  // Voice 14: "Amazing work! You've explored the Minasa festival and mastered all three perfect tenses."
+  B: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/19_pabkpy.m4a',  // Voice 19: "Fantastic work! You've mastered subject-verb agreement."
+  C: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a',  // Voice 25: "Great job! You applied prepositions of time and manner correctly."
+  D: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/28_w9z2vq.m4a',  // Voice 28: "Brilliant! You applied prepositions, subject-verb agreement, and perfect tenses correctly."
 };
 
 // End-of-game congratulation speeches — Voices 29–35 (files 30–35)
