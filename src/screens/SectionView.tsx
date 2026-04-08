@@ -363,7 +363,7 @@ export default function SectionView() {
           className="btn btn-ghost btn-sm"
           onClick={e => { e.stopPropagation(); goToScene('GRAMMAR_LESSON'); }}
         >
-          📚 Review Lesson
+          {section.id === 'D' ? '📚 Review Grammar' : '📚 Review Lesson'}
         </button>
       </div>
     </div>
