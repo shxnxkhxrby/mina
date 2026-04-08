@@ -34,9 +34,9 @@ const GRAMMAR_LESSON_AUDIO: Record<string, string[]> = {
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/18_rldz2p.m4a', // Page 2 — SVA Rule 3 (Noncount)
   ],
   C: [
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a', // Page 0 — Prepositions of Time intro
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/22_sx7vkx.m4a', // Page 1 — Manner prepositions
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a', // Page 2 — "You're ready to converse"
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a', // Page 0 — Voice 20: "Hi! Before you start conversing with the riders, let's review prepositions of time and manner"
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a', // Page 1 — Voice 22: "Prepositions of manner tell us how something happens"
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a', // Page 2 — Voice 24: "Now that you understand prepositions of time and manner, you're ready to converse with the riders"
   ],
 };
 

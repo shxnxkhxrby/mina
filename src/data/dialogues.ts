@@ -13,11 +13,11 @@ export const TEACHER_DIALOGUES = [
 ];
 
 export const MINA_INTRO_DIALOGUES = [
-  { speaker:'Mina', text:"Hello! I'm Mina, here to guide you through your Minasa Festival tasks. I see you've learned about the history of Minasa and your assignments, but maybe you're wondering where to start." },
-  { speaker:'Mina', text:"No worries! First, we'll visit local shops in Bustos that sell Minasa. Talking to the shop owners will help you practice your English by asking questions and reporting answers." },
-  { speaker:'Mina', text:"You'll also observe how Minasa is made and sold, which will help with your documentation task." },
-  { speaker:'Mina', text:"Along the way, I'll guide you through different places in Bustos while also teaching important grammar areas such as Tenses, Subject-Verb Agreement, and Prepositions." },
-  { speaker:'Mina', text:"Ready? Let's begin your adventure! 🌸" },
+  { speaker:'Mina', text:"Hello! I'm Mina, here to guide you through your Minasa Festival tasks. I see you've learned about the history of Minasa and your assignments, but maybe you're wondering where to start.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/1_j6gnjf.m4a' },
+  { speaker:'Mina', text:"No worries! First, we'll visit local shops in Bustos that sell Minasa. Talking to the shop owners will help you practice your English by asking questions and reporting answers.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/2_yqasnm.m4a' },
+  { speaker:'Mina', text:"You'll also observe how Minasa is made and sold, which will help with your documentation task.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/4_z2aae9.m4a' },
+  { speaker:'Mina', text:"Along the way, I'll guide you through different places in Bustos while also teaching important grammar areas such as Tenses, Subject-Verb Agreement, and Prepositions.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/3_pdexki.m4a' },
+  { speaker:'Mina', text:"Ready? Let's begin your adventure! 🌸", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/6_l06ibr.m4a' },
 ];
 
 // Store greeting dialogues — shown BEFORE questions start
@@ -71,6 +71,25 @@ export const STORE_GREETINGS: Record<string, { lines: {speaker:string; text:stri
     { speaker:'Karen', text:"Now let's see if you can combine both time and manner!" },
   ]},
 };
+
+// Section-complete audio (plays after each section's last store is finished)
+// Voice 14 (file 15) = Section A complete; Voice 19 (file 20) = B; Voice 25 (file 26) = C; Voice 28 (file 29) = D
+export const SECTION_COMPLETE_AUDIO: Record<string, string> = {
+  A: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/15_xd8vmw.m4a',  // Voice 14: "Amazing work! You've explored the Minasa festival and mastered all three perfect tenses."
+  B: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/20_arukqm.m4a',  // Voice 19: "Fantastic work! You've mastered subject-verb agreement."
+  C: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',  // Voice 25: "Great job! You applied prepositions of time and manner correctly."
+  D: 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/29_ehqqkk.m4a',  // Voice 28: "Brilliant! You applied prepositions, subject-verb agreement, and perfect tenses correctly."
+};
+
+// End-of-game congratulation speeches — Voices 29–35 (files 30–35)
+export const COMPLETION_DIALOGUES = [
+  { speaker:'Mina', text:"Congratulations! You have completed learning the three major grammar areas: subject-verb agreement, prepositions of time and manner, and perfect tenses. That is not a small achievement; it's a big step forward in your journey as a learner.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563624/30_rjo7it.m4a' },
+  { speaker:'Mina', text:"Throughout your adventure, you explored different challenges, made careful choices, and applied important grammar rules in real situations. You didn't just answer questions; you understood how grammar works and how it brings clarity and meaning to communication.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/31_ytdesq.m4a' },
+  { speaker:'Mina', text:"You showed discipline in following rules, creativity in expressing ideas, and unity in connecting different concepts together. These are the same qualities that make both great performers and great communicators.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/32_jeswzg.m4a' },
+  { speaker:'Mina', text:"Take a moment to be proud of what you have accomplished today. Every correct answer, every mistake you learned from, and every concept you mastered has helped you grow stronger in grammar.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563625/33_evwij9.m4a' },
+  { speaker:'Mina', text:"But remember, this achievement is only the beginning. There is still more to discover, more to practice, and more to master. Each new lesson will build on what you've learned and take you even further.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563626/34_r6qfin.m4a' },
+  { speaker:'Mina', text:"If you're ready for a greater challenge, you can try Mastery Checkpoint and test your skills at a higher level. It will push you to think deeper and apply everything you've learned in more complex situations.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563657/35_qtd4eo.m4a' },
+];
 
 export const CUTSCENE_PARAGRAPHS = [
   {
