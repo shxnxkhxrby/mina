@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTION_D } from '../data/sectionD';
@@ -53,6 +53,15 @@ export default function SectionDScreen() {
   const minaBg = useMinaBg();
   const [minaBgSrcIdx, setMinaBgSrcIdx] = useState(0);
 
+  // Bug fix #3: ref mirrors sessionScore so handleNext always reads the
+  // up-to-date value even when called in the same render cycle as setSessionScore.
+  const scoreRef = useRef(0);
+
+  // Bug fix #2: snapshot dancer at the moment we enter DANCER_RESULT so
+  // the result card never loses its data even if activeDancerIdx changes.
+  const resultDancerRef = useRef(SECTION_D.stores[0]);
+  const resultScoreRef = useRef(0);
+
   const prog = sectionProgress['D'] || {};
 
   // ── Background — same safe lookup as SectionView ───────────────────────────
@@ -65,10 +74,13 @@ export default function SectionDScreen() {
   const question = qSet?.questions[questionIdx];
   const totalQ = qSet?.questions.length ?? 5;
 
-  // ── Unlock logic: dancers unlock sequentially ──────────────────────────────
+  // ── Unlock logic: dancers unlock after previous is ATTEMPTED (not just completed)
+  // Bug fix #5: previously required completed===true, locking players who failed.
   function isDancerUnlocked(i: number): boolean {
     if (i === 0) return true;
-    return prog[SECTION_D.stores[i - 1].id]?.completed === true;
+    const prev = prog[SECTION_D.stores[i - 1].id];
+    // Unlocked if previous dancer has been attempted at all
+    return !!prev && (prev.completed === true || (prev.attempts !== undefined && prev.attempts > 0));
   }
 
   // ── Handlers ───────────────────────────────────────────────────────────────
@@ -78,6 +90,8 @@ export default function SectionDScreen() {
       setTimeout(() => setLockedMsg(''), 2500);
       return;
     }
+    // Bug fix #4: always fully reset quiz state before starting
+    scoreRef.current = 0;
     setActiveDancerIdx(i);
     setQuestionIdx(0);
     setSessionScore(0);
@@ -90,25 +104,39 @@ export default function SectionDScreen() {
     if (showFeedback) return;
     setSelected(choiceIdx);
     setShowFeedback(true);
-    if (question.choices[choiceIdx].isCorrect) {
-      setSessionScore(s => s + 1);
+    // Bug fix #3: update ref immediately so handleNext always reads correct value
+    if (question && question.choices[choiceIdx]?.isCorrect) {
+      scoreRef.current += 1;
+      setSessionScore(scoreRef.current);
     }
   }
 
   function handleNext() {
+    if (!dancer || !qSet) return; // guard against undefined
     if (questionIdx + 1 < totalQ) {
       setQuestionIdx(q => q + 1);
       setSelected(null);
       setShowFeedback(false);
     } else {
-      completeStore('D', dancer.id, sessionScore);
-      addScore(sessionScore, totalQ);
+      // Bug fix #3: use scoreRef.current (always fresh) not sessionScore (may be stale)
+      const finalScore = scoreRef.current;
+      // Bug fix #2: snapshot dancer & score for result card before any state changes
+      resultDancerRef.current = dancer;
+      resultScoreRef.current = finalScore;
+      completeStore('D', dancer.id, finalScore);
+      addScore(finalScore, totalQ);
       setPhase('DANCER_RESULT');
     }
   }
 
   function handleAfterResult() {
     const nextIdx = activeDancerIdx + 1;
+    // Bug fix #4: reset all quiz state before going to next dancer
+    scoreRef.current = 0;
+    setSessionScore(0);
+    setQuestionIdx(0);
+    setSelected(null);
+    setShowFeedback(false);
     if (nextIdx < SECTION_D.stores.length) {
       setActiveDancerIdx(nextIdx);
       setPhase('DANCER_SELECT');
@@ -379,7 +407,7 @@ export default function SectionDScreen() {
         {/* ══════════════════════════════════════════════════════════════════════
             QUESTION PHASE
         ══════════════════════════════════════════════════════════════════════ */}
-        {phase === 'QUESTION' && question && (
+        {phase === 'QUESTION' && (
           <motion.div
             key={`q-${activeDancerIdx}-${questionIdx}`}
             initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
@@ -391,134 +419,155 @@ export default function SectionDScreen() {
               zIndex: 5,
             }}
           >
-            {/* Progress bar */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px',
-            }}>
-              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
-                {dancer.npcName}
-              </span>
-              <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '3px' }}>
+            {/* Bug fix #1: guard — never render a blank screen if data is missing */}
+            {(!question || !dancer) ? (
+              <div style={{
+                background: 'rgba(255,255,255,0.95)', borderRadius: '16px',
+                padding: '32px 40px', textAlign: 'center', maxWidth: '400px',
+              }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>⚠️</div>
                 <div style={{
-                  width: `${(questionIdx / totalQ) * 100}%`,
-                  height: '100%', background: '#F5C84A', borderRadius: '3px',
-                  transition: 'width 0.4s',
-                }} />
+                  fontFamily: 'var(--font-title)', color: 'var(--olive-brown)',
+                  fontSize: 'clamp(0.85rem,1.8vw,1.1rem)', marginBottom: '16px',
+                }}>
+                  Could not load questions. Please try again.
+                </div>
+                <button className="btn btn-ghost" onClick={() => setPhase('DANCER_SELECT')}>
+                  ← Back to Dancers
+                </button>
               </div>
-              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
-                {questionIdx + 1}/{totalQ}
-              </span>
-            </div>
+            ) : (
+              <>
+                {/* Progress bar */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px',
+                }}>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
+                    {dancer.npcName}
+                  </span>
+                  <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.3)', borderRadius: '3px' }}>
+                    <div style={{
+                      width: `${(questionIdx / totalQ) * 100}%`,
+                      height: '100%', background: '#F5C84A', borderRadius: '3px',
+                      transition: 'width 0.4s',
+                    }} />
+                  </div>
+                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.7rem', color: 'white' }}>
+                    {questionIdx + 1}/{totalQ}
+                  </span>
+                </div>
 
-            {/* NPC dialogue bubble */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              background: 'rgba(255,255,255,0.15)',
-              backdropFilter: 'blur(4px)',
-              border: '1px solid rgba(255,255,255,0.3)',
-              borderRadius: '14px', padding: 'clamp(8px,1.5vh,14px) clamp(12px,2vw,20px)',
-              fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.62rem,1.3vw,0.8rem)',
-              color: 'white', marginBottom: '10px', lineHeight: 1.5,
-            }}>
-              <span style={{ fontWeight: 700, color: '#FFD700' }}>{dancer.npcName}: </span>
-              {question.npcDialogueBefore}
-            </div>
+                {/* NPC dialogue bubble */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  background: 'rgba(255,255,255,0.15)',
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '14px', padding: 'clamp(8px,1.5vh,14px) clamp(12px,2vw,20px)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(0.62rem,1.3vw,0.8rem)',
+                  color: 'white', marginBottom: '10px', lineHeight: 1.5,
+                }}>
+                  <span style={{ fontWeight: 700, color: '#FFD700' }}>{dancer.npcName}: </span>
+                  {question.npcDialogueBefore}
+                </div>
 
-            {/* Question card */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              background: 'rgba(255,255,255,0.95)',
-              borderRadius: '14px', padding: 'clamp(10px,1.8vh,18px) clamp(12px,2vw,20px)',
-              fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.72rem,1.5vw,0.95rem)',
-              color: 'var(--olive-brown)',
-              marginBottom: '10px', textAlign: 'center',
-            }}>
-              {question.questionText}
-            </div>
+                {/* Question card */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  background: 'rgba(255,255,255,0.95)',
+                  borderRadius: '14px', padding: 'clamp(10px,1.8vh,18px) clamp(12px,2vw,20px)',
+                  fontFamily: 'var(--font-title)',
+                  fontSize: 'clamp(0.72rem,1.5vw,0.95rem)',
+                  color: 'var(--olive-brown)',
+                  marginBottom: '10px', textAlign: 'center',
+                }}>
+                  {question.questionText}
+                </div>
 
-            {/* Choices */}
-            <div style={{
-              width: '100%', maxWidth: '560px',
-              display: 'flex', flexDirection: 'column', gap: '8px',
-            }}>
-              {question.choices.map((choice, ci) => {
-                let bg = 'rgba(255,255,255,0.92)';
-                let border = '2px solid transparent';
-                if (showFeedback) {
-                  if (choice.isCorrect) { bg = '#d4edda'; border = '2px solid #28a745'; }
-                  else if (ci === selected && !choice.isCorrect) { bg = '#f8d7da'; border = '2px solid #dc3545'; }
-                } else if (ci === selected) {
-                  border = '2px solid var(--teal)';
-                }
-                return (
+                {/* Choices */}
+                <div style={{
+                  width: '100%', maxWidth: '560px',
+                  display: 'flex', flexDirection: 'column', gap: '8px',
+                }}>
+                  {question.choices.map((choice, ci) => {
+                    let bg = 'rgba(255,255,255,0.92)';
+                    let border = '2px solid transparent';
+                    if (showFeedback) {
+                      if (choice.isCorrect) { bg = '#d4edda'; border = '2px solid #28a745'; }
+                      else if (ci === selected && !choice.isCorrect) { bg = '#f8d7da'; border = '2px solid #dc3545'; }
+                    } else if (ci === selected) {
+                      border = '2px solid var(--teal)';
+                    }
+                    return (
+                      <motion.button
+                        key={ci}
+                        onClick={() => handleChoice(ci)}
+                        whileHover={!showFeedback ? { scale: 1.02 } : {}}
+                        whileTap={!showFeedback ? { scale: 0.98 } : {}}
+                        style={{
+                          background: bg, border, borderRadius: '10px',
+                          padding: 'clamp(8px,1.4vh,13px) clamp(12px,2vw,18px)',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
+                          color: '#333', cursor: showFeedback ? 'default' : 'pointer',
+                          textAlign: 'left', transition: 'all 0.2s',
+                        }}
+                      >
+                        {choice.text}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                {/* Feedback */}
+                <AnimatePresence>
+                  {showFeedback && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                      style={{
+                        width: '100%', maxWidth: '560px',
+                        marginTop: '10px',
+                        background: question.choices[selected!]?.isCorrect
+                          ? 'rgba(40,167,69,0.92)' : 'rgba(220,53,69,0.92)',
+                        borderRadius: '12px',
+                        padding: 'clamp(8px,1.4vh,14px) clamp(12px,2vw,18px)',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
+                        color: 'white', lineHeight: 1.5,
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, marginBottom: '2px' }}>
+                        {question.choices[selected!]?.isCorrect ? '✅ Correct!' : '❌ Not quite!'}
+                      </div>
+                      <div>
+                        {question.choices[selected!]?.isCorrect
+                          ? question.feedbackCorrect
+                          : question.feedbackWrong}
+                      </div>
+                      <div style={{
+                        marginTop: '4px', fontSize: 'clamp(0.55rem,1.1vw,0.7rem)',
+                        opacity: 0.9, fontStyle: 'italic',
+                      }}>
+                        📖 {question.grammarRule}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Next button */}
+                {showFeedback && (
                   <motion.button
-                    key={ci}
-                    onClick={() => handleChoice(ci)}
-                    whileHover={!showFeedback ? { scale: 1.02 } : {}}
-                    whileTap={!showFeedback ? { scale: 0.98 } : {}}
-                    style={{
-                      background: bg, border, borderRadius: '10px',
-                      padding: 'clamp(8px,1.4vh,13px) clamp(12px,2vw,18px)',
-                      fontFamily: 'var(--font-body)',
-                      fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
-                      color: '#333', cursor: showFeedback ? 'default' : 'pointer',
-                      textAlign: 'left', transition: 'all 0.2s',
-                    }}
+                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    onClick={handleNext}
+                    className="btn btn-primary"
+                    style={{ marginTop: '12px', fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
                   >
-                    {choice.text}
+                    {questionIdx + 1 < totalQ ? 'Next ➜' : 'Finish 🎉'}
                   </motion.button>
-                );
-              })}
-            </div>
-
-            {/* Feedback */}
-            <AnimatePresence>
-              {showFeedback && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{
-                    width: '100%', maxWidth: '560px',
-                    marginTop: '10px',
-                    background: question.choices[selected!]?.isCorrect
-                      ? 'rgba(40,167,69,0.92)' : 'rgba(220,53,69,0.92)',
-                    borderRadius: '12px',
-                    padding: 'clamp(8px,1.4vh,14px) clamp(12px,2vw,18px)',
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
-                    color: 'white', lineHeight: 1.5,
-                  }}
-                >
-                  <div style={{ fontWeight: 700, marginBottom: '2px' }}>
-                    {question.choices[selected!]?.isCorrect ? '✅ Correct!' : '❌ Not quite!'}
-                  </div>
-                  <div>
-                    {question.choices[selected!]?.isCorrect
-                      ? question.feedbackCorrect
-                      : question.feedbackWrong}
-                  </div>
-                  <div style={{
-                    marginTop: '4px', fontSize: 'clamp(0.55rem,1.1vw,0.7rem)',
-                    opacity: 0.9, fontStyle: 'italic',
-                  }}>
-                    📖 {question.grammarRule}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Next button */}
-            {showFeedback && (
-              <motion.button
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                onClick={handleNext}
-                className="btn btn-primary"
-                style={{ marginTop: '12px', fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
-              >
-                {questionIdx + 1 < totalQ ? 'Next ➜' : 'Finish 🎉'}
-              </motion.button>
+                )}
+              </>
             )}
           </motion.div>
         )}
@@ -537,56 +586,64 @@ export default function SectionDScreen() {
               zIndex: 10, padding: '20px',
             }}
           >
-            <div style={{
-              background: 'rgba(255,255,255,0.96)',
-              borderRadius: '20px', padding: 'clamp(20px,4vh,36px) clamp(24px,5vw,48px)',
-              textAlign: 'center', maxWidth: '420px', width: '100%',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
-            }}>
-              <div style={{ fontSize: 'clamp(2rem,5vw,3.5rem)', marginBottom: '8px' }}>
-                {sessionScore >= 4 ? '🎉' : '💪'}
-              </div>
-              <div style={{
-                fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(1rem,2.4vw,1.5rem)',
-                color: 'var(--olive-brown)', marginBottom: '6px',
-              }}>
-                {dancer.npcName} — Done!
-              </div>
-              <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(0.75rem,1.5vw,1rem)',
-                color: '#555', marginBottom: '12px',
-              }}>
-                Score: <strong style={{ color: sessionScore >= 4 ? '#28a745' : '#dc3545' }}>
-                  {sessionScore}/{totalQ}
-                </strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
-                {[1, 2, 3, 4, 5].map(n => (
-                  <span key={n} style={{ fontSize: 'clamp(1rem,2.2vw,1.6rem)' }}>
-                    {n <= sessionScore ? '⭐' : '☆'}
-                  </span>
-                ))}
-              </div>
-              <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
-                color: '#666', marginBottom: '16px',
-                background: '#f8f9fa', borderRadius: '10px', padding: '10px 14px',
-              }}>
-                {sessionScore >= 4
-                  ? `Great job! You've completed ${dancer.npcName}'s challenge.`
-                  : `Keep practicing! You need 4/5 to pass. You can try again from the dancer select.`}
-              </div>
-              <button
-                className="btn btn-primary"
-                onClick={handleAfterResult}
-                style={{ fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
-              >
-                {activeDancerIdx + 1 < SECTION_D.stores.length ? 'Next Dancer ➜' : 'Continue ➜'}
-              </button>
-            </div>
+            {/* Bug fix #2: use snapshotted refs — immune to activeDancerIdx/sessionScore changing */}
+            {(() => {
+              const rd = resultDancerRef.current;
+              const rs = resultScoreRef.current;
+              const rdTotalQ = rd?.questionSets?.[0]?.questions?.length ?? 5;
+              return (
+                <div style={{
+                  background: 'rgba(255,255,255,0.96)',
+                  borderRadius: '20px', padding: 'clamp(20px,4vh,36px) clamp(24px,5vw,48px)',
+                  textAlign: 'center', maxWidth: '420px', width: '100%',
+                  boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
+                }}>
+                  <div style={{ fontSize: 'clamp(2rem,5vw,3.5rem)', marginBottom: '8px' }}>
+                    {rs >= 4 ? '🎉' : '💪'}
+                  </div>
+                  <div style={{
+                    fontFamily: 'var(--font-title)',
+                    fontSize: 'clamp(1rem,2.4vw,1.5rem)',
+                    color: 'var(--olive-brown)', marginBottom: '6px',
+                  }}>
+                    {rd?.npcName ?? 'Dancer'} — Done!
+                  </div>
+                  <div style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'clamp(0.75rem,1.5vw,1rem)',
+                    color: '#555', marginBottom: '12px',
+                  }}>
+                    Score: <strong style={{ color: rs >= 4 ? '#28a745' : '#dc3545' }}>
+                      {rs}/{rdTotalQ}
+                    </strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <span key={n} style={{ fontSize: 'clamp(1rem,2.2vw,1.6rem)' }}>
+                        {n <= rs ? '⭐' : '☆'}
+                      </span>
+                    ))}
+                  </div>
+                  <div style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
+                    color: '#666', marginBottom: '16px',
+                    background: '#f8f9fa', borderRadius: '10px', padding: '10px 14px',
+                  }}>
+                    {rs >= 4
+                      ? `Great job! You've completed ${rd?.npcName ?? 'this'} challenge.`
+                      : `Keep practicing! You need 4/${rdTotalQ} to pass. You can try again from the dancer select.`}
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleAfterResult}
+                    style={{ fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
+                  >
+                    {activeDancerIdx + 1 < SECTION_D.stores.length ? 'Next Dancer ➜' : 'Continue ➜'}
+                  </button>
+                </div>
+              );
+            })()}
           </motion.div>
         )}
 
@@ -594,17 +651,22 @@ export default function SectionDScreen() {
             MINA CLOSING SPEECH — uses MinaIntro-style scalloped bubble
         ══════════════════════════════════════════════════════════════════════ */}
         {phase === 'MINA_CLOSING' && (
+          // Bug fix #8: stable key so wrapper never remounts on line advance —
+          // only the inner dialogue div re-animates.
           <motion.div
-            key={`mina-${minaLineIdx}`}
+            key="mina-closing"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
             style={{
               position: 'absolute', inset: 0,
+              // Bug fix #7: position:relative creates a stacking context so the
+              // bg img's zIndex stays contained and never escapes behind the scene.
+              position: 'relative',
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
               zIndex: 10, padding: 'clamp(60px,10vh,80px) clamp(20px,5vw,60px) 20px',
             }}
           >
-            {/* Mina cycling background */}
+            {/* Mina cycling background — zIndex:0 is safe now that parent has position:relative */}
             <img
               src={minaBg.candidates[minaBgSrcIdx]}
               alt=""
@@ -612,59 +674,72 @@ export default function SectionDScreen() {
                 position: 'absolute', inset: 0, width: '100%', height: '100%',
                 objectFit: 'cover', objectPosition: 'center top',
                 filter: 'blur(3px) brightness(0.72) saturate(0.9)',
-                transform: 'scale(1.04)', zIndex: -1,
+                transform: 'scale(1.04)', zIndex: 0,
               }}
               onError={() => {
                 if (minaBgSrcIdx + 1 < minaBg.candidates.length) setMinaBgSrcIdx(i => i + 1);
               }}
             />
-            <div style={{ marginBottom: '16px' }}>
-              <img
-                src={ASSETS.minaMascot}
-                alt="Mina"
-                style={{
-                  width: 'clamp(64px,12vw,110px)',
-                  height: 'clamp(64px,12vw,110px)',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
-                }}
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              />
-            </div>
 
-            <div style={{
-              background: 'rgba(255,255,255,0.97)',
-              borderRadius: '20px',
-              padding: 'clamp(18px,3.5vh,30px) clamp(20px,4vw,40px)',
-              maxWidth: '560px', width: '100%',
-              boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
-              textAlign: 'center',
-            }}>
-              <div style={{
-                fontFamily: 'var(--font-body)',
-                fontSize: 'clamp(0.72rem,1.5vw,0.95rem)',
-                color: 'var(--olive-brown)',
-                lineHeight: 1.7, marginBottom: '20px',
-              }}>
-                <span style={{ fontWeight: 700, color: '#8B1A8B' }}>Mina: </span>
-                {MINA_LINES[minaLineIdx]}
+            {/* All content sits above the bg img */}
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <img
+                  src={ASSETS.minaMascot}
+                  alt="Mina"
+                  style={{
+                    width: 'clamp(64px,12vw,110px)',
+                    height: 'clamp(64px,12vw,110px)',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
+                  }}
+                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '16px' }}>
-                {MINA_LINES.map((_, i) => (
-                  <div key={i} style={{
-                    width: '8px', height: '8px', borderRadius: '50%',
-                    background: i === minaLineIdx ? '#8B1A8B' : 'rgba(139,26,139,0.3)',
-                    transition: 'background 0.3s',
-                  }} />
-                ))}
-              </div>
-              <button
-                className="btn btn-primary"
-                onClick={handleMinaNext}
-                style={{ fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
-              >
-                {minaLineIdx + 1 < MINA_LINES.length ? 'Continue ➜' : '🎓 See Results'}
-              </button>
+
+              {/* Bug fix #8: key on the dialogue card only — it re-animates per line,
+                  the wrapper above stays mounted so the bg image never flickers. */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`mina-line-${minaLineIdx}`}
+                  initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.22 }}
+                  style={{
+                    background: 'rgba(255,255,255,0.97)',
+                    borderRadius: '20px',
+                    padding: 'clamp(18px,3.5vh,30px) clamp(20px,4vw,40px)',
+                    maxWidth: '560px', width: '100%',
+                    boxShadow: '0 12px 40px rgba(0,0,0,0.3)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'clamp(0.72rem,1.5vw,0.95rem)',
+                    color: 'var(--olive-brown)',
+                    lineHeight: 1.7, marginBottom: '20px',
+                  }}>
+                    <span style={{ fontWeight: 700, color: '#8B1A8B' }}>Mina: </span>
+                    {MINA_LINES[minaLineIdx]}
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '16px' }}>
+                    {MINA_LINES.map((_, i) => (
+                      <div key={i} style={{
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        background: i === minaLineIdx ? '#8B1A8B' : 'rgba(139,26,139,0.3)',
+                        transition: 'background 0.3s',
+                      }} />
+                    ))}
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleMinaNext}
+                    style={{ fontSize: 'clamp(0.7rem,1.4vw,0.9rem)' }}
+                  >
+                    {minaLineIdx + 1 < MINA_LINES.length ? 'Continue ➜' : '🎓 See Results'}
+                  </button>
+                </motion.div>
+              </AnimatePresence>
             </div>
           </motion.div>
         )}
