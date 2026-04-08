@@ -119,23 +119,26 @@ export default function MainMenu() {
         </div>
       </div>
 
-      {/* Mina mascot — bottom right, big */}
+      {/* Mina mascot — bottom right, fully dynamic sizing */}
       <motion.img
         src={ASSETS.minaMascot}
         alt="Mina"
-        initial={{ opacity: 0, x: 30 }}
+        initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 120, damping: 18 }}
         style={{
           position: 'absolute',
           bottom: 0,
-          right: 'clamp(10px,4vw,60px)',
-          width: 'clamp(110px,24vw,280px)',
-          height: 'auto',
-          filter: 'drop-shadow(0 6px 20px rgba(0,0,0,0.5))',
+          right: 'clamp(0px,2vw,40px)',
+          height: 'clamp(260px,72vh,720px)',
+          width: 'auto',
+          maxWidth: '52vw',
+          filter: 'drop-shadow(0 8px 28px rgba(0,0,0,0.55))',
           animation: 'float 3s ease-in-out infinite',
           zIndex: 10,
           pointerEvents: 'none',
+          objectFit: 'contain',
+          objectPosition: 'bottom right',
         }}
         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />

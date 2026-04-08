@@ -186,7 +186,7 @@ export default function StorylineScreen() {
           style={{
             position: 'absolute', inset: 0, width: '100%', height: '100%',
             objectFit: 'cover', objectPosition: 'center top',
-            filter: 'blur(8px) brightness(0.45) saturate(0.7)',
+            filter: 'blur(3px) brightness(0.72) saturate(0.9)',
             transform: 'scale(1.04)', zIndex: 0,
           }}
           onError={() => {
