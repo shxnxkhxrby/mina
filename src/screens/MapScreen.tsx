@@ -29,8 +29,8 @@ const ZONE_GRADIENTS: Record<string, string> = {
 
 // Absolute positions only used on larger screens (>=600px)
 const ZONE_POSITIONS: Record<string, { x: string; y: string }> = {
-  A: { x: '15%', y: '35%' },
-  B: { x: '25%', y: '66%' },
+  A: { x: '15%', y: '45%' },
+  B: { x: '25%', y: '74%' },
   C: { x: '73%', y: '50%' },
   D: { x: '83%', y: '80%' },
 };

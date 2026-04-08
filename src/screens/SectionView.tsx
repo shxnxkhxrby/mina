@@ -143,7 +143,8 @@ export default function SectionView() {
           justifyContent: 'center',
           position: 'relative',
           zIndex: 10,
-          paddingBottom: 'clamp(52px,10vh,88px)',
+          paddingTop: 'clamp(10px,2vh,20px)',
+          paddingBottom: 'clamp(58px,11vh,96px)',
           paddingLeft: 'clamp(8px,2vw,20px)',
           paddingRight: 'clamp(8px,2vw,20px)',
           overflowX: 'auto',
@@ -179,7 +180,7 @@ export default function SectionView() {
               {/* Card */}
               <div
                 style={{
-                  width: 'clamp(150px,22vw,240px)',
+                  width: 'clamp(120px,20vw,200px)',
                   background: completed
                     ? 'rgba(255,248,220,0.97)'
                     : unlocked
@@ -213,8 +214,8 @@ export default function SectionView() {
                 {/* Sprite / emoji — larger */}
                 <div
                   style={{
-                    width: 'clamp(100px,18vw,160px)',
-                    height: 'clamp(100px,18vw,160px)',
+                    width: 'clamp(70px,13vw,110px)',
+                    height: 'clamp(70px,13vw,110px)',
                     borderRadius: '14px', overflow: 'hidden',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: showEmoji ? 'transparent' : 'rgba(0,0,0,0.04)',
@@ -348,10 +349,10 @@ export default function SectionView() {
       <div
         style={{
           position: 'absolute',
-          bottom: 'clamp(10px,2vh,22px)',
+          bottom: 'clamp(12px,2.5vh,28px)',
           left: 0, right: 0,
           display: 'flex', justifyContent: 'center', gap: '10px',
-          zIndex: 10,
+          zIndex: 30,
         }}
       >
         <button className="btn btn-ghost btn-sm"

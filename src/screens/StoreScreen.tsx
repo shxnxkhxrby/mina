@@ -304,6 +304,8 @@ export default function StoreScreen() {
       zIndex: 20,
       display: 'flex',
       flexDirection: 'column',
+      justifyContent: 'center',
+      overflowY: 'auto',
     }}>
       <AnimatePresence mode="wait">
         <motion.div
@@ -312,7 +314,6 @@ export default function StoreScreen() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.28, ease: 'easeOut' }}
-          style={{ display: 'flex', flexDirection: 'column', flex: 1 }}
         >
           {children}
         </motion.div>
@@ -321,7 +322,7 @@ export default function StoreScreen() {
   );
 
   const renderChoices = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(5px,1vh,9px)', marginTop: '10px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(4px,0.8vh,8px)', marginTop: '8px' }}>
       {currentQ.choices.map((choice, i) => {
         const isCorrectChoice = choice.isCorrect;
         let bg = 'rgba(255,255,255,0.9)';
@@ -342,10 +343,10 @@ export default function StoreScreen() {
             whileHover={selected === null ? { x: -3, scale: 1.015 } : {}}
             style={{
               display: 'flex', alignItems: 'center',
-              gap: 'clamp(8px,1.5vw,12px)',
+              gap: 'clamp(6px,1.2vw,10px)',
               background: bg, border: `2px solid ${border}`,
               borderRadius: '11px',
-              padding: 'clamp(8px,1.4vh,13px) clamp(10px,1.8vw,16px)',
+              padding: 'clamp(7px,1.2vh,11px) clamp(8px,1.5vw,14px)',
               cursor: selected !== null ? 'default' : 'pointer',
               textAlign: 'left', width: '100%',
               transition: 'background 0.2s, border-color 0.2s',
@@ -354,15 +355,15 @@ export default function StoreScreen() {
           >
             <span style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              width: 'clamp(22px,3vw,30px)', height: 'clamp(22px,3vw,30px)',
+              width: 'clamp(20px,2.6vw,28px)', height: 'clamp(20px,2.6vw,28px)',
               background: badgeBg, color: 'white', borderRadius: '7px',
               fontFamily: 'var(--font-char)', fontWeight: 700,
-              fontSize: 'clamp(0.62rem,1.1vw,0.82rem)',
+              fontSize: 'clamp(0.58rem,1vw,0.76rem)',
               flexShrink: 0, transition: 'background 0.2s',
             }}>{choiceLabels[i]}</span>
             <span style={{
-              fontFamily: 'var(--font-body)', fontSize: 'clamp(0.72rem,1.4vw,0.92rem)',
-              color: '#2A1800', lineHeight: 1.4,
+              fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.3vw,0.88rem)',
+              color: '#2A1800', lineHeight: 1.35,
             }}>
               {choice.text.replace(/^[A-D]\.\s*/, '')}
             </span>
@@ -519,9 +520,9 @@ export default function StoreScreen() {
             {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
               <div style={{
                 fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(0.88rem,1.9vw,1.2rem)',
+                fontSize: 'clamp(0.8rem,1.7vw,1.1rem)',
                 color: '#2A1800', fontWeight: 800, lineHeight: 1.4,
-                marginBottom: '6px',
+                marginBottom: '4px',
               }}>
                 {currentQ.questionText}
                 <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>

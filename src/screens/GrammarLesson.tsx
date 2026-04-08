@@ -57,15 +57,15 @@ function ScallopedBubble({ children }: { children: React.ReactNode }) {
       </div>
       <div style={{
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
-        border: '4px solid #F5C84A', borderTop: 'none',
-        borderRadius: '0 0 20px 20px',
-        padding: 'clamp(12px,2.5vh,22px) clamp(14px,3.5vw,30px) clamp(12px,2.5vh,22px)',
+        border: '4px solid #F5C84A', borderTop: 'none', borderBottom: 'none',
+        borderRadius: 0,
+        padding: 'clamp(12px,2.5vh,22px) clamp(14px,3.5vw,30px) clamp(18px,3vh,28px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
       }}>
         {children}
       </div>
-      {/* Bottom scallop — peaks pointing down */}
-      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
+      {/* Bottom scallop — in normal flow so it sits flush below the box */}
+      <div style={{ height: '20px', overflow: 'hidden', position: 'relative', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
           <path d={scallopBottom} fill="#F5C84A" />
         </svg>
