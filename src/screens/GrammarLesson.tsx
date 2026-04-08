@@ -5,38 +5,53 @@ import { SECTIONS } from '../data/sections';
 import { ASSETS } from '../data/assets';
 
 // ── Audio URLs per section — one entry per lesson page ────────────────────
-// Section A (Perfect Tenses): Voices 6–13 → files 8,7,9,10,11,12,13,14
-//   Page 0 (Intro/Preamble):  file 8  — "Before you talk to shop owners, let's review perfect tenses"
-//   Page 1 (Past Perfect):    file 7  — Past Perfect rule + file 9 = example (play both → use 8_xtlyka first then 9)
-//   Page 2 (Present Perfect): file 10 — Present Perfect rule
-//   Page 3 (Future Perfect):  file 11 — Future Perfect rule
-//   Page 4 (Summary):         file 13 — Summary of all three tenses
-// Section B (SVA): Voices 15–18 → files 16,17,18,19
-//   Page 0: file 16 — Rule 1 (Proximity)
-//   Page 1: file 17 — Rule 2 (Quantifiers)
-//   Page 2: file 18 — Rule 3 (Noncount/Plural-only)
-// Section C (Prepositions): Voices 20–24 → files 21,22,23,24,25
-//   Page 0: file 21 — Prepositions of time intro + examples
-//   Page 1: file 23 — Prepositions of manner
-//   Page 2: file 25 — "Now that you understand, you're ready"
+// Section A (Perfect Tenses): Voices 6–13 → files 8(V6),7(V7),9(V8),10(V9),11(V10),12(V11),13(V12),14(V13)
+//   Note: filenames 7 and 8 were uploaded in swapped order relative to voice numbers.
+//         file 8_xtlyka = Voice 6 (preamble); file 7_mehoew = Voice 7 (Past Perfect rule)
+//
+//   Page 0 (Preamble):           file 8_xtlyka  — Voice 6: "Hey there again, let's review perfect tenses"
+//   Page 1 (Past Perfect rule):  file 7_mehoew  — Voice 7: "Past perfect tense shows..."
+//   Page 2 (Past Perfect ex):    file 9_spph6a  — Voice 8: Example "The bakers had prepared..."
+//   Page 3 (Present Perfect rule): file 10_ldciim — Voice 9: "Present perfect connects past to present..."
+//   Page 4 (Present Perfect ex):   file 11_ktrb9e — Voice 10: Example "Many visitors have enjoyed..."
+//   Page 5 (Future Perfect rule):  file 12_cduwtz — Voice 11: "Future perfect shows action before future time..."
+//   Page 6 (Future Perfect ex):    file 13_ycrq7v — Voice 12: Example "By the end of the festival..."
+//   Page 7 (Summary):              file 14_p843qm — Voice 13: Summary of all three tenses
+//
+// Section B (SVA): Voices 15–17 → files 16(V15),17(V16),18(V17)
+//   Page 0: file 16_eibuny — Voice 15: Rule 1 (Proximity + phrase between subject/verb)
+//   Page 1: file 17_ov5yvd — Voice 16: Rule 2 (Quantifiers: each/either/everyone → singular; both/few/many → plural)
+//   Page 2: file 18_rldz2p — Voice 17: Rule 3 (Noncount nouns → singular; plural-only nouns → plural)
+//
+// Section C (Prepositions): Voices 20–24 → files 21(V20),22(V21),23(V22),24(V23),25(V24)
+//   Page 0: file 21_ht1kj7 — Voice 20: Intro "Hi! Before you start... prepositions of time: AT, ON, IN"
+//   Page 1: file 22_sx7vkx — Voice 21: Time examples "the ride started at 5:30 AM / on Sunday / in January"
+//   Page 2: file 23_oxr6hf — Voice 22: "Prepositions of manner tell us how... BY, WITH, IN"
+//   Page 3: file 24_qwsdwu — Voice 23: Manner examples "traveled by bike / with her friends / with determination"
+//   Page 4: file 25_xf1dkb — Voice 24: "Now that you understand, you're ready to converse with the riders"
 
 const GRAMMAR_LESSON_AUDIO: Record<string, string[]> = {
   A: [
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/8_xtlyka.m4a',  // Page 0 — Preamble
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/7_mehoew.m4a',  // Page 1 — Past Perfect rule
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/10_ldciim.m4a', // Page 2 — Present Perfect rule
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/11_ktrb9e.m4a', // Page 3 — Future Perfect rule
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/13_ycrq7v.m4a', // Page 4 — Summary
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/8_xtlyka.m4a',  // Page 0 — Preamble (Voice 6)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/7_mehoew.m4a',  // Page 1 — Past Perfect rule (Voice 7)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/9_spph6a.m4a',  // Page 2 — Past Perfect example (Voice 8)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563616/10_ldciim.m4a', // Page 3 — Present Perfect rule (Voice 9)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/11_ktrb9e.m4a', // Page 4 — Present Perfect example (Voice 10)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563617/12_cduwtz.m4a', // Page 5 — Future Perfect rule (Voice 11)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/13_ycrq7v.m4a', // Page 6 — Future Perfect example (Voice 12)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563618/14_p843qm.m4a', // Page 7 — Summary (Voice 13)
   ],
   B: [
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/16_eibuny.m4a', // Page 0 — SVA Rule 1 (Proximity)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/17_ov5yvd.m4a', // Page 1 — SVA Rule 2 (Quantifiers)
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/18_rldz2p.m4a', // Page 2 — SVA Rule 3 (Noncount)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/16_eibuny.m4a', // Page 0 — SVA Rule 1: Proximity (Voice 15)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563619/17_ov5yvd.m4a', // Page 1 — SVA Rule 2: Quantifiers (Voice 16)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563620/18_rldz2p.m4a', // Page 2 — SVA Rule 3: Noncount/Plural-only (Voice 17)
   ],
   C: [
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a', // Page 0 — Voice 20: "Hi! Before you start conversing with the riders, let's review prepositions of time and manner"
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a', // Page 1 — Voice 22: "Prepositions of manner tell us how something happens"
-    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a', // Page 2 — Voice 24: "Now that you understand prepositions of time and manner, you're ready to converse with the riders"
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/21_ht1kj7.m4a', // Page 0 — Prepositions of Time intro + rule (Voice 20)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/22_sx7vkx.m4a', // Page 1 — Prepositions of Time examples (Voice 21)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a', // Page 2 — Prepositions of Manner rule (Voice 22)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a', // Page 3 — Prepositions of Manner examples (Voice 23)
+    'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/25_xf1dkb.m4a', // Page 4 — Ready to converse (Voice 24)
   ],
 };
 
@@ -111,7 +126,7 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
       ),
     });
 
-    // Page 1 — Past Perfect (Voice 7 / file 7)
+    // Page 1 — Past Perfect RULE (Voice 7 / file 7_mehoew)
     pages.push({
       badge: '⏮ PAST PERFECT',
       badgeColor: ['#C0392B', '#96281B'],
@@ -128,14 +143,32 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
           <div style={{ background: 'linear-gradient(135deg, #FDECEA 0%, #F9CCCA 100%)', border: '2.5px solid #C0392B', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.2vw,1.3rem)', fontWeight: 700, color: '#7B1C14', textAlign: 'center' as const }}>
             had + past participle
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', marginTop: '8px', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
+        </>
+      ),
+    });
+
+    // Page 2 — Past Perfect EXAMPLE (Voice 8 / file 9_spph6a)
+    pages.push({
+      badge: '⏮ PAST PERFECT',
+      badgeColor: ['#C0392B', '#96281B'],
+      title: 'Past Perfect — Example',
+      render: (_lesson, showCursor) => (
+        <>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Past Perfect — Example
+            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#C0392B' }}>▌</span>
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, #FDECEA 0%, #F9CCCA 100%)', border: '2.5px solid #C0392B', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.2vw,1.3rem)', fontWeight: 700, color: '#7B1C14', textAlign: 'center' as const, marginBottom: '10px' }}>
+            had + past participle
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
             💬 {_lesson.examples[0]}
           </div>
         </>
       ),
     });
 
-    // Page 2 — Present Perfect (Voice 9 / file 10)
+    // Page 3 — Present Perfect RULE (Voice 9 / file 10_ldciim)
     pages.push({
       badge: '⏺ PRESENT PERFECT',
       badgeColor: ['#27AE60', '#1E8449'],
@@ -152,14 +185,32 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
           <div style={{ background: 'linear-gradient(135deg, #E8F8EE 0%, #C8F0D8 100%)', border: '2.5px solid #27AE60', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.2vw,1.3rem)', fontWeight: 700, color: '#1A5C30', textAlign: 'center' as const }}>
             have / has + past participle
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', marginTop: '8px', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
+        </>
+      ),
+    });
+
+    // Page 4 — Present Perfect EXAMPLE (Voice 10 / file 11_ktrb9e)
+    pages.push({
+      badge: '⏺ PRESENT PERFECT',
+      badgeColor: ['#27AE60', '#1E8449'],
+      title: 'Present Perfect — Example',
+      render: (_lesson, showCursor) => (
+        <>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Present Perfect — Example
+            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#27AE60' }}>▌</span>
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, #E8F8EE 0%, #C8F0D8 100%)', border: '2.5px solid #27AE60', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.2vw,1.3rem)', fontWeight: 700, color: '#1A5C30', textAlign: 'center' as const, marginBottom: '10px' }}>
+            have / has + past participle
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
             💬 {_lesson.examples[1]}
           </div>
         </>
       ),
     });
 
-    // Page 3 — Future Perfect (Voice 11 / file 12)
+    // Page 5 — Future Perfect RULE (Voice 11 / file 12_cduwtz)
     pages.push({
       badge: '⏭ FUTURE PERFECT',
       badgeColor: ['#2980B9', '#1F618D'],
@@ -176,14 +227,32 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
           <div style={{ background: 'linear-gradient(135deg, #EAF2FF 0%, #C8DEFF 100%)', border: '2.5px solid #2980B9', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.2vw,1.3rem)', fontWeight: 700, color: '#1A3A6B', textAlign: 'center' as const }}>
             will have + past participle
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', marginTop: '8px', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
+        </>
+      ),
+    });
+
+    // Page 6 — Future Perfect EXAMPLE (Voice 12 / file 13_ycrq7v)
+    pages.push({
+      badge: '⏭ FUTURE PERFECT',
+      badgeColor: ['#2980B9', '#1F618D'],
+      title: 'Future Perfect — Example',
+      render: (_lesson, showCursor) => (
+        <>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Future Perfect — Example
+            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2980B9' }}>▌</span>
+          </div>
+          <div style={{ background: 'linear-gradient(135deg, #EAF2FF 0%, #C8DEFF 100%)', border: '2.5px solid #2980B9', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.2vw,1.3rem)', fontWeight: 700, color: '#1A3A6B', textAlign: 'center' as const, marginBottom: '10px' }}>
+            will have + past participle
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
             💬 {_lesson.examples[2]}
           </div>
         </>
       ),
     });
 
-    // Page 4 — Summary (Voice 13 / file 14)
+    // Page 7 — Summary (Voice 13 / file 14_p843qm)
     pages.push({
       badge: '✅ SUMMARY',
       badgeColor: ['#8E44AD', '#6C3483'],
@@ -266,7 +335,7 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
     });
 
   } else if (sectionId === 'C') {
-    // Page 0 — Prepositions of Time (Voice 20 / file 21)
+    // Page 0 — Prepositions of Time intro + rule (Voice 20 / file 21_ht1kj7)
     pages.push({
       badge: '📚 PREPOSITIONS',
       badgeColor: ['#2980B9', '#1F618D'],
@@ -283,14 +352,29 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
           <div style={{ background: 'rgba(41,128,185,0.08)', border: '2.5px solid #2980B9', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#2A1800', lineHeight: 1.6 }}>
             <strong style={{ color: '#2980B9' }}>📖 Rule:</strong> {_lesson.rule}
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', marginTop: '8px', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
+        </>
+      ),
+    });
+
+    // Page 1 — Prepositions of Time EXAMPLES (Voice 21 / file 22_sx7vkx)
+    pages.push({
+      badge: '📚 PREPOSITIONS',
+      badgeColor: ['#2980B9', '#1F618D'],
+      title: 'Prepositions of Time — Examples',
+      render: (_lesson, showCursor) => (
+        <>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Prepositions of Time — Examples
+            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2980B9' }}>▌</span>
+          </div>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.7vw,1rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
             💬 {_lesson.examples[0]} &nbsp;|&nbsp; 💬 {_lesson.examples[1]} &nbsp;|&nbsp; 💬 {_lesson.examples[2]}
           </div>
         </>
       ),
     });
 
-    // Page 1 — Prepositions of Manner (Voice 22 / file 23)
+    // Page 2 — Prepositions of Manner RULE (Voice 22 / file 23_oxr6hf)
     pages.push({
       badge: '✏️ MANNER',
       badgeColor: ['#3A9E5C', '#217A42'],
@@ -301,8 +385,23 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
             Prepositions of Manner
             <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3A9E5C' }}>▌</span>
           </div>
-          <div style={{ background: 'rgba(58,158,92,0.08)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
+          <div style={{ background: 'rgba(58,158,92,0.08)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,1.9vw,1.08rem)', color: '#2A1800', lineHeight: 1.6 }}>
             <strong style={{ color: '#3A9E5C' }}>📖 Rule:</strong> {_lesson.rule2}
+          </div>
+        </>
+      ),
+    });
+
+    // Page 3 — Prepositions of Manner EXAMPLES (Voice 23 / file 24_qwsdwu)
+    pages.push({
+      badge: '✏️ MANNER',
+      badgeColor: ['#3A9E5C', '#217A42'],
+      title: 'Prepositions of Manner — Examples',
+      render: (_lesson, showCursor) => (
+        <>
+          <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.4vw,1.45rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
+            Prepositions of Manner — Examples
+            <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3A9E5C' }}>▌</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
             {[_lesson.examples[3], _lesson.examples[4], _lesson.examples[5]].filter(Boolean).map((ex: string, i: number) => (
@@ -315,9 +414,9 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
       ),
     });
 
-    // Page 2 — Ready to practice (Voice 24 / file 25)
+    // Page 4 — Ready to practice (Voice 24 / file 25_xf1dkb)
     pages.push({
-      badge: '💡 EXAMPLES',
+      badge: '💡 QUICK REFERENCE',
       badgeColor: ['#8E44AD', '#6C3483'],
       title: 'See It in Action',
       render: (_lesson, showCursor) => (
