@@ -45,12 +45,14 @@ function Particle({ delay, x, size }: { delay: number; x: string; size: number }
 }
 
 function ScallopedBubble({ children }: { children: React.ReactNode }) {
-  const scallop = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
+  const scallopTop = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
+  const scallopBottom = Array.from({ length: 60 }, (_, i) => `M${i * 20},0 Q${i * 20 + 10},24 ${i * 20 + 20},0`).join(' ');
   return (
     <div style={{ position: 'relative', width: '100%' }}>
+      {/* Top scallop — peaks pointing up */}
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={scallop} fill="#F5C84A" />
+          <path d={scallopTop} fill="#F5C84A" />
         </svg>
       </div>
       <div style={{
@@ -59,13 +61,13 @@ function ScallopedBubble({ children }: { children: React.ReactNode }) {
         borderRadius: '0 0 20px 20px',
         padding: 'clamp(12px,2.5vh,22px) clamp(14px,3.5vw,30px) clamp(12px,2.5vh,22px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
-        maxHeight: '60vh', overflowY: 'auto',
       }}>
         {children}
       </div>
-      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2, transform: 'rotate(180deg)' }}>
+      {/* Bottom scallop — peaks pointing down */}
+      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={scallop} fill="#F5C84A" />
+          <path d={scallopBottom} fill="#F5C84A" />
         </svg>
       </div>
     </div>
@@ -482,7 +484,7 @@ export default function GrammarLesson() {
           src={ASSETS.minaMascot}
           alt="Mina"
           style={{
-            width: 'clamp(90px,16vw,200px)', height: 'auto',
+            width: 'clamp(160px,26vw,320px)', height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.4))', display: 'block',
           }}

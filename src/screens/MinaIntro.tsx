@@ -22,11 +22,13 @@ function Particle({ delay, x, size }: { delay: number; x: string; size: number }
 
 // ── Scalloped bubble ───────────────────────────────────────────────────────
 function ScallopedBubble({ children }: { children: React.ReactNode }) {
+  const scallopTop = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
+  const scallopBottom = Array.from({ length: 60 }, (_, i) => `M${i * 20},0 Q${i * 20 + 10},24 ${i * 20 + 20},0`).join(' ');
   return (
     <div style={{ position: 'relative', width: '100%' }}>
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ')} fill="#F5C84A" />
+          <path d={scallopTop} fill="#F5C84A" />
         </svg>
       </div>
       <div style={{
@@ -38,9 +40,9 @@ function ScallopedBubble({ children }: { children: React.ReactNode }) {
       }}>
         {children}
       </div>
-      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2, transform: 'rotate(180deg)' }}>
+      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ')} fill="#F5C84A" />
+          <path d={scallopBottom} fill="#F5C84A" />
         </svg>
       </div>
     </div>
@@ -154,7 +156,7 @@ export default function MinaIntro() {
           src={ASSETS.minaMascot}
           alt="Mina"
           style={{
-            width: 'clamp(130px,28vw,400px)', height: 'auto',
+            width: 'clamp(180px,32vw,420px)', height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.4))', display: 'block',
           }}

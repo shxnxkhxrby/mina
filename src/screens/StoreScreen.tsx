@@ -46,14 +46,18 @@ function Particle({ delay, x, size }: { delay: number; x: string; size: number }
   );
 }
 
-const SCALLOP_PATH = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
+// Top scallop: peaks point UP (valleys at y=24, peaks at y=0)
+const SCALLOP_TOP_PATH = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
+// Bottom scallop: peaks point DOWN (valleys at y=0, peaks at y=24)
+const SCALLOP_BOTTOM_PATH = Array.from({ length: 60 }, (_, i) => `M${i * 20},0 Q${i * 20 + 10},24 ${i * 20 + 20},0`).join(' ');
 
 function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
   return (
     <div style={{ position: 'relative', width: '100%' }}>
+      {/* Top scallop — peaks pointing up into the badge area */}
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={SCALLOP_PATH} fill={color} />
+          <path d={SCALLOP_TOP_PATH} fill={color} />
         </svg>
       </div>
       <div style={{
@@ -62,13 +66,13 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
         borderRadius: '0 0 20px 20px',
         padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.2vh,20px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
-        maxHeight: '55vh', overflowY: 'auto',
       }}>
         {children}
       </div>
-      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2, transform: 'rotate(180deg)' }}>
+      {/* Bottom scallop — peaks pointing downward */}
+      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={SCALLOP_PATH} fill={color} />
+          <path d={SCALLOP_BOTTOM_PATH} fill={color} />
         </svg>
       </div>
     </div>
@@ -293,10 +297,13 @@ export default function StoreScreen() {
   const renderDialoguePanel = (children: React.ReactNode, phaseKey: string | number) => (
     <div style={{
       position: 'absolute',
-      top: 'clamp(62px,12vh,100px)',
+      top: 'clamp(48px,9vh,80px)',
       right: 'clamp(12px,2.5vw,28px)',
       left: 'clamp(130px,28vw,360px)',
+      bottom: 'clamp(16px,3vh,32px)',
       zIndex: 20,
+      display: 'flex',
+      flexDirection: 'column',
     }}>
       <AnimatePresence mode="wait">
         <motion.div
@@ -305,6 +312,7 @@ export default function StoreScreen() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.28, ease: 'easeOut' }}
+          style={{ display: 'flex', flexDirection: 'column', flex: 1 }}
         >
           {children}
         </motion.div>
@@ -414,20 +422,6 @@ export default function StoreScreen() {
 
       {PARTICLES.map((p, i) => <Particle key={i} {...p} />)}
       <div className="bunting" style={{ zIndex: 5 }} />
-
-      {/* Top bar */}
-      <div style={{
-        position: 'absolute', top: 'clamp(38px,7vh,60px)', left: '50%', transform: 'translateX(-50%)',
-        fontFamily: 'var(--font-title)', fontSize: 'clamp(0.8rem,1.7vw,1.1rem)',
-        color: 'white', background: 'rgba(0,0,0,0.55)',
-        padding: '4px 18px', borderRadius: '50px',
-        border: `2px solid ${theme.qBorder}`,
-        whiteSpace: 'nowrap', zIndex: 10,
-        boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
-        maxWidth: '60vw', overflow: 'hidden', textOverflow: 'ellipsis',
-      }}>
-        {store.emoji} {store.name} · {store.npcName}
-      </div>
 
       {/* Back button */}
       <button className="btn btn-ghost btn-sm"
@@ -744,8 +738,8 @@ export default function StoreScreen() {
                   src={(ASSETS as Record<string, string>).minaMascot ?? ''}
                   alt="Mina"
                   style={{
-                    width: 'clamp(72px,14vw,120px)',
-                    height: 'clamp(72px,14vw,120px)',
+                    width: 'clamp(130px,22vw,220px)',
+                    height: 'auto',
                     objectFit: 'contain',
                     filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
                   }}
