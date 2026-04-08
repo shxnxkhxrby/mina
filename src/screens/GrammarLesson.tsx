@@ -413,10 +413,10 @@ export default function GrammarLesson() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const section = SECTIONS.find(s => s.id === currentSection);
-  if (!section) return null;
+  if (!section || !currentSection) return null;
   const lesson = section.lesson;
 
-  const LESSON_PAGES = buildLessonPages(lesson, currentSection);
+  const LESSON_PAGES = buildLessonPages(lesson, currentSection as string);
   const isLast = page === LESSON_PAGES.length - 1;
   const current = LESSON_PAGES[page];
   const [gradStart, gradEnd] = current.badgeColor;
@@ -433,7 +433,7 @@ export default function GrammarLesson() {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-    const sectionAudio = GRAMMAR_LESSON_AUDIO[currentSection] ?? GRAMMAR_LESSON_AUDIO.A;
+    const sectionAudio = GRAMMAR_LESSON_AUDIO[currentSection as string] ?? GRAMMAR_LESSON_AUDIO.A;
     const src = sectionAudio[page];
     if (!src) return;
     const audio = new Audio(src);

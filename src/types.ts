@@ -52,6 +52,9 @@ export interface GrammarLesson {
   topic: string;
   intro: string;
   rule: string;
+  rule2?: string;   // second rule (e.g. Present Perfect for Section A)
+  rule3?: string;   // third rule (e.g. Future Perfect for Section A)
+  summary?: string; // closing summary page
   formula: string;
   examples: string[];
 }
