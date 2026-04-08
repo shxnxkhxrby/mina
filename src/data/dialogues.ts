@@ -13,11 +13,11 @@ export const TEACHER_DIALOGUES = [
 ];
 
 export const MINA_INTRO_DIALOGUES = [
-  { speaker:'Mina', text:"Hello! I'm Mina, here to guide you through your Minasa Festival tasks. I see you've learned about the history of Minasa and your assignments, but maybe you're wondering where to start.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/1_j6gnjf.m4a' },
-  { speaker:'Mina', text:"No worries! First, we'll visit local shops in Bustos that sell Minasa. Talking to the shop owners will help you practice your English by asking questions and reporting answers.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/2_yqasnm.m4a' },
-  { speaker:'Mina', text:"You'll also observe how Minasa is made and sold, which will help with your documentation task.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/3_pdexki.m4a' },
+  { speaker:'Mina', text:"Hello! I'm Mina, here to guide you through your Minasa Festival tasks.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/1_j6gnjf.m4a' },
+  { speaker:'Mina', text:"I see you've learned about the history of Minasa and your assignments, but maybe you're wondering where to start.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/2_yqasnm.m4a' },
+  { speaker:'Mina', text:"No worries! First, we’ll visit local shops in Bustos that sell Minasa. Talking to the shop owners will help you:\nPractice your English by asking questions and reporting answers.\n\nObserve how Minasa is made and sold, which will help with your documentation task.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/3_pdexki.m4a' },
   { speaker:'Mina', text:"Along the way, I'll guide you through different places in Bustos while also teaching important grammar areas such as Tenses, Subject-Verb Agreement, and Prepositions.", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/4_z2aae9.m4a' },
-  { speaker:'Mina', text:"Ready? Let's begin your adventure! 🌸", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/6_l06ibr.m4a' },
+  { speaker:'Mina', text:"Ready? Let's begin your adventure!", audio:'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563615/5_tswr61.m4a' },
 ];
 
 // Store greeting dialogues — shown BEFORE questions start
