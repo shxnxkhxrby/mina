@@ -311,7 +311,7 @@ function ZoneCard({
         animate={unlocked ? { y: [0, -4, 0] } : {}}
         transition={unlocked ? { duration: 2.5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1 } : {}}
         style={{
-          width: mobile ? 'clamp(100px,22vw,140px)' : 'clamp(110px,13vw,180px)',
+          width: mobile ? 'clamp(100px,22vw,130px)' : 'clamp(100px,13vw,170px)',
           borderRadius: '14px',
           overflow: 'hidden',
           border: `3px solid ${unlocked ? color : '#888'}`,
@@ -325,7 +325,7 @@ function ZoneCard({
           filter: unlocked ? 'none' : 'grayscale(0.8) brightness(0.55)',
         }}
       >
-        <div style={{ height: mobile ? 'clamp(70px,18vw,110px)' : 'clamp(80px,11vw,150px)', position: 'relative' }}>
+        <div style={{ height: mobile ? 'clamp(60px,14vw,90px)' : 'clamp(70px,9vw,120px)', position: 'relative' }}>
           {!bgImage && (
             <div style={{
               position: 'absolute', inset: 0,

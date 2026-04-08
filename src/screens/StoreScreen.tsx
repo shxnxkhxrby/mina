@@ -53,8 +53,8 @@ const SCALLOP_BOTTOM_PATH = Array.from({ length: 60 }, (_, i) => `M${i * 20},0 Q
 
 function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
   return (
-    <div style={{ position: 'relative', width: '100%', borderRadius: '0 0 20px 20px', overflow: 'hidden' }}>
-      {/* Top scallop — peaks pointing up into the badge area */}
+    <div style={{ position: 'relative', width: '100%' }}>
+      {/* Top scallop */}
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
           <path d={SCALLOP_TOP_PATH} fill={color} />
@@ -64,13 +64,13 @@ function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.Reac
         background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
         border: `4px solid ${color}`, borderTop: 'none', borderBottom: 'none',
         borderRadius: 0,
-        padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(22px,3.5vh,32px)',
+        padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(18px,3vh,28px)',
         position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
       }}>
         {children}
       </div>
-      {/* Bottom scallop — peaks pointing downward */}
-      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
+      {/* Bottom scallop */}
+      <div style={{ height: '20px', overflow: 'hidden', position: 'relative', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
           <path d={SCALLOP_BOTTOM_PATH} fill={color} />
         </svg>
@@ -270,7 +270,7 @@ export default function StoreScreen() {
             else setNpcFailed(true);
           }}
           style={{
-            width: 'clamp(160px,32vw,380px)', height: 'auto',
+            width: 'clamp(120px,26vw,320px)', height: 'auto',
             objectFit: 'contain',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
             display: 'block',
@@ -299,7 +299,7 @@ export default function StoreScreen() {
       position: 'absolute',
       top: 'clamp(48px,9vh,80px)',
       right: 'clamp(12px,2.5vw,28px)',
-      left: 'clamp(110px,22vw,300px)',
+      left: 'clamp(130px,28vw,360px)',
       bottom: 'clamp(16px,3vh,32px)',
       zIndex: 20,
       display: 'flex',
@@ -560,15 +560,8 @@ export default function StoreScreen() {
                 width: 'clamp(270px,52vw,500px)', maxWidth: '92vw',
                 textAlign: 'center',
                 boxShadow: `0 14px 52px rgba(0,0,0,0.5), 0 0 0 6px ${isCorrect ? 'rgba(40,167,69,0.12)' : 'rgba(220,53,69,0.12)'}`,
-                position: 'relative', overflow: 'hidden',
               }}
             >
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '10px', overflow: 'hidden' }}>
-                <svg viewBox="0 0 400 12" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                  <path d={Array.from({ length: 20 }, (_, i) => `M${i * 20},12 Q${i * 20 + 10},0 ${i * 20 + 20},12`).join(' ')}
-                    fill={isCorrect ? '#28A745' : '#DC3545'} />
-                </svg>
-              </div>
               <motion.div
                 initial={{ scale: 0 }} animate={{ scale: 1 }}
                 transition={{ delay: 0.1, type: 'spring', stiffness: 400 }}
@@ -616,19 +609,12 @@ export default function StoreScreen() {
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
             style={{
               width: 'clamp(280px,52vw,520px)', maxWidth: '94vw',
-              maxHeight: '88vh', overflowY: 'auto',
+              maxHeight: '85vh', overflowY: 'auto',
               textAlign: 'center', margin: '0 auto',
               border: `3px solid ${badgeGradStart}`,
-              position: 'relative', overflow: 'hidden',
             }}
           >
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '12px', overflow: 'hidden' }}>
-              <svg viewBox="0 0 520 14" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                <path d={Array.from({ length: 26 }, (_, i) => `M${i * 20},14 Q${i * 20 + 10},0 ${i * 20 + 20},14`).join(' ')} fill={badgeGradStart} />
-              </svg>
-            </div>
-
-            <div style={{ paddingTop: '16px' }}>
+            <div style={{ paddingTop: '8px' }}>
               <div style={{ fontSize: 'clamp(2.2rem,5vw,3.5rem)', marginBottom: '6px' }}>
                 {scoreRef.current >= 4 ? '🎉' : '😊'}
               </div>
@@ -738,7 +724,7 @@ export default function StoreScreen() {
                   src={(ASSETS as Record<string, string>).minaMascot ?? ''}
                   alt="Mina"
                   style={{
-                    width: 'clamp(130px,22vw,220px)',
+                    width: 'clamp(180px,30vw,300px)',
                     height: 'auto',
                     objectFit: 'contain',
                     filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
