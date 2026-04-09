@@ -19,7 +19,11 @@ const initialProgress: GameState['sectionProgress'] = {};
 export const useGameStore = create<GameState & {
   advancedScore: { total: number; correct: number };
   addAdvancedScore: (correct: number, total: number) => void;
-}>()(  
+  musicVolume: number;
+  voiceVolume: number;
+  setMusicVolume: (v: number) => void;
+  setVoiceVolume: (v: number) => void;
+}>()(
   persist(
     (set, get) => ({
       playerName: '',
@@ -33,12 +37,18 @@ export const useGameStore = create<GameState & {
       firstPlay: true,
       isAdvancedMode: false,
 
+      // Audio volumes (0–1)
+      musicVolume: 0.5,
+      voiceVolume: 0.8,
+
       setPlayerName: (name) => set({ playerName: name }),
       goToScene: (scene) => set({ currentScene: scene }),
       setSection: (id) => set({ currentSection: id }),
       setStoreIndex: (i) => set({ currentStoreIndex: i }),
       setQuestionSet: (s) => set({ currentQuestionSet: s }),
       setAdvancedMode: (val) => set({ isAdvancedMode: val }),
+      setMusicVolume: (v) => set({ musicVolume: Math.max(0, Math.min(1, v)) }),
+      setVoiceVolume: (v) => set({ voiceVolume: Math.max(0, Math.min(1, v)) }),
 
       completeStore: (sectionId, storeId, score) => {
         const prev = get().sectionProgress;
@@ -74,7 +84,7 @@ export const useGameStore = create<GameState & {
         if (id === 'A') return true;
         if (id === 'B') return allStoresComplete('A', get().sectionProgress);
         if (id === 'C') return allStoresComplete('B', get().sectionProgress);
-        if (id === 'D') return allStoresComplete('C', get().sectionProgress); // ← NEW
+        if (id === 'D') return allStoresComplete('C', get().sectionProgress);
         return false;
       },
 
