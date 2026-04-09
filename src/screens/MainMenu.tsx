@@ -50,17 +50,17 @@ export default function MainMenu() {
         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
 
-      {/* Blur + dim overlay */}
+      {/* Blur + dim overlay — darker */}
       <div style={{
         position: 'absolute',
         inset: 0,
         backdropFilter: 'blur(2.5px)',
         WebkitBackdropFilter: 'blur(2.5px)',
-        background: 'rgba(0,0,0,0.10)',
+        background: 'rgba(0,0,0,0.42)',
         zIndex: 1,
       }} />
 
-      {/* Title top-left */}
+      {/* Title — centered */}
       <motion.div
         initial={{ opacity: 0, y: -18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -68,8 +68,10 @@ export default function MainMenu() {
         style={{
           position: 'absolute',
           top: 'clamp(14px, 3vh, 30px)',
-          left: 'clamp(20px, 4vw, 48px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
           zIndex: 20,
+          whiteSpace: 'nowrap',
         }}
       >
         <span style={{
@@ -94,13 +96,13 @@ export default function MainMenu() {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 'clamp(80px, 14vh, 120px) clamp(32px, 6vw, 80px) clamp(28px, 5vh, 64px)',
+        justifyContent: 'flex-end',
+        padding: 'clamp(80px, 14vh, 120px) clamp(0px, 0vw, 0px) clamp(28px, 5vh, 64px) clamp(32px, 6vw, 80px)',
         boxSizing: 'border-box',
-        gap: 'clamp(16px, 3vw, 48px)',
+        gap: 'clamp(0px, 1vw, 16px)',
       }}>
 
-        {/* Tile grid */}
+        {/* Tile grid — nudged right toward Mina */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -113,6 +115,8 @@ export default function MainMenu() {
             width: 'clamp(300px, 44vw, 560px)',
             height: 'clamp(260px, 44vh, 500px)',
             flexShrink: 0,
+            marginRight: 'clamp(-32px, -3vw, -12px)',
+            zIndex: 11,
           }}
           className="menu-grid"
         >
@@ -141,7 +145,7 @@ export default function MainMenu() {
           />
         </motion.div>
 
-        {/* Mina mascot */}
+        {/* Mina mascot — larger, visible on mobile */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -162,9 +166,9 @@ export default function MainMenu() {
             animate={{ y: [0, -16, 0] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
             style={{
-              height: 'clamp(300px, 78vh, 760px)',
+              height: 'clamp(380px, 88vh, 900px)',
               width: 'auto',
-              maxWidth: 'clamp(220px, 40vw, 500px)',
+              maxWidth: 'clamp(260px, 48vw, 560px)',
               objectFit: 'contain',
               objectPosition: 'bottom',
               filter: 'drop-shadow(0 14px 36px rgba(0,0,0,0.28))',
@@ -180,22 +184,31 @@ export default function MainMenu() {
 
         @media (max-width: 560px) {
           .menu-grid {
-            width: 88vw !important;
+            width: 54vw !important;
             height: auto !important;
+            margin-right: 0 !important;
+            z-index: 11;
           }
           .mina-wrap {
-            display: none !important;
+            position: absolute !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            pointer-events: none;
+          }
+          .mina-wrap img {
+            height: clamp(220px, 58vw, 340px) !important;
+            max-width: 52vw !important;
           }
         }
 
         @media (min-width: 561px) and (max-width: 860px) {
           .menu-grid {
-            width: 54vw !important;
+            width: 50vw !important;
             height: clamp(230px, 46vw, 420px) !important;
           }
           .mina-wrap img {
-            height: clamp(240px, 52vw, 400px) !important;
-            max-width: 38vw !important;
+            height: clamp(300px, 62vw, 500px) !important;
+            max-width: 42vw !important;
           }
         }
 
