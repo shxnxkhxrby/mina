@@ -1,106 +1,100 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useGameStore } from '../store/gameStore';
 
-const BGM_URL = 'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775740394/MINASA_BGM_c1dgyc.mp3';
+const BGM_URL =
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775740394/MINASA_BGM_c1dgyc.mp3';
 
-/**
- * AudioManager — mount this ONCE at the app root (e.g. inside App.tsx / main layout).
- * It creates a single looping <audio> element that persists for the entire session.
- * Volume is driven by the musicVolume value from the game store.
- */
+// ── Global singleton audio refs (survive re-renders / HMR) ────────────────
+let bgmInstance: HTMLAudioElement | null = null;
+
+function getBgm(): HTMLAudioElement {
+  if (!bgmInstance) {
+    bgmInstance = new Audio(BGM_URL);
+    bgmInstance.loop = true;
+    bgmInstance.preload = 'auto';
+  }
+  return bgmInstance;
+}
+
+// ── AudioManager component — mount ONCE in App.tsx ────────────────────────
 export default function AudioManager() {
   const musicVolume = useGameStore(s => s.musicVolume);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const startedRef = useRef(false);
 
-  // Create audio element once
+  // Start BGM on first user interaction if not already playing
   useEffect(() => {
-    const audio = new Audio(BGM_URL);
-    audio.loop = true;
-    audio.volume = useGameStore.getState().musicVolume;
-    audioRef.current = audio;
+    const bgm = getBgm();
+    bgm.volume = musicVolume;
 
-    // Try autoplay; if blocked, start on first user interaction
-    const tryPlay = () => {
-      if (!startedRef.current) {
-        startedRef.current = true;
-        audio.play().catch(() => {});
-      }
+    const startBgm = () => {
+      if (startedRef.current) return;
+      startedRef.current = true;
+      bgm.play().catch(() => {});
+      // Remove all listeners once started
+      document.removeEventListener('click', startBgm);
+      document.removeEventListener('keydown', startBgm);
+      document.removeEventListener('touchstart', startBgm);
     };
 
-    audio.play().then(() => {
-      startedRef.current = true;
-    }).catch(() => {
-      // Autoplay blocked — wait for first interaction
-      const events = ['click', 'touchstart', 'keydown'];
-      const handler = () => {
-        tryPlay();
-        events.forEach(e => document.removeEventListener(e, handler));
-      };
-      events.forEach(e => document.addEventListener(e, handler, { once: true }));
-    });
+    // Try immediate autoplay first
+    bgm.play()
+      .then(() => { startedRef.current = true; })
+      .catch(() => {
+        // Autoplay blocked — wait for interaction
+        document.addEventListener('click', startBgm);
+        document.addEventListener('keydown', startBgm);
+        document.addEventListener('touchstart', startBgm);
+      });
 
     return () => {
-      audio.pause();
-      audio.src = '';
-      audioRef.current = null;
+      document.removeEventListener('click', startBgm);
+      document.removeEventListener('keydown', startBgm);
+      document.removeEventListener('touchstart', startBgm);
     };
   }, []);
 
-  // Sync volume whenever musicVolume changes in the store
+  // Sync volume whenever it changes in the store
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = musicVolume;
-    }
+    const bgm = getBgm();
+    bgm.volume = Math.max(0, Math.min(1, musicVolume));
   }, [musicVolume]);
 
-  return null;
+  return null; // purely side-effect component
 }
 
-/**
- * Helper hook — call this inside any component that plays Mina's voice lines.
- * It returns a `play(src)` function that respects voiceVolume from the store.
- *
- * Usage:
- *   const { play, stop } = useVoiceAudio();
- *   useEffect(() => { play(MINA_INTRO_DIALOGUES[idx].audio); }, [idx]);
- */
+// ── Hook: voice audio that respects voiceVolume from the store ────────────
 export function useVoiceAudio() {
   const voiceVolume = useGameStore(s => s.voiceVolume);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-  };
+  }, []);
 
-  const play = (src: string | undefined) => {
-    stop();
-    if (!src) return;
-    const audio = new Audio(src);
-    audio.volume = useGameStore.getState().voiceVolume;
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-  };
+  const play = useCallback(
+    (src: string | undefined) => {
+      stop();
+      if (!src) return;
+      const audio = new Audio(src);
+      audio.volume = Math.max(0, Math.min(1, voiceVolume));
+      audioRef.current = audio;
+      audio.play().catch(() => {});
+    },
+    [voiceVolume, stop],
+  );
 
-  // Keep volume in sync even mid-playback
+  // Keep live audio in sync if volume slider moves mid-play
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = voiceVolume;
+      audioRef.current.volume = Math.max(0, Math.min(1, voiceVolume));
     }
   }, [voiceVolume]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
+  // Stop on unmount
+  useEffect(() => () => stop(), [stop]);
 
   return { play, stop };
 }
