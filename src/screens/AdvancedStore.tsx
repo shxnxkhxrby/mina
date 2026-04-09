@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
+import { getLevelBgCandidates } from '../data/assets';
 
 type Phase = 'question' | 'answered' | 'done';
 
@@ -12,11 +13,11 @@ const SECTION_ACCENT: Record<string, string> = {
   D: '#8B1A8B',
 };
 
-const SECTION_BG: Record<string, string> = {
-  A: 'linear-gradient(135deg,#FFF8F0 0%,#FFF0E0 100%)',
-  B: 'linear-gradient(135deg,#F0FFF4 0%,#E0F5E8 100%)',
-  C: 'linear-gradient(135deg,#F0F4FF 0%,#E0E8FF 100%)',
-  D: 'linear-gradient(135deg,#FAF0FF 0%,#F0E0FF 100%)',
+const SECTION_FALLBACK: Record<string, string> = {
+  A: 'linear-gradient(135deg,#FFE090,#F5C84A)',
+  B: 'linear-gradient(135deg,#A8D8A0,#5B9A50)',
+  C: 'linear-gradient(135deg,#A0C8F0,#4088C0)',
+  D: 'linear-gradient(135deg,#E0A0F0,#8B1A8B)',
 };
 
 export default function AdvancedStore() {
@@ -33,7 +34,11 @@ export default function AdvancedStore() {
   if (!qSet) return null;
 
   const accent = SECTION_ACCENT[section.id] ?? '#E85D26';
-  const pageBg = SECTION_BG[section.id] ?? SECTION_BG.A;
+  const fallbackBg = SECTION_FALLBACK[section.id] ?? SECTION_FALLBACK.A;
+
+  const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
+  const [bgIndex, setBgIndex] = useState(0);
+  const [bgFailed, setBgFailed] = useState(false);
 
   const [phase, setPhase] = useState<Phase>('question');
   const [qIdx, setQIdx] = useState(0);
@@ -89,9 +94,34 @@ export default function AdvancedStore() {
   return (
     <div style={{
       position: 'fixed', inset: 0, width: '100%', height: '100%',
-      background: pageBg, overflow: 'hidden',
+      background: fallbackBg, overflow: 'hidden',
       display: 'flex', flexDirection: 'column',
     }}>
+
+      {/* Blurred backdrop image (same as original AdvancedStore) */}
+      {!bgFailed && (
+        <img
+          key={`${currentStoreIndex}-${bgIndex}`}
+          src={bgCandidates[bgIndex]}
+          alt=""
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center top',
+            filter: 'blur(6px) brightness(0.55)', transform: 'scale(1.08)',
+            zIndex: 0,
+          }}
+          onError={() => {
+            if (bgIndex < bgCandidates.length - 1) setBgIndex(b => b + 1);
+            else setBgFailed(true);
+          }}
+        />
+      )}
+      {/* Overlay so text remains readable */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'rgba(255,255,255,0.72)',
+        zIndex: 1, pointerEvents: 'none',
+      }} />
 
       {/* ── Header bar ── */}
       <div style={{
@@ -102,6 +132,7 @@ export default function AdvancedStore() {
         padding: 'clamp(10px,2vh,16px) clamp(14px,3vw,28px)',
         display: 'flex', alignItems: 'center', gap: '12px',
         zIndex: 10,
+        position: 'relative',
       }}>
         <button
           className="btn btn-ghost btn-sm"
@@ -159,6 +190,7 @@ export default function AdvancedStore() {
           padding: 'clamp(16px,3vh,32px) clamp(16px,4vw,48px)',
           display: 'flex', flexDirection: 'column', gap: 'clamp(12px,2vh,20px)',
           maxWidth: '760px', width: '100%', margin: '0 auto', boxSizing: 'border-box',
+          position: 'relative', zIndex: 2,
         }}>
 
           {/* Question number tag */}
