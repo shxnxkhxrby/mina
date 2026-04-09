@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { TEACHER_DIALOGUES } from '../data/dialogues';
+import { useVoiceAudio } from '../components/AudioManager';
 
-// ── Audio for Teacher's 9 dialogue lines (files 27–35) ────────────────────
+// ── Audio for Teacher's 9 dialogue lines ─────────────────────────────────
 const TEACHER_AUDIO = [
   'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/27_j7h9zv.m4a',
   'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/28_w9z2vq.m4a',
@@ -19,46 +20,18 @@ const TEACHER_AUDIO = [
 export default function TeacherIntro() {
   const { goToScene } = useGameStore();
   const [idx, setIdx] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { play: playVoice, stop: stopVoice } = useVoiceAudio();
+
   const current = TEACHER_DIALOGUES[idx];
   const isLast = idx === TEACHER_DIALOGUES.length - 1;
 
   // Play audio for each teacher dialogue line
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    const src = TEACHER_AUDIO[idx];
-    if (!src) return;
-    const audio = new Audio(src);
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, [idx]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  };
+    playVoice(TEACHER_AUDIO[idx]);
+  }, [idx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const advance = () => {
-    stopAudio();
+    stopVoice();
     if (isLast) goToScene('MINA_INTRO');
     else setIdx(i => i + 1);
   };
@@ -98,7 +71,7 @@ export default function TeacherIntro() {
         }}>Teacher</div>
       </motion.div>
 
-      {/* Dialogue box at bottom — chat bubble with tail toward teacher */}
+      {/* Dialogue box at bottom */}
       <div style={{
         position:'absolute', bottom:'clamp(12px,3vh,28px)',
         left:'clamp(12px,3vw,28px)', right:'clamp(12px,3vw,28px)',

@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { ASSETS } from '../data/assets';
 import { useMinaBg } from '../hooks/useMinaBg';
+import { useVoiceAudio } from '../components/AudioManager';
 
 // ── Mina audio for Chapter 2 slides only (slides index 0, 1, 2 of chapter 2)
 // Playback order follows the URL list sequence: slot 0=file6, slot 1=file8, slot 2=file7
@@ -99,7 +100,7 @@ export default function StorylineScreen() {
   const [chapterIdx, setChapterIdx] = useState(0);
   const [slideIdx, setSlideIdx] = useState(0);
   const [showSkipConfirm, setShowSkipConfirm] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { play: playVoice, stop: stopVoice } = useVoiceAudio();
   const minaBg = useMinaBg();
   const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
@@ -111,44 +112,14 @@ export default function StorylineScreen() {
 
   // Play Mina audio only for Chapter 2 slides
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
     if (chapterIdx === 1) {
-      // Chapter 2 = index 1
-      const src = MINA_CHAPTER2_AUDIO[slideIdx];
-      if (src) {
-        const audio = new Audio(src);
-        audioRef.current = audio;
-        audio.play().catch(() => {});
-      }
+      playVoice(MINA_CHAPTER2_AUDIO[slideIdx]);
+    } else {
+      stopVoice();
     }
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, [chapterIdx, slideIdx]);
+  }, [chapterIdx, slideIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  };
+  const stopAudio = () => stopVoice();
 
   const advance = () => {
     if (showSkipConfirm) return;

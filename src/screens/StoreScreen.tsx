@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
@@ -8,6 +8,7 @@ import { STORE_GREETINGS } from '../data/dialogues';
 const ALL_SECTIONS = [...SECTIONS, SECTION_D];
 import { getLevelBgCandidates, getNpcCandidates, ASSETS } from '../data/assets';
 import { getLevelTheme } from '../data/levelThemes';
+import { useVoiceAudio } from '../components/AudioManager';
 
 type Phase = 'greeting' | 'intro' | 'question' | 'answered' | 'done' | 'mina_closing';
 
@@ -145,7 +146,7 @@ export default function StoreScreen() {
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
   const [showCursor, setShowCursor] = useState(true);
   const [minaLineIdx, setMinaLineIdx] = useState(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
   const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
   const [bgIndex, setBgIndex] = useState(0);
@@ -172,22 +173,10 @@ export default function StoreScreen() {
 
   useEffect(() => {
     if (phase !== 'mina_closing') return;
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
-    const src = MINA_CLOSING_AUDIO[minaLineIdx];
-    if (!src) return;
-    const audio = new Audio(src);
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-    return () => { audio.pause(); audio.currentTime = 0; };
-  }, [phase, minaLineIdx]);
+    playVoice(MINA_CLOSING_AUDIO[minaLineIdx]);
+  }, [phase, minaLineIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    return () => { audioRef.current?.pause(); audioRef.current = null; };
-  }, []);
-
-  const stopAudio = () => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
-  };
+  const stopAudio = () => stopVoice();
 
   const isLastSectionDStore = currentSection === 'D' && currentStoreIndex === section.stores.length - 1;
 

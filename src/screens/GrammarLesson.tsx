@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { ASSETS } from '../data/assets';
 import { useMinaBg } from '../hooks/useMinaBg';
+import { useVoiceAudio } from '../components/AudioManager';
 
 const GRAMMAR_LESSON_AUDIO: Record<string, string[]> = {
   A: [
@@ -28,7 +29,6 @@ const GRAMMAR_LESSON_AUDIO: Record<string, string[]> = {
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563621/23_oxr6hf.m4a',
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563622/24_qwsdwu.m4a',
   ],
-  // Section D: Voice 26 (intro to Grammar Street Dance Challenge) + Voice 27 (transition to dancers)
   D: [
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/26_fegdul.m4a',
     'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775563623/27_j7h9zv.m4a',
@@ -55,7 +55,6 @@ function ScallopedBubble({ children }: { children: React.ReactNode }) {
   const scallopBottom = Array.from({ length: 60 }, (_, i) => `M${i * 20},0 Q${i * 20 + 10},24 ${i * 20 + 20},0`).join(' ');
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      {/* Top scallop — peaks pointing up */}
       <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
           <path d={scallopTop} fill="#F5C84A" />
@@ -70,7 +69,6 @@ function ScallopedBubble({ children }: { children: React.ReactNode }) {
       }}>
         {children}
       </div>
-      {/* Bottom scallop — in normal flow so it sits flush below the box */}
       <div style={{ height: '20px', overflow: 'hidden', position: 'relative', zIndex: 2 }}>
         <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
           <path d={scallopBottom} fill="#F5C84A" />
@@ -338,8 +336,6 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
       ),
     });
   } else if (sectionId === 'D') {
-    // ── Section D: Mixed Grammar Review ──────────────────────────────────────
-    // Voice 26: Welcome to Grammar Street Dance Challenge + review overview
     pages.push({
       badge: '🎉 GRAMMAR STREET DANCE CHALLENGE', badgeColor: ['#8B1A8B', '#B060D0'], title: 'Welcome!',
       render: (_lesson, showCursor) => (
@@ -368,7 +364,6 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
         </>
       ),
     });
-    // Voice 27: Transition — meet the dancers
     pages.push({
       badge: '💃 MEET THE DANCERS', badgeColor: ['#B060D0', '#8B1A8B'], title: 'The Dancers',
       render: (_lesson, showCursor) => (
@@ -459,12 +454,11 @@ export default function GrammarLesson() {
   const { currentSection, goToScene } = useGameStore();
   const [page, setPage] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { play: playVoice, stop: stopVoice } = useVoiceAudio();
   const minaBg = useMinaBg();
   const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
   const section = SECTIONS.find(s => s.id === currentSection);
-  // Section D has no entry in SECTIONS — use an empty dummy so lesson pages can render from static content
   const lesson = section?.lesson ?? {};
   if (!currentSection) return null;
   if (currentSection !== 'D' && !section) return null;
@@ -480,26 +474,12 @@ export default function GrammarLesson() {
   }, []);
 
   useEffect(() => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
     const sectionAudio = GRAMMAR_LESSON_AUDIO[currentSection as string] ?? GRAMMAR_LESSON_AUDIO.A;
-    const src = sectionAudio[page];
-    if (!src) return;
-    const audio = new Audio(src);
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-    return () => { audio.pause(); audio.currentTime = 0; };
-  }, [page, currentSection]);
-
-  useEffect(() => {
-    return () => { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; } };
-  }, []);
-
-  const stopAudio = () => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
-  };
+    playVoice(sectionAudio[page]);
+  }, [page, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const advance = () => {
-    stopAudio();
+    stopVoice();
     if (isLast) goToScene('SECTION_VIEW');
     else setPage(p => p + 1);
   };
@@ -507,15 +487,9 @@ export default function GrammarLesson() {
   return (
     <div
       style={{
-        position: 'fixed',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        position: 'fixed', inset: 0, width: '100%', height: '100%',
+        overflow: 'hidden', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}
       onClick={advance}
     >
@@ -541,13 +515,9 @@ export default function GrammarLesson() {
       {PARTICLES.map((p, i) => <Particle key={i} {...p} />)}
       <div className="bunting" style={{ zIndex: 5 }} />
 
-      {/* Mina mascot — bottom right, bigger */}
+      {/* Mina mascot */}
       <motion.div
-        style={{
-          position: 'absolute',
-          right: 0, bottom: 0,
-          zIndex: 10, pointerEvents: 'none',
-        }}
+        style={{ position: 'absolute', right: 0, bottom: 0, zIndex: 10, pointerEvents: 'none' }}
         initial={{ x: 80, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.15 }}
@@ -566,10 +536,9 @@ export default function GrammarLesson() {
         />
       </motion.div>
 
-      {/* Lesson box — centered, leaves room for Mina */}
+      {/* Lesson box */}
       <div style={{
-        position: 'relative',
-        zIndex: 20,
+        position: 'relative', zIndex: 20,
         width: 'clamp(280px, 72vw, 720px)',
         maxWidth: 'calc(100vw - clamp(100px,20vw,220px) - 24px)',
         marginRight: 'clamp(90px,16vw,200px)',
@@ -608,7 +577,6 @@ export default function GrammarLesson() {
 
             <ScallopedBubble>
               {current.render(lesson, showCursor)}
-
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '14px' }}>
                 <div style={{ display: 'flex', gap: '5px' }}>
                   {LESSON_PAGES.map((_, i) => (
@@ -628,7 +596,7 @@ export default function GrammarLesson() {
                   fontSize: 'clamp(0.62rem, 1.2vw, 0.85rem)',
                   color: '#8A6000', marginLeft: 'auto',
                 }}>
-                  {isLast ? "Click to start! →" : 'Click to continue ▶'}
+                  {isLast ? 'Click to start! →' : 'Click to continue ▶'}
                 </div>
               </div>
             </ScallopedBubble>
@@ -636,7 +604,6 @@ export default function GrammarLesson() {
         </AnimatePresence>
       </div>
 
-      {/* Back button */}
       {page > 0 && (
         <button
           className="btn btn-ghost btn-sm"
@@ -644,13 +611,12 @@ export default function GrammarLesson() {
             position: 'absolute', bottom: 'clamp(12px,3vh,28px)',
             left: 'clamp(14px,3vw,32px)', opacity: 0.85, zIndex: 30,
           }}
-          onClick={e => { e.stopPropagation(); stopAudio(); setPage(p => p - 1); }}
+          onClick={e => { e.stopPropagation(); stopVoice(); setPage(p => p - 1); }}
         >
           ← Back
         </button>
       )}
 
-      {/* Skip button */}
       {!isLast && (
         <button
           className="btn btn-ghost btn-sm"
@@ -658,7 +624,7 @@ export default function GrammarLesson() {
             position: 'absolute', top: 'clamp(40px,7.5vh,66px)',
             right: 'clamp(10px,2vw,20px)', opacity: 0.8, zIndex: 30,
           }}
-          onClick={e => { e.stopPropagation(); stopAudio(); goToScene('SECTION_VIEW'); }}
+          onClick={e => { e.stopPropagation(); stopVoice(); goToScene('SECTION_VIEW'); }}
         >
           Skip →
         </button>

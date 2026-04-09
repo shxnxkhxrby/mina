@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { SECTION_D } from '../data/sectionD';
 import { ASSETS } from '../data/assets';
 import { useMinaBg } from '../hooks/useMinaBg';
+import { useVoiceAudio } from '../components/AudioManager';
 
 // ── One audio file per section completion ─────────────────────────────────
 // A → Voice 14: "Amazing work! You've explored the Minasa Festival..."
@@ -80,9 +81,9 @@ export default function FeedbackScreen() {
     setStoreIndex, setQuestionSet, setSection, isAdvancedMode,
   } = useGameStore();
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const minaBg = useMinaBg();
   const [bgSrcIdx, setBgSrcIdx] = useState(0);
+  const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
   const ALL_SECTIONS = [...SECTIONS, SECTION_D];
   const section = ALL_SECTIONS.find(s => s.id === currentSection);
@@ -121,39 +122,12 @@ export default function FeedbackScreen() {
   // Play the single Mina audio when congrats phase mounts
   useEffect(() => {
     if (phase !== 'congrats') return;
-
     const src = SECTION_CONGRATS_AUDIO[currentSection ?? 'A'];
-    if (!src) return;
-
-    const audio = new Audio(src);
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, [phase, currentSection]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  };
+    playVoice(src);
+  }, [phase, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCongratsClick = () => {
-    stopAudio();
+    stopVoice();
     setPhase('feedback');
   };
 
@@ -294,7 +268,7 @@ export default function FeedbackScreen() {
             position: 'absolute', bottom: 'clamp(16px,3.5vh,32px)',
             right: 'clamp(16px,3vw,28px)', zIndex: 10, opacity: 0.75, color: accentColor,
           }}
-          onClick={e => { e.stopPropagation(); stopAudio(); setPhase('feedback'); }}
+          onClick={e => { e.stopPropagation(); stopVoice(); setPhase('feedback'); }}
         >
           Skip →
         </button>

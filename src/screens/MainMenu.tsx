@@ -52,10 +52,10 @@ export default function MainMenu() {
         }}
         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
-      {/* Light overlay to keep background visible but readable */}
+      {/* Light overlay */}
       <div style={{
         position: 'absolute', inset: 0,
-        background: 'rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.06)',
         zIndex: 1,
       }} />
 
@@ -118,19 +118,16 @@ export default function MainMenu() {
             onClick={handleStoryMode}
             delay={0.2}
             label={playerName ? 'Continue' : 'Story Mode'}
-            color="#E8650A"
           />
 
-          {/* TOP-RIGHT: New Game (if save exists) or Advanced Mode shifted */}
+          {/* TOP-RIGHT: New Game (if save exists) or empty slot */}
           {playerName ? (
             <TileButton
               onClick={handleNewGame}
               delay={0.26}
               label="New Game"
-              color="#E8650A"
             />
           ) : (
-            /* placeholder — empty transparent tile to keep grid shape */
             <div style={{ background: 'transparent' }} />
           )}
 
@@ -139,7 +136,6 @@ export default function MainMenu() {
             onClick={handleAdvanced}
             delay={0.32}
             label="Advanced Mode"
-            color="#E8650A"
           />
 
           {/* BOTTOM-RIGHT: Volume Settings */}
@@ -246,21 +242,23 @@ export default function MainMenu() {
 }
 
 // ── Tile button ─────────────────────────────────────────────────────────────
-function TileButton({
-  onClick, delay, label, color, isVolume, showVolume,
-  musicVolume, voiceVolume, setMusicVolume, setVoiceVolume,
-}: {
+interface TileButtonProps {
   onClick: () => void;
   delay: number;
   label: string;
-  color: string;
+  color?: string;           // optional — was previously required, caused TS2741
   isVolume?: boolean;
   showVolume?: boolean;
   musicVolume?: number;
   voiceVolume?: number;
   setMusicVolume?: (v: number) => void;
   setVoiceVolume?: (v: number) => void;
-}) {
+}
+
+function TileButton({
+  onClick, delay, label, isVolume, showVolume,
+  musicVolume, voiceVolume, setMusicVolume, setVoiceVolume,
+}: TileButtonProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.88 }}

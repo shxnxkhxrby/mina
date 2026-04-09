@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTION_D } from '../data/sectionD';
 import { getLevelBgCandidates, getNpcCandidates, ASSETS } from '../data/assets';
 import { getLevelTheme } from '../data/levelThemes';
+import { useVoiceAudio } from '../components/AudioManager';
 
 // ── Audio: Mina's closing speech (voices 29–35) ───────────────────────────
 const MINA_CLOSING_AUDIO = [
@@ -137,8 +138,8 @@ export default function CutsceneScreen() {
   const scoreRef = useRef(0);
   const [scoreDisplay, setScoreDisplay] = useState(0);
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
+  const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // ── Derived ────────────────────────────────────────────────────────────
   const prog    = sectionProgress['D'] || {};
@@ -170,19 +171,8 @@ export default function CutsceneScreen() {
   // ── Mina closing audio ─────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== 'MINA_CLOSING') return;
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
-    const src = MINA_CLOSING_AUDIO[minaLineIdx];
-    if (!src) return;
-    const audio = new Audio(src);
-    audioRef.current = audio;
-    audio.play().catch(() => {});
-    return () => { audio.pause(); audio.currentTime = 0; };
-  }, [phase, minaLineIdx]);
-
-  // ── Cleanup audio on unmount ───────────────────────────────────────────
-  useEffect(() => {
-    return () => { audioRef.current?.pause(); audioRef.current = null; };
-  }, []);
+    playVoice(MINA_CLOSING_AUDIO[minaLineIdx]);
+  }, [phase, minaLineIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Navigate to score when finished ───────────────────────────────────
   useEffect(() => {
@@ -192,9 +182,7 @@ export default function CutsceneScreen() {
     }
   }, [phase]);
 
-  const stopAudio = () => {
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
-  };
+  const stopAudio = () => stopVoice();
 
   // ── Unlock logic ───────────────────────────────────────────────────────
   function isDancerUnlocked(i: number): boolean {
