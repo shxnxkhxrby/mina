@@ -1,92 +1,22 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
-import { getLevelBgCandidates, getNpcCandidates } from '../data/assets';
-import { getLevelTheme } from '../data/levelThemes';
 
 type Phase = 'question' | 'answered' | 'done';
 
-function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
-  return (
-    <motion.div
-      style={{
-        position: 'absolute', left: x, bottom: '10%',
-        width: size, height: size, borderRadius: '50%',
-        background: 'rgba(255, 220, 100, 0.55)',
-        pointerEvents: 'none', zIndex: 1,
-      }}
-      animate={{ y: [0, -80, -160], opacity: [0, 0.7, 0] }}
-      transition={{ duration: 3.5, delay, repeat: Infinity, ease: 'easeOut' }}
-    />
-  );
-}
+const SECTION_ACCENT: Record<string, string> = {
+  A: '#E85D26',
+  B: '#3A9E5C',
+  C: '#3A4DB8',
+  D: '#8B1A8B',
+};
 
-const SCALLOP = Array.from({ length: 60 }, (_, i) => `M${i * 20},24 Q${i * 20 + 10},0 ${i * 20 + 20},24`).join(' ');
-
-function ScallopedBubble({ children, color = '#F5C84A' }: { children: React.ReactNode; color?: string }) {
-  return (
-    <div style={{ position: 'relative', width: '100%' }}>
-      <div style={{ position: 'absolute', top: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2 }}>
-        <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={SCALLOP} fill={color} />
-        </svg>
-      </div>
-      <div style={{
-        background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
-        border: `4px solid ${color}`, borderTop: 'none',
-        borderRadius: '0 0 20px 20px',
-        padding: 'clamp(12px,2.2vh,20px) clamp(12px,2.5vw,24px) clamp(12px,2.2vh,20px)',
-        position: 'relative', boxShadow: '0 6px 28px rgba(180,120,0,0.18)', zIndex: 1,
-        maxHeight: '55vh', overflowY: 'auto',
-      }}>
-        {children}
-      </div>
-      <div style={{ position: 'absolute', bottom: '-18px', left: 0, right: 0, height: '20px', overflow: 'hidden', zIndex: 2, transform: 'rotate(180deg)' }}>
-        <svg viewBox="0 0 1200 24" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-          <path d={SCALLOP} fill={color} />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function SpeakerBadge({ label, gradStart, gradEnd }: { label: string; gradStart: string; gradEnd: string }) {
-  return (
-    <motion.div
-      initial={{ scale: 0.7, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ delay: 0.08, type: 'spring', stiffness: 300 }}
-      style={{
-        display: 'inline-block',
-        background: `linear-gradient(135deg, ${gradStart}, ${gradEnd})`,
-        border: '3px solid #FFD700', borderRadius: '10px',
-        padding: '4px 18px 4px 14px',
-        position: 'relative', zIndex: 3,
-        boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
-        clipPath: 'polygon(8px 0%, 100% 0%, 100% 100%, 8px 100%, 0% 50%)',
-      }}
-    >
-      <span style={{
-        fontFamily: 'var(--font-title)', fontSize: 'clamp(0.72rem,1.6vw,1rem)',
-        color: 'white', fontWeight: 900, letterSpacing: '2px',
-        textShadow: '1px 2px 0 rgba(0,0,0,0.3)',
-      }}>{label}</span>
-    </motion.div>
-  );
-}
-
-const PARTICLES = [
-  { delay: 0, x: '8%', size: 10 }, { delay: 0.8, x: '18%', size: 7 },
-  { delay: 1.5, x: '32%', size: 12 }, { delay: 0.3, x: '48%', size: 8 },
-  { delay: 2.1, x: '62%', size: 6 }, { delay: 1.2, x: '75%', size: 10 },
-  { delay: 0.6, x: '88%', size: 7 },
-];
-
-const THEME_BADGE: Record<number, [string, string]> = {
-  0: ['#FF7A1A', '#E85D10'],
-  1: ['#3A9E5C', '#217A42'],
-  2: ['#5B6FD4', '#3A4DB8'],
+const SECTION_BG: Record<string, string> = {
+  A: 'linear-gradient(135deg,#FFF8F0 0%,#FFF0E0 100%)',
+  B: 'linear-gradient(135deg,#F0FFF4 0%,#E0F5E8 100%)',
+  C: 'linear-gradient(135deg,#F0F4FF 0%,#E0E8FF 100%)',
+  D: 'linear-gradient(135deg,#FAF0FF 0%,#F0E0FF 100%)',
 };
 
 export default function AdvancedStore() {
@@ -102,8 +32,8 @@ export default function AdvancedStore() {
   const qSet = store.questionSets.find(qs => qs.id === currentQuestionSet) ?? store.questionSets[0];
   if (!qSet) return null;
 
-  const theme = getLevelTheme(currentStoreIndex);
-  const [badgeGradStart, badgeGradEnd] = THEME_BADGE[currentStoreIndex] ?? THEME_BADGE[0];
+  const accent = SECTION_ACCENT[section.id] ?? '#E85D26';
+  const pageBg = SECTION_BG[section.id] ?? SECTION_BG.A;
 
   const [phase, setPhase] = useState<Phase>('question');
   const [qIdx, setQIdx] = useState(0);
@@ -113,28 +43,10 @@ export default function AdvancedStore() {
   const [feedbackText, setFeedbackText] = useState('');
   const [isCorrect, setIsCorrect] = useState(false);
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
-  const [showCursor, setShowCursor] = useState(true);
-
-  const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
-  const [bgIndex, setBgIndex] = useState(0);
-  const [bgFailed, setBgFailed] = useState(false);
-  const npcCandidates = getNpcCandidates(section.id, currentStoreIndex);
-  const [npcIndex, setNpcIndex] = useState(0);
-  const [npcFailed, setNpcFailed] = useState(false);
-
-  const secBg: Record<string, string> = {
-    A: 'linear-gradient(160deg,#FFF3D0 0%,#FFE090 50%,#F5C84A 100%)',
-    B: 'linear-gradient(160deg,#D4EED0 0%,#A8D8A0 50%,#7CBB70 100%)',
-    C: 'linear-gradient(160deg,#D0E8FF 0%,#A0C8F0 50%,#70A8DC 100%)',
-  };
 
   const currentQ = qSet.questions[qIdx];
   const totalQ = qSet.questions.length;
-
-  useEffect(() => {
-    const t = setInterval(() => setShowCursor(c => !c), 530);
-    return () => clearInterval(t);
-  }, []);
+  const choiceLabels = ['A', 'B', 'C', 'D'];
 
   const handleAnswer = (i: number) => {
     if (selected !== null) return;
@@ -151,14 +63,15 @@ export default function AdvancedStore() {
   const handleNext = () => {
     if (qIdx + 1 >= totalQ) { setPhase('done'); return; }
     setQIdx(i => i + 1);
-    setSelected(null); setFeedbackText('');
+    setSelected(null);
+    setFeedbackText('');
     setPhase('question');
   };
 
   const handleFinish = () => {
     completeStore(section.id, store.id, scoreRef.current);
     addScore(scoreRef.current, totalQ);
-    goToScene('FEEDBACK');
+    goToScene('SCORE_SUMMARY');
   };
 
   const handleRetry = () => {
@@ -171,237 +84,230 @@ export default function AdvancedStore() {
     setPhase('question');
   };
 
-  const choiceLabels = ['A', 'B', 'C', 'D'];
-
-  const renderChoices = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(5px,1vh,9px)', marginTop: '10px' }}>
-      {currentQ.choices.map((choice, i) => {
-        const isCorrectChoice = choice.isCorrect;
-        let bg = 'rgba(255,255,255,0.9)';
-        let border = 'rgba(180,140,0,0.35)';
-        let badgeBg = badgeGradStart;
-        let opacity = 1;
-        if (selected !== null) {
-          if (isCorrectChoice) { bg = '#D4EDDA'; border = '#28A745'; badgeBg = '#28A745'; }
-          else if (i === selected) { bg = '#F8D7DA'; border = '#DC3545'; badgeBg = '#DC3545'; }
-          else { opacity = 0.4; }
-        }
-        return (
-          <motion.button key={i}
-            disabled={selected !== null}
-            onClick={() => handleAnswer(i)}
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity, x: 0, transition: { delay: i * 0.07 } }}
-            whileHover={selected === null ? { x: -3, scale: 1.015 } : {}}
-            style={{
-              display: 'flex', alignItems: 'center',
-              gap: 'clamp(8px,1.5vw,12px)',
-              background: bg, border: `2px solid ${border}`,
-              borderRadius: '11px',
-              padding: 'clamp(7px,1.3vh,11px) clamp(10px,1.8vw,16px)',
-              cursor: selected !== null ? 'default' : 'pointer',
-              textAlign: 'left', width: '100%',
-              transition: 'background 0.2s, border-color 0.2s',
-              boxShadow: selected === null ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
-            }}
-          >
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              width: 'clamp(22px,3vw,30px)', height: 'clamp(22px,3vw,30px)',
-              background: badgeBg, color: 'white', borderRadius: '7px',
-              fontFamily: 'var(--font-char)', fontWeight: 700,
-              fontSize: 'clamp(0.6rem,1.1vw,0.78rem)',
-              flexShrink: 0, transition: 'background 0.2s',
-            }}>{choiceLabels[i]}</span>
-            <span style={{
-              fontFamily: 'var(--font-body)', fontSize: 'clamp(0.7rem,1.4vw,0.88rem)',
-              color: '#2A1800', lineHeight: 1.4,
-            }}>
-              {choice.text.replace(/^[A-D]\.\s*/, '')}
-            </span>
-          </motion.button>
-        );
-      })}
-    </div>
-  );
-
-  const renderProgressStrip = () => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
-      <div style={{ display: 'flex', gap: '4px' }}>
-        {Array.from({ length: totalQ }).map((_, i) => (
-          <div key={i} style={{
-            width: 'clamp(6px,1.2vw,10px)', height: 'clamp(6px,1.2vw,10px)',
-            borderRadius: '50%',
-            background: i < qIdx ? '#28A745' : i === qIdx ? badgeGradStart : 'rgba(180,140,0,0.25)',
-            transition: 'background 0.3s',
-          }} />
-        ))}
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-body)', fontSize: 'clamp(0.5rem,0.95vw,0.64rem)',
-        color: '#8A6000', marginLeft: 'auto',
-      }}>Q {qIdx + 1}/{totalQ} · ⭐ {scoreDisplay}</div>
-    </div>
-  );
+  const progressPct = totalQ > 0 ? ((qIdx + (selected !== null ? 1 : 0)) / totalQ) * 100 : 0;
 
   return (
     <div style={{
       position: 'fixed', inset: 0, width: '100%', height: '100%',
-      background: bgFailed ? (secBg[section.id] || secBg.A) : undefined,
-      overflow: 'hidden',
+      background: pageBg, overflow: 'hidden',
+      display: 'flex', flexDirection: 'column',
     }}>
-      {!bgFailed && (
-        <img
-          key={`${currentStoreIndex}-${bgIndex}`}
-          src={bgCandidates[bgIndex]}
-          alt={`Level ${currentStoreIndex + 1}`}
-          style={{
-            position: 'absolute', inset: 0, width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center top',
-            filter: 'blur(6px) brightness(0.55)', transform: 'scale(1.08)',
-          }}
-          onError={() => {
-            if (bgIndex < bgCandidates.length - 1) setBgIndex(b => b + 1);
-            else setBgFailed(true);
-          }}
-        />
-      )}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'linear-gradient(to bottom, rgba(255,248,220,0.78) 0%, rgba(30,18,0,0.32) 100%)',
-        pointerEvents: 'none', zIndex: 1,
-      }} />
 
-      {PARTICLES.map((p, i) => <Particle key={i} {...p} />)}
-      <div className="bunting" style={{ zIndex: 5 }} />
-
-      {/* Top bar */}
+      {/* ── Header bar ── */}
       <div style={{
-        position: 'absolute', top: 'clamp(38px,7vh,60px)', left: '50%', transform: 'translateX(-50%)',
-        zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
-        maxWidth: '60vw',
+        flexShrink: 0,
+        background: 'white',
+        borderBottom: `3px solid ${accent}`,
+        boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        padding: 'clamp(10px,2vh,16px) clamp(14px,3vw,28px)',
+        display: 'flex', alignItems: 'center', gap: '12px',
+        zIndex: 10,
       }}>
-        <div style={{
-          fontFamily: 'var(--font-title)', fontSize: 'clamp(0.72rem,1.5vw,1rem)',
-          color: 'white', background: 'rgba(0,0,0,0.55)',
-          padding: '4px 18px', borderRadius: '50px',
-          border: `2px solid ${theme.qBorder}`,
-          whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(0,0,0,0.25)',
-          overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%',
-        }}>
-          {store.emoji} {store.name} · {store.npcName}
+        <button
+          className="btn btn-ghost btn-sm"
+          style={{ flexShrink: 0, fontSize: 'clamp(0.7rem,1.3vw,0.85rem)' }}
+          onClick={() => goToScene('ADVANCED_SECTION_VIEW')}
+        >← Back</button>
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+            <span style={{
+              fontFamily: 'var(--font-title)',
+              fontSize: 'clamp(0.75rem,1.5vw,1rem)',
+              color: accent, fontWeight: 700,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+            }}>
+              {section.emoji} {store.name} — {section.grammarTopic}
+            </span>
+            <span style={{
+              flexShrink: 0,
+              background: accent, color: 'white',
+              fontFamily: 'var(--font-char)', fontWeight: 700,
+              fontSize: 'clamp(0.42rem,0.8vw,0.58rem)',
+              padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px',
+            }}>⚡ MASTERY CHECKPOINT</span>
+          </div>
+          {/* Progress bar */}
+          <div style={{ height: '6px', background: 'rgba(0,0,0,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
+            <motion.div
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.4 }}
+              style={{ height: '100%', background: accent, borderRadius: '4px' }}
+            />
+          </div>
         </div>
+
         <div style={{
-          background: 'rgba(232,93,38,0.92)', border: '2px solid #FFD700',
-          borderRadius: '20px', padding: '2px 10px',
+          flexShrink: 0,
           fontFamily: 'var(--font-char)', fontWeight: 700,
-          fontSize: 'clamp(0.44rem,0.85vw,0.58rem)', color: 'white', letterSpacing: '1px',
-        }}>⚡ ADVANCED MODE</div>
+          fontSize: 'clamp(0.65rem,1.2vw,0.82rem)',
+          color: accent,
+          background: `${accent}15`,
+          border: `1.5px solid ${accent}44`,
+          borderRadius: '10px', padding: '4px 12px',
+          textAlign: 'center', lineHeight: 1.3,
+        }}>
+          <div>Q {qIdx + 1}/{totalQ}</div>
+          <div style={{ fontSize: 'clamp(0.55rem,1vw,0.68rem)', opacity: 0.75 }}>⭐ {scoreDisplay} pts</div>
+        </div>
       </div>
 
-      <button className="btn btn-ghost btn-sm"
-        style={{
-          position: 'absolute', top: 'clamp(38px,7vh,60px)', left: 'clamp(10px,2vw,18px)',
-          zIndex: 100, opacity: 0.95,
-          fontSize: 'clamp(0.7rem,1.4vw,0.9rem)', fontWeight: 700,
-          background: 'rgba(0,0,0,0.45)', border: '2px solid rgba(255,255,255,0.5)',
-          borderRadius: '20px', color: 'white', padding: '4px 14px',
-        }}
-        onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>← Back</button>
-
-      {/* NPC sprite — bigger */}
-      <motion.div
-        style={{
-          position: 'absolute', left: 0, bottom: 0,
-          zIndex: 10, pointerEvents: 'none',
-        }}
-        initial={{ x: -80, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 140, damping: 18, delay: 0.15 }}
-      >
-        {npcFailed ? (
-          <motion.span
-            style={{
-              display: 'block',
-              fontSize: 'clamp(80px,18vw,200px)', lineHeight: 1,
-              filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.5))',
-            }}
-            animate={{ y: [0, -14, 0] }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-          >{store.emoji}</motion.span>
-        ) : (
-          <motion.img
-            src={npcCandidates[npcIndex]}
-            alt={store.npcName}
-            onError={() => {
-              if (npcIndex + 1 < npcCandidates.length) setNpcIndex(n => n + 1);
-              else setNpcFailed(true);
-            }}
-            style={{
-              width: 'clamp(120px,26vw,320px)', height: 'auto',
-              objectFit: 'contain',
-              filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
-              display: 'block',
-            }}
-            animate={{ y: [0, -14, 0] }}
-            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        )}
-        <div style={{
-          textAlign: 'center', marginTop: '4px', marginBottom: '8px',
-          fontFamily: 'var(--font-char)', fontWeight: 700,
-          fontSize: 'clamp(0.55rem,1vw,0.72rem)', color: 'white',
-          background: 'rgba(0,0,0,0.55)', border: `1.5px solid ${theme.qBorder}`,
-          padding: '2px 12px', borderRadius: '50px',
-          display: 'inline-block',
-          position: 'relative', left: '50%', transform: 'translateX(-50%)',
-          whiteSpace: 'nowrap',
-        }}>{store.npcName}</div>
-      </motion.div>
-
-      {/* Dialogue panel */}
+      {/* ── Question area ── */}
       {(phase === 'question' || phase === 'answered') && (
         <div style={{
-          position: 'absolute',
-          top: 'clamp(62px,12vh,100px)',
-          right: 'clamp(12px,2.5vw,28px)',
-          left: 'clamp(130px,28vw,360px)',
-          zIndex: 20,
+          flex: 1, overflowY: 'auto',
+          padding: 'clamp(16px,3vh,32px) clamp(16px,4vw,48px)',
+          display: 'flex', flexDirection: 'column', gap: 'clamp(12px,2vh,20px)',
+          maxWidth: '760px', width: '100%', margin: '0 auto', boxSizing: 'border-box',
         }}>
+
+          {/* Question number tag */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+          }}>
+            <div style={{
+              background: accent, color: 'white',
+              fontFamily: 'var(--font-char)', fontWeight: 700,
+              fontSize: 'clamp(0.6rem,1.1vw,0.75rem)',
+              padding: '3px 12px', borderRadius: '20px',
+              letterSpacing: '0.5px', flexShrink: 0,
+            }}>Question {qIdx + 1} of {totalQ}</div>
+            <div style={{
+              height: '1px', flex: 1,
+              background: `linear-gradient(90deg, ${accent}44, transparent)`,
+            }} />
+          </div>
+
+          {/* Question card */}
           <AnimatePresence mode="wait">
             <motion.div
               key={qIdx}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.28, ease: 'easeOut' }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22 }}
+              style={{
+                background: 'white',
+                border: `2px solid ${accent}33`,
+                borderRadius: '16px',
+                padding: 'clamp(16px,3vh,28px) clamp(16px,3vw,28px)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.07)',
+              }}
             >
-              <SpeakerBadge label={store.npcName} gradStart={badgeGradStart} gradEnd={badgeGradEnd} />
-              <ScallopedBubble>
-                {currentQ.npcDialogueBefore && (
-                  <div style={{
-                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.72rem,1.4vw,0.9rem)',
-                    color: '#5A3E00', lineHeight: 1.5, marginBottom: '8px', fontStyle: 'italic',
-                  }}>{currentQ.npcDialogueBefore}</div>
-                )}
-                {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
-                  <div style={{
-                    fontFamily: 'var(--font-title)', fontSize: 'clamp(0.82rem,1.8vw,1.1rem)',
-                    color: '#2A1800', fontWeight: 800, lineHeight: 1.4, marginBottom: '6px',
-                  }}>
-                    {currentQ.questionText}
-                    <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>
-                  </div>
-                )}
-                {renderChoices()}
-                {renderProgressStrip()}
-              </ScallopedBubble>
+              {/* Context / dialogue (if any) */}
+              {currentQ.npcDialogueBefore && currentQ.npcDialogueBefore !== currentQ.questionText && (
+                <div style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(0.72rem,1.4vw,0.9rem)',
+                  color: '#6B5B45',
+                  lineHeight: 1.65,
+                  marginBottom: '12px',
+                  paddingBottom: '12px',
+                  borderBottom: `1px dashed ${accent}33`,
+                  fontStyle: 'italic',
+                }}>
+                  {currentQ.npcDialogueBefore}
+                </div>
+              )}
+
+              {/* Main question text */}
+              <div style={{
+                fontFamily: 'var(--font-title)',
+                fontSize: 'clamp(0.9rem,1.9vw,1.2rem)',
+                color: '#1A1200',
+                fontWeight: 800,
+                lineHeight: 1.55,
+              }}>
+                {currentQ.questionText || currentQ.npcDialogueBefore}
+              </div>
             </motion.div>
           </AnimatePresence>
+
+          {/* Choices */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px,1.2vh,10px)' }}>
+            {currentQ.choices.map((choice, i) => {
+              const isCorrectChoice = choice.isCorrect;
+              let bg = 'white';
+              let border = 'rgba(0,0,0,0.12)';
+              let labelBg = accent;
+              let textColor = '#1A1200';
+              let opacity = 1;
+
+              if (selected !== null) {
+                if (isCorrectChoice) {
+                  bg = '#D4EDDA'; border = '#28A745'; labelBg = '#28A745'; textColor = '#155724';
+                } else if (i === selected) {
+                  bg = '#F8D7DA'; border = '#DC3545'; labelBg = '#DC3545'; textColor = '#721c24';
+                } else {
+                  opacity = 0.35;
+                }
+              }
+
+              return (
+                <motion.button
+                  key={i}
+                  disabled={selected !== null}
+                  onClick={() => handleAnswer(i)}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity, x: 0, transition: { delay: i * 0.06 } }}
+                  whileHover={selected === null ? { x: 3, boxShadow: `0 4px 16px ${accent}33` } : {}}
+                  style={{
+                    display: 'flex', alignItems: 'center',
+                    gap: 'clamp(10px,1.8vw,16px)',
+                    background: bg,
+                    border: `2px solid ${border}`,
+                    borderRadius: '12px',
+                    padding: 'clamp(10px,1.8vh,16px) clamp(12px,2vw,20px)',
+                    cursor: selected !== null ? 'default' : 'pointer',
+                    textAlign: 'left', width: '100%',
+                    transition: 'all 0.18s',
+                    boxShadow: selected === null ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
+                  }}
+                >
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    width: 'clamp(28px,3.5vw,36px)', height: 'clamp(28px,3.5vw,36px)',
+                    background: labelBg, color: 'white',
+                    borderRadius: '8px',
+                    fontFamily: 'var(--font-char)', fontWeight: 800,
+                    fontSize: 'clamp(0.65rem,1.2vw,0.82rem)',
+                    flexShrink: 0, transition: 'background 0.18s',
+                  }}>{choiceLabels[i]}</span>
+                  <span style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'clamp(0.75rem,1.5vw,0.95rem)',
+                    color: textColor, lineHeight: 1.5,
+                    fontWeight: selected !== null && isCorrectChoice ? 700 : 400,
+                    transition: 'color 0.18s',
+                  }}>
+                    {choice.text.replace(/^[A-D]\.\s*/, '')}
+                  </span>
+                  {selected !== null && isCorrectChoice && (
+                    <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 'clamp(0.9rem,1.6vw,1.1rem)' }}>✓</span>
+                  )}
+                  {selected !== null && i === selected && !isCorrectChoice && (
+                    <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 'clamp(0.9rem,1.6vw,1.1rem)' }}>✗</span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Progress dots */}
+          <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', paddingTop: '4px' }}>
+            {Array.from({ length: totalQ }).map((_, i) => (
+              <div key={i} style={{
+                width: i === qIdx ? '20px' : '7px', height: '7px',
+                borderRadius: '4px',
+                background: i < qIdx ? '#28A745' : i === qIdx ? accent : 'rgba(0,0,0,0.12)',
+                transition: 'all 0.3s',
+              }} />
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Answer result overlay */}
+      {/* ── Feedback overlay ── */}
       <AnimatePresence>
         {phase === 'answered' && (
           <motion.div
@@ -409,167 +315,190 @@ export default function AdvancedStore() {
             style={{
               position: 'absolute', inset: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(0,0,0,0.5)', zIndex: 40,
+              background: 'rgba(0,0,0,0.45)', zIndex: 40,
+              padding: 'clamp(14px,3vw,32px)',
             }}
           >
             <motion.div
-              initial={{ scale: 0.72, opacity: 0, y: 24 }}
+              initial={{ scale: 0.82, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.72, opacity: 0, y: 24 }}
+              exit={{ scale: 0.82, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 280, damping: 22 }}
               style={{
                 background: isCorrect
-                  ? 'linear-gradient(180deg,#E8F8EE 0%,#D4EDDA 100%)'
-                  : 'linear-gradient(180deg,#FFF0F0 0%,#F8D7DA 100%)',
-                border: `4px solid ${isCorrect ? '#28A745' : '#DC3545'}`,
-                borderRadius: '22px',
-                padding: 'clamp(18px,3.5vh,38px) clamp(20px,4vw,48px)',
-                width: 'clamp(260px,50vw,480px)', maxWidth: '92vw',
+                  ? 'linear-gradient(160deg,#F0FFF4,#D4EDDA)'
+                  : 'linear-gradient(160deg,#FFF5F5,#F8D7DA)',
+                border: `3px solid ${isCorrect ? '#28A745' : '#DC3545'}`,
+                borderRadius: '20px',
+                padding: 'clamp(20px,4vh,40px) clamp(24px,5vw,52px)',
+                width: 'clamp(280px,55vw,520px)', maxWidth: '92vw',
                 textAlign: 'center',
-                boxShadow: `0 14px 52px rgba(0,0,0,0.5), 0 0 0 6px ${isCorrect ? 'rgba(40,167,69,0.12)' : 'rgba(220,53,69,0.12)'}`,
-                position: 'relative', overflow: 'hidden',
+                boxShadow: '0 16px 56px rgba(0,0,0,0.35)',
               }}
             >
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '10px', overflow: 'hidden' }}>
-                <svg viewBox="0 0 400 12" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                  <path d={Array.from({ length: 20 }, (_, i) => `M${i * 20},12 Q${i * 20 + 10},0 ${i * 20 + 20},12`).join(' ')}
-                    fill={isCorrect ? '#28A745' : '#DC3545'} />
-                </svg>
-              </div>
-              <motion.div
-                initial={{ scale: 0 }} animate={{ scale: 1 }}
-                transition={{ delay: 0.1, type: 'spring', stiffness: 400 }}
-                style={{ fontSize: 'clamp(2.2rem,5vw,4rem)', marginBottom: '8px', lineHeight: 1 }}
-              >
+              <div style={{ fontSize: 'clamp(2rem,4.5vw,3.5rem)', marginBottom: '10px', lineHeight: 1 }}>
                 {isCorrect ? '✅' : '❌'}
-              </motion.div>
-              <div style={{
-                fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.3vw,1.7rem)',
-                color: isCorrect ? '#155724' : '#721c24', marginBottom: '10px',
-              }}>
-                {isCorrect ? 'Correct! 🎉' : 'Wrong...'}
               </div>
               <div style={{
-                fontFamily: 'var(--font-body)', fontSize: 'clamp(0.68rem,1.4vw,0.88rem)',
+                fontFamily: 'var(--font-title)',
+                fontSize: 'clamp(1.1rem,2.5vw,1.8rem)',
+                color: isCorrect ? '#155724' : '#721c24',
+                marginBottom: '12px',
+              }}>
+                {isCorrect ? 'Correct!' : 'Incorrect'}
+              </div>
+              <div style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'clamp(0.72rem,1.4vw,0.9rem)',
                 color: isCorrect ? '#1a5c2e' : '#7a2030',
-                lineHeight: 1.65, marginBottom: '20px',
-                background: isCorrect ? 'rgba(40,167,69,0.08)' : 'rgba(220,53,69,0.08)',
-                borderRadius: '12px', padding: '10px 14px',
+                lineHeight: 1.7, marginBottom: '22px',
+                background: isCorrect ? 'rgba(40,167,69,0.07)' : 'rgba(220,53,69,0.07)',
+                borderRadius: '10px', padding: '10px 14px',
               }}>{feedbackText}</div>
               <motion.button
                 className="btn btn-primary"
-                whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.96 }}
-                onClick={handleNext} style={{ minWidth: '120px' }}
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
+                onClick={handleNext}
+                style={{
+                  minWidth: '130px',
+                  background: isCorrect ? '#28A745' : accent,
+                  borderColor: isCorrect ? '#28A745' : accent,
+                }}
               >
-                {qIdx + 1 >= totalQ ? 'Finish →' : 'Next →'}
+                {qIdx + 1 >= totalQ ? 'See Results →' : 'Next Question →'}
               </motion.button>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Done overlay */}
+      {/* ── Done / Results overlay ── */}
       {phase === 'done' && (
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.6)', padding: 'clamp(14px,3vw,36px)',
+          background: 'rgba(0,0,0,0.55)', padding: 'clamp(14px,3vw,36px)',
           overflowY: 'auto', zIndex: 50,
         }}>
           <motion.div
             className="panel"
-            initial={{ scale: 0.82, opacity: 0, y: 28 }}
+            initial={{ scale: 0.85, opacity: 0, y: 24 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ type: 'spring', stiffness: 200, damping: 20 }}
             style={{
-              width: 'clamp(270px,90vw,500px)', maxWidth: '94vw',
+              width: 'clamp(280px,90vw,520px)', maxWidth: '94vw',
               maxHeight: '88vh', overflowY: 'auto',
               textAlign: 'center', margin: '0 auto',
-              border: `3px solid ${badgeGradStart}`,
-              position: 'relative', overflow: 'hidden',
+              border: `3px solid ${accent}`,
             }}
           >
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '12px', overflow: 'hidden' }}>
-              <svg viewBox="0 0 520 14" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
-                <path d={Array.from({ length: 26 }, (_, i) => `M${i * 20},14 Q${i * 20 + 10},0 ${i * 20 + 20},14`).join(' ')} fill={badgeGradStart} />
-              </svg>
-            </div>
+            {/* Top accent bar */}
+            <div style={{
+              height: '6px', background: accent,
+              borderRadius: '12px 12px 0 0',
+              marginTop: '-1px', marginLeft: '-1px', marginRight: '-1px',
+            }} />
 
-            <div style={{ paddingTop: '16px' }}>
-              <div style={{ fontSize: 'clamp(2rem,5vw,3.5rem)', marginBottom: '6px' }}>
-                {scoreRef.current >= 4 ? '🎉' : '😊'}
-              </div>
-              <div className="panel-title" style={{ marginBottom: '8px' }}>
-                {scoreRef.current >= 4 ? 'Excellent Work!' : 'Good Try!'}
-              </div>
-              <div className="score-badge" style={{ margin: '0 auto 14px' }}>
-                Score: {scoreRef.current} / {totalQ}
+            <div style={{ padding: 'clamp(16px,3vh,28px) clamp(16px,3vw,24px)' }}>
+
+              {/* Score */}
+              <div style={{ marginBottom: '6px' }}>
+                <div style={{
+                  fontFamily: 'var(--font-title)',
+                  fontSize: 'clamp(0.8rem,1.6vw,1.1rem)',
+                  color: accent, marginBottom: '6px',
+                }}>
+                  ⚡ Mastery Checkpoint Complete
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-title)',
+                  fontSize: 'clamp(2.2rem,5vw,3.8rem)',
+                  color: scoreRef.current >= 4 ? '#28A745' : accent,
+                  lineHeight: 1,
+                }}>
+                  {scoreRef.current}/{totalQ}
+                </div>
+                <div style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
+                  color: 'var(--text-muted)', marginTop: '2px',
+                }}>
+                  {Math.round((scoreRef.current / totalQ) * 100)}% — {store.name}
+                </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
+              {/* Stars */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '18px' }}>
                 {[1, 2, 3, 4, 5].map(n => (
                   <motion.span key={n}
-                    initial={{ scale: 0, rotate: -30 }} animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: n * 0.1, type: 'spring', stiffness: 300 }}
-                    style={{ fontSize: 'clamp(1.2rem,3vw,2rem)' }}>
+                    initial={{ scale: 0, rotate: -20 }} animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: n * 0.08, type: 'spring', stiffness: 300 }}
+                    style={{ fontSize: 'clamp(1.3rem,3vw,2.1rem)' }}>
                     {n <= scoreRef.current ? '⭐' : '☆'}
                   </motion.span>
                 ))}
               </div>
 
+              {/* Results table */}
               <div style={{
                 background: 'var(--surface)', borderRadius: '12px',
-                padding: 'clamp(8px,1.5vh,12px) clamp(10px,2vw,14px)',
-                marginBottom: '14px', textAlign: 'left',
+                padding: 'clamp(10px,1.8vh,16px) clamp(12px,2vw,18px)',
+                marginBottom: '18px', textAlign: 'left',
               }}>
                 <div style={{
                   fontFamily: 'var(--font-char)', fontWeight: 700,
-                  fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
-                  color: 'var(--olive-brown)', marginBottom: '8px',
-                }}>Question Results:</div>
+                  fontSize: 'clamp(0.65rem,1.2vw,0.8rem)',
+                  color: 'var(--olive-brown)', marginBottom: '10px',
+                  paddingBottom: '6px',
+                  borderBottom: '1px solid rgba(0,0,0,0.08)',
+                }}>Results</div>
                 {results.map((r, i) => (
                   <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: '8px',
-                    padding: 'clamp(4px,0.8vh,6px) 0',
-                    borderBottom: i < results.length - 1 ? '1px solid rgba(122,107,61,0.12)' : 'none',
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: 'clamp(5px,0.9vh,8px) 0',
+                    borderBottom: i < results.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
                   }}>
-                    <span style={{ fontSize: 'clamp(0.85rem,1.6vw,1.05rem)', flexShrink: 0 }}>
+                    <span style={{
+                      fontFamily: 'var(--font-char)', fontWeight: 700,
+                      fontSize: 'clamp(0.6rem,1.1vw,0.75rem)',
+                      color: 'var(--text-muted)', flexShrink: 0, minWidth: '24px',
+                    }}>Q{i + 1}</span>
+                    <span style={{ fontSize: 'clamp(0.85rem,1.5vw,1rem)', flexShrink: 0 }}>
                       {r.correct ? '✅' : '❌'}
                     </span>
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.6rem,1.1vw,0.74rem)', color: 'var(--dark-brown)' }}>
-                      <strong>Q{i + 1}</strong>
-                      {!r.correct && (
-                        <span style={{ color: 'var(--forest)', marginLeft: '6px' }}>
-                          → {r.correctAns.replace(/^[A-D]\.\s*/, '')}
-                        </span>
-                      )}
-                    </div>
+                    {!r.correct && (
+                      <span style={{
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'clamp(0.58rem,1vw,0.72rem)',
+                        color: '#28A745',
+                      }}>
+                        Correct: {r.correctAns.replace(/^[A-D]\.\s*/, '')}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
 
-              <p style={{
-                fontFamily: 'var(--font-body)', fontSize: 'clamp(0.65rem,1.3vw,0.82rem)',
-                color: '#7A6355', marginBottom: '16px', lineHeight: 1.5,
-              }}>
-                {scoreRef.current >= 4
-                  ? `${store.npcName} is impressed! You may proceed! 🌟`
-                  : `${store.npcName} says: "Let's try again with new questions!" 💪`}
-              </p>
-
+              {/* Actions */}
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 {scoreRef.current >= 4 ? (
                   <motion.button className="btn btn-success"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                    onClick={handleFinish}>✅ Continue →</motion.button>
+                    onClick={handleFinish}>
+                    ✅ Continue →
+                  </motion.button>
                 ) : (
                   <>
-                    <button className="btn btn-ghost btn-sm" onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>
-                      ← Section
+                    <button className="btn btn-ghost btn-sm"
+                      onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>
+                      ← Back to Section
                     </button>
                     <motion.button className="btn btn-primary btn-sm"
                       whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                      onClick={handleRetry}>🔄 Try Again</motion.button>
+                      onClick={handleRetry}
+                      style={{ background: accent, borderColor: accent }}>
+                      🔄 Try Again
+                    </motion.button>
                   </>
                 )}
               </div>

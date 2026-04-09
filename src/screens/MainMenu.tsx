@@ -50,7 +50,7 @@ export default function MainMenu() {
         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
 
-      {/* Blur + dim overlay — darker */}
+      {/* Blur + dim overlay */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -60,7 +60,7 @@ export default function MainMenu() {
         zIndex: 1,
       }} />
 
-      {/* Title — centered */}
+      {/* Title — M.I.N.A. */}
       <motion.div
         initial={{ opacity: 0, y: -18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -72,19 +72,77 @@ export default function MainMenu() {
           transform: 'translateX(-50%)',
           zIndex: 20,
           whiteSpace: 'nowrap',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0px',
         }}
       >
+        {/* Decorative rule */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '2px',
+        }}>
+          <div style={{
+            width: 'clamp(24px, 5vw, 48px)',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent, rgba(232,101,10,0.8))',
+            borderRadius: '2px',
+          }} />
+          <div style={{
+            width: 'clamp(4px, 0.8vw, 6px)',
+            height: 'clamp(4px, 0.8vw, 6px)',
+            borderRadius: '50%',
+            background: '#F5C84A',
+            boxShadow: '0 0 8px rgba(245,200,74,0.9)',
+          }} />
+          <div style={{
+            width: 'clamp(24px, 5vw, 48px)',
+            height: '2px',
+            background: 'linear-gradient(90deg, rgba(232,101,10,0.8), transparent)',
+            borderRadius: '2px',
+          }} />
+        </div>
+
+        {/* M.I.N.A. wordmark */}
+        <div style={{ position: 'relative', lineHeight: 1 }}>
+          <span style={{
+            fontFamily: '"Fredoka One", cursive',
+            fontSize: 'clamp(2rem, 5.5vw, 3.6rem)',
+            color: '#E8650A',
+            fontWeight: 900,
+            textShadow: '3px 4px 0 rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.4)',
+            letterSpacing: '5px',
+            display: 'block',
+          }}>
+            M.I.N.A.
+          </span>
+          {/* Gold underline accent */}
+          <div style={{
+            position: 'absolute',
+            bottom: '-2px',
+            left: '0',
+            right: '0',
+            height: '3px',
+            background: 'linear-gradient(90deg, transparent, #F5C84A 25%, #F5C84A 75%, transparent)',
+            borderRadius: '2px',
+          }} />
+        </div>
+
+        {/* Subtitle tagline */}
         <span style={{
           fontFamily: '"Fredoka One", cursive',
-          fontSize: 'clamp(2rem, 5.5vw, 3.6rem)',
-          color: '#E8650A',
-          fontWeight: 900,
-          textShadow: '3px 4px 0 rgba(0,0,0,0.20), 0 1px 0 rgba(255,255,255,0.5)',
-          letterSpacing: '1px',
-          lineHeight: 1,
+          fontSize: 'clamp(0.5rem, 1.1vw, 0.78rem)',
+          color: 'rgba(255,248,220,0.88)',
+          letterSpacing: '5px',
+          textTransform: 'uppercase' as const,
+          textShadow: '0 1px 4px rgba(0,0,0,0.6)',
+          marginTop: '6px',
           display: 'block',
         }}>
-          Mina App
+          Grammar Quest
         </span>
       </motion.div>
 
@@ -96,13 +154,13 @@ export default function MainMenu() {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: 'clamp(80px, 14vh, 120px) clamp(0px, 0vw, 0px) clamp(28px, 5vh, 64px) clamp(32px, 6vw, 80px)',
+        justifyContent: 'center',
+        padding: 'clamp(80px, 14vh, 120px) 0 clamp(28px, 5vh, 64px)',
         boxSizing: 'border-box',
-        gap: 'clamp(0px, 1vw, 16px)',
+        gap: 0,
       }}>
 
-        {/* Tile grid — nudged right toward Mina */}
+        {/* Tile grid */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -112,11 +170,12 @@ export default function MainMenu() {
             gridTemplateColumns: '1fr 1fr',
             gridTemplateRows: '1fr 1fr',
             gap: 'clamp(8px, 1.2vw, 16px)',
-            width: 'clamp(300px, 44vw, 560px)',
-            height: 'clamp(260px, 44vh, 500px)',
+            width: 'clamp(280px, 38vw, 480px)',
+            height: 'clamp(240px, 40vh, 460px)',
             flexShrink: 0,
-            marginRight: 'clamp(-32px, -3vw, -12px)',
             zIndex: 11,
+            marginLeft: 'clamp(16px, 6vw, 80px)',
+            marginRight: 'clamp(-40px, -4vw, -16px)',
           }}
           className="menu-grid"
         >
@@ -130,7 +189,7 @@ export default function MainMenu() {
             <Tile onClick={handleNewGame} delay={0.24} label="New Game" />
           ) : null}
 
-          <Tile onClick={handleAdvanced} delay={0.30} label="Advanced Mode" />
+          <Tile onClick={handleAdvanced} delay={0.30} label="Mastery Checkpoint" />
 
           <Tile
             onClick={() => setShowVolume(v => !v)}
@@ -145,7 +204,7 @@ export default function MainMenu() {
           />
         </motion.div>
 
-        {/* Mina mascot — larger, visible on mobile */}
+        {/* Mina mascot */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -184,8 +243,9 @@ export default function MainMenu() {
 
         @media (max-width: 560px) {
           .menu-grid {
-            width: 54vw !important;
+            width: 56vw !important;
             height: auto !important;
+            margin-left: clamp(12px, 4vw, 24px) !important;
             margin-right: 0 !important;
             z-index: 11;
           }
@@ -203,8 +263,9 @@ export default function MainMenu() {
 
         @media (min-width: 561px) and (max-width: 860px) {
           .menu-grid {
-            width: 50vw !important;
-            height: clamp(230px, 46vw, 420px) !important;
+            width: 46vw !important;
+            height: clamp(220px, 44vw, 400px) !important;
+            margin-right: clamp(-24px, -2vw, -8px) !important;
           }
           .mina-wrap img {
             height: clamp(300px, 62vw, 500px) !important;
@@ -278,7 +339,7 @@ function Tile({
         style={{
           width: '100%',
           height: '100%',
-          minHeight: 'clamp(90px, 16vh, 160px)',
+          minHeight: 'clamp(80px, 14vh, 140px)',
           background: 'linear-gradient(160deg, #F07820 0%, #E8650A 50%, #CF5508 100%)',
           border: '3.5px solid rgba(255,255,255,0.55)',
           borderRadius: 'clamp(12px, 1.8vw, 22px)',
@@ -338,7 +399,7 @@ function Tile({
         ) : (
           <span style={{
             fontFamily: '"Fredoka One", cursive',
-            fontSize: 'clamp(1rem, 2.6vw, 1.7rem)',
+            fontSize: 'clamp(0.9rem, 2.2vw, 1.5rem)',
             color: '#fff',
             fontWeight: 900,
             textShadow: '0 2px 4px rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.15)',

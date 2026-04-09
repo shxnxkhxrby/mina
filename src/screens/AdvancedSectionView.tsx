@@ -22,27 +22,56 @@ const FALLBACK_GRADIENT: Record<string, string> = {
 export default function AdvancedSectionView() {
   const {
     currentSection, setStoreIndex, goToScene,
-    isStoreUnlocked, sectionProgress, setQuestionSet,
+    sectionProgress, setQuestionSet,
   } = useGameStore();
 
   const [lockedMsg, setLockedMsg] = useState('');
   const [spriteErrors, setSpriteErrors] = useState<Record<number, boolean>>({});
   const [bgImgFailed, setBgImgFailed] = useState(false);
 
+  // ── Guard: section must exist ────────────────────────────────────────────
   const section = SECTIONS.find(s => s.id === currentSection);
-  if (!section) return null;
+  if (!section) {
+    // Graceful fallback — go back to MAP instead of blank screen
+    return (
+      <div style={{
+        position: 'fixed', inset: 0,
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        background: FALLBACK_GRADIENT.A,
+        gap: '16px',
+      }}>
+        <div style={{ fontFamily: 'var(--font-title)', fontSize: '1.4rem', color: 'white' }}>
+          Section not found
+        </div>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => goToScene('MAP')}
+        >
+          ← Back to Map
+        </button>
+      </div>
+    );
+  }
 
   const bg = getSectionBg(section.id);
   const prog = sectionProgress[section.id] || {};
   const showBgImage = !!bg && !bgImgFailed;
 
+  // ── Store unlock logic ───────────────────────────────────────────────────
+  // In Advanced Mode: store[0] is always unlocked.
+  // store[i] is unlocked if store[i-1] is completed (bestScore exists & completed).
+  const isAdvancedStoreUnlocked = (storeIndex: number): boolean => {
+    if (storeIndex === 0) return true;
+    const prevStore = section.stores[storeIndex - 1];
+    if (!prevStore) return false;
+    return !!(prog[prevStore.id]?.completed);
+  };
+
   const handleStore = (i: number) => {
-    if (!isStoreUnlocked(section.id, i)) {
-      setLockedMsg(
-        i === 0
-          ? 'Complete a previous level first!'
-          : `Complete ${section.stores[i - 1].name} first!`,
-      );
+    if (!isAdvancedStoreUnlocked(i)) {
+      const prevStoreName = section.stores[i - 1]?.name ?? 'the previous level';
+      setLockedMsg(`Complete ${prevStoreName} first!`);
       setTimeout(() => setLockedMsg(''), 2500);
       return;
     }
@@ -149,8 +178,8 @@ export default function AdvancedSectionView() {
         }}
       >
         {section.stores.map((store, i) => {
-          const unlocked = isStoreUnlocked(section.id, i);
-          const completed = prog[store.id]?.completed;
+          const unlocked = isAdvancedStoreUnlocked(i);
+          const completed = !!(prog[store.id]?.completed);
           const bestScore = prog[store.id]?.bestScore ?? 0;
           const spriteSrc = getSpriteSrc(section.id, i);
           const showEmoji = spriteErrors[i];
@@ -219,7 +248,7 @@ export default function AdvancedSectionView() {
                   LVL {i + 1}
                 </div>
 
-                {/* Sprite / emoji — larger */}
+                {/* Sprite / emoji */}
                 <div
                   style={{
                     width: 'clamp(100px,18vw,160px)',

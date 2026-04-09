@@ -67,13 +67,18 @@ async function exportCertificateAsPng(
   ctx.fillStyle = '#C8547A';
   ctx.fillText(playerName, W/2, 318);
   ctx.font = '18px Arial, sans-serif'; ctx.fillStyle = '#4A3000';
-  ctx.fillText('has successfully completed', W/2, 365);
-  ctx.font = 'bold 22px Arial, sans-serif'; ctx.fillStyle = '#2A1800';
-  ctx.fillText(isAdvanced ? 'Minasa: Grammar Quest — Advanced Mode' : 'Minasa: Grammar Quest', W/2, 398);
-  ctx.font = '15px Arial, sans-serif';
-  ctx.fillStyle = isAdvanced ? '#4A5AC0' : '#8A6A30';
-  ctx.fillText('Exploring the Minasa Festival in Bustos, Bulacan', W/2, 434);
-  ctx.fillText('Perfect Tenses  ·  Subject-Verb Agreement  ·  Prepositions', W/2, 458);
+  if (isAdvanced) {
+    ctx.fillText('has successfully completed', W/2, 365);
+    ctx.font = 'bold 22px Arial, sans-serif'; ctx.fillStyle = '#2A1800';
+    ctx.fillText('Minasa: Grammar Quest — Advanced Mode', W/2, 398);
+    ctx.font = '15px Arial, sans-serif'; ctx.fillStyle = '#4A5AC0';
+    ctx.fillText('Exploring the Minasa Festival in Bustos, Bulacan', W/2, 434);
+    ctx.fillText('Perfect Tenses  ·  Subject-Verb Agreement  ·  Prepositions', W/2, 458);
+  } else {
+    ctx.font = '15px Arial, sans-serif'; ctx.fillStyle = '#4A3000';
+    ctx.fillText('In recognition of his/her successful completion of the MINA Story Mode,', W/2, 375);
+    ctx.fillText('demonstrating exceptional dedication and mastery of grammar fundamentals.', W/2, 398);
+  }
   const bW = 380, bH = 46, bX = (W-bW)/2, bY = 486;
   const badgeGrad = ctx.createLinearGradient(bX,0,bX+bW,0);
   badgeGrad.addColorStop(0, accent); badgeGrad.addColorStop(1, accent2);
@@ -132,8 +137,10 @@ function printCertificate(
   <div class="cert"><div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
   <div class="hrule"></div><div class="icon">${iconChar}</div><div class="cert-title">${certLabel}</div>
   <div class="certify">This is to certify that</div><div class="name">${playerName}</div>
-  <div class="completed">has successfully completed <strong>${questTitle}</strong></div>
-  <div class="subline">Exploring the Minasa Festival in Bustos, Bulacan<br/>Perfect Tenses &middot; Subject-Verb Agreement &middot; Prepositions</div>
+  ${isAdvanced
+    ? `<div class="completed">has successfully completed <strong>${questTitle}</strong></div><div class="subline">Exploring the Minasa Festival in Bustos, Bulacan<br/>Perfect Tenses &middot; Subject-Verb Agreement &middot; Prepositions</div>`
+    : `<div class="completed" style="font-size:15px;line-height:1.6;max-width:80%;text-align:center;">In recognition of his/her successful completion of the <strong>MINA Story Mode</strong>, demonstrating exceptional dedication and mastery of grammar fundamentals.</div>`
+  }
   <div class="badge">🏆 &nbsp;${correct}/${total} &middot; ${pct}% &middot; ${grade}</div>
   <div class="hrule"></div><div class="dateline">${dateStr} &middot; EL306 Language Learning Materials</div></div>
   <script>window.onload=function(){setTimeout(function(){window.print();},800);};</script></body></html>`;
@@ -344,12 +351,17 @@ export default function ScoreSummary() {
                 {playerName}
               </div>
               <div style={{ fontFamily:'var(--font-body)', fontSize:'clamp(0.62rem,1.1vw,0.88rem)', color:'#4A3000', lineHeight:1.5 }}>
-                has successfully completed <strong>{isAdvancedMode ? 'Minasa: Grammar Quest — Advanced Mode' : 'Minasa: Grammar Quest'}</strong>
+                {isAdvancedMode
+                  ? <>has successfully completed <strong>Minasa: Grammar Quest — Advanced Mode</strong></>
+                  : <>In recognition of his/her successful completion of the <strong>MINA Story Mode</strong>, demonstrating exceptional dedication and mastery of grammar fundamentals.</>
+                }
               </div>
-              <div style={{ fontFamily:'var(--font-body)', fontSize:'clamp(0.56rem,0.95vw,0.78rem)', color:subCol, lineHeight:1.55 }}>
-                Exploring the Minasa Festival in Bustos, Bulacan<br/>
-                Perfect Tenses · Subject-Verb Agreement · Prepositions
-              </div>
+              {isAdvancedMode && (
+                <div style={{ fontFamily:'var(--font-body)', fontSize:'clamp(0.56rem,0.95vw,0.78rem)', color:subCol, lineHeight:1.55 }}>
+                  Exploring the Minasa Festival in Bustos, Bulacan<br/>
+                  Perfect Tenses · Subject-Verb Agreement · Prepositions
+                </div>
+              )}
               <div style={{
                 background: isAdvancedMode ? 'linear-gradient(135deg,#3A4DB8,#5B6FD4)' : 'linear-gradient(135deg,#C8860A,#F5C518)',
                 color:'white', fontFamily:'var(--font-title)', fontWeight:700,
