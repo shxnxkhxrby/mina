@@ -32,12 +32,9 @@ export default function MainMenu() {
       width: '100%',
       height: '100%',
       overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
+      fontFamily: '"Fredoka One", "Baloo 2", cursive',
     }}>
-      {/* ── Background image ── */}
+      {/* ── Background ── */}
       <img
         src={ASSETS.logo}
         alt=""
@@ -52,133 +49,134 @@ export default function MainMenu() {
         }}
         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
-      {/* Light overlay */}
+
+      {/* Subtle blur + dim overlay */}
       <div style={{
-        position: 'absolute', inset: 0,
-        background: 'rgba(255,255,255,0.06)',
+        position: 'absolute',
+        inset: 0,
+        backdropFilter: 'blur(3px)',
+        WebkitBackdropFilter: 'blur(3px)',
+        background: 'rgba(0,0,0,0.08)',
         zIndex: 1,
       }} />
 
-      {/* ── Title ── */}
+      {/* ── Title: top-left ── */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
         style={{
           position: 'absolute',
-          top: 'clamp(10px, 3vh, 24px)',
-          left: 'clamp(12px, 3vw, 32px)',
+          top: 'clamp(10px, 2.5vh, 22px)',
+          left: 'clamp(14px, 3vw, 36px)',
           zIndex: 20,
         }}
       >
         <span style={{
-          fontFamily: '"Fredoka One", "Baloo 2", "Comic Sans MS", cursive',
-          fontSize: 'clamp(1.6rem, 4.5vw, 3rem)',
+          fontFamily: '"Fredoka One", cursive',
+          fontSize: 'clamp(1.8rem, 5vw, 3.2rem)',
           color: '#E8650A',
           fontWeight: 900,
-          textShadow: '2px 3px 0 rgba(0,0,0,0.18), 0 1px 0 #fff',
+          textShadow: '3px 4px 0 rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.6)',
           letterSpacing: '1px',
+          display: 'block',
+          lineHeight: 1,
         }}>
           Mina App
         </span>
       </motion.div>
 
-      {/* ── Main layout: Grid LEFT + Mina RIGHT ── */}
+      {/* ── Main layout ── */}
       <div style={{
-        position: 'relative',
+        position: 'absolute',
+        inset: 0,
         zIndex: 10,
-        width: '100%',
-        height: '100%',
         display: 'flex',
-        flexDirection: 'row',
         alignItems: 'flex-end',
-        justifyContent: 'center',
-        padding: 'clamp(60px, 10vh, 90px) clamp(8px, 2vw, 24px) clamp(12px, 2vh, 24px)',
+        justifyContent: 'flex-start',
+        padding: 'clamp(72px, 12vh, 110px) clamp(10px, 3vw, 40px) clamp(16px, 4vh, 40px)',
         boxSizing: 'border-box',
-        gap: 0,
+        gap: 'clamp(0px, 2vw, 20px)',
       }}>
-        {/* ── Left: 2×2 tile grid ── */}
+
+        {/* ── Left: tile grid ── */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15, duration: 0.45, ease: 'easeOut' }}
+          transition={{ delay: 0.1, duration: 0.5, ease: 'easeOut' }}
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gridTemplateRows: 'auto auto',
-            gap: 'clamp(4px, 0.8vw, 8px)',
-            width: 'clamp(280px, 50vw, 540px)',
-            alignSelf: 'center',
+            gridTemplateRows: '1fr 1fr',
+            gap: 'clamp(5px, 0.8vw, 10px)',
+            width: 'clamp(290px, 46vw, 560px)',
+            height: 'clamp(240px, 46vh, 480px)',
             flexShrink: 0,
+            alignSelf: 'flex-end',
           }}
           className="menu-grid"
         >
-          {/* TOP-LEFT: Story Mode or Continue */}
-          <TileButton
-            onClick={handleStoryMode}
-            delay={0.2}
-            label={playerName ? 'Continue' : 'Story Mode'}
-          />
-
-          {/* TOP-RIGHT: New Game (if save exists) or empty slot */}
+          {/* TOP-LEFT */}
           {playerName ? (
-            <TileButton
-              onClick={handleNewGame}
-              delay={0.26}
-              label="New Game"
-            />
+            <Tile onClick={handleStoryMode} delay={0.18} label="Continue" />
           ) : (
-            <div style={{ background: 'transparent' }} />
+            /* Fresh start: Story Mode spans full top row */
+            <Tile onClick={handleStoryMode} delay={0.18} label="Story Mode" wide />
+          )}
+
+          {/* TOP-RIGHT: New Game only if save exists */}
+          {playerName ? (
+            <Tile onClick={handleNewGame} delay={0.24} label="New Game" />
+          ) : (
+            /* empty slot — wide tile above already spans 2 cols */
+            null
           )}
 
           {/* BOTTOM-LEFT: Advanced Mode */}
-          <TileButton
-            onClick={handleAdvanced}
-            delay={0.32}
-            label="Advanced Mode"
-          />
+          <Tile onClick={handleAdvanced} delay={0.30} label="Advanced Mode" />
 
           {/* BOTTOM-RIGHT: Volume Settings */}
-          <div style={{ position: 'relative' }}>
-            <TileButton
-              onClick={() => setShowVolume(v => !v)}
-              delay={0.38}
-              label="Volume settings"
-              isVolume
-              showVolume={showVolume}
-              musicVolume={musicVolume}
-              voiceVolume={voiceVolume}
-              setMusicVolume={setMusicVolume}
-              setVoiceVolume={setVoiceVolume}
-            />
-          </div>
+          <Tile
+            onClick={() => setShowVolume(v => !v)}
+            delay={0.36}
+            label="Volume Settings"
+            isVolume
+            showVolume={showVolume}
+            musicVolume={musicVolume}
+            voiceVolume={voiceVolume}
+            setMusicVolume={setMusicVolume}
+            setVoiceVolume={setVoiceVolume}
+          />
         </motion.div>
 
         {/* ── Right: Mina mascot ── */}
         <motion.div
-          initial={{ opacity: 0, x: 40 }}
+          initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1, type: 'spring', stiffness: 80, damping: 16 }}
+          transition={{ delay: 0.08, type: 'spring', stiffness: 70, damping: 14 }}
           style={{
             flexShrink: 0,
             alignSelf: 'flex-end',
-            marginBottom: '-4px',
-            marginLeft: 'clamp(-20px, -2vw, 0px)',
+            marginBottom: '-6px',
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'flex-end',
           }}
-          className="mina-mascot-wrap"
+          className="mina-wrap"
         >
           <motion.img
             src={ASSETS.minaMascot}
             alt="Mina"
-            animate={{ y: [0, -12, 0] }}
-            transition={{ duration: 3.0, repeat: Infinity, ease: 'easeInOut' }}
+            animate={{ y: [0, -14, 0] }}
+            transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
             style={{
-              height: 'clamp(220px, 70vh, 680px)',
+              height: 'clamp(260px, 72vh, 700px)',
               width: 'auto',
-              maxWidth: 'clamp(180px, 38vw, 400px)',
+              maxWidth: 'clamp(200px, 42vw, 480px)',
               objectFit: 'contain',
               objectPosition: 'bottom',
-              filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.25))',
+              filter: 'drop-shadow(0 12px 32px rgba(0,0,0,0.30))',
               display: 'block',
             }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -189,24 +187,24 @@ export default function MainMenu() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 
-        /* Mobile: stack vertically */
-        @media (max-width: 540px) {
+        @media (max-width: 560px) {
           .menu-grid {
-            width: 92vw !important;
-            grid-template-columns: 1fr 1fr !important;
+            width: 90vw !important;
+            height: auto !important;
           }
-          .mina-mascot-wrap {
+          .mina-wrap {
             display: none !important;
           }
         }
 
-        /* Tablet portrait */
-        @media (min-width: 541px) and (max-width: 768px) {
+        @media (min-width: 561px) and (max-width: 820px) {
           .menu-grid {
-            width: 54vw !important;
+            width: 52vw !important;
+            height: clamp(220px, 44vw, 400px) !important;
           }
-          .mina-mascot-wrap img {
-            height: clamp(200px, 55vw, 380px) !important;
+          .mina-wrap img {
+            height: clamp(220px, 55vw, 380px) !important;
+            max-width: 36vw !important;
           }
         }
 
@@ -214,26 +212,25 @@ export default function MainMenu() {
           -webkit-appearance: none;
           appearance: none;
           width: 100%;
-          height: 4px;
-          border-radius: 3px;
+          height: 5px;
+          border-radius: 4px;
           outline: none;
           cursor: pointer;
-          background: rgba(255,255,255,0.4);
         }
         input[type='range'].vol-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
-          width: 14px; height: 14px;
+          width: 16px; height: 16px;
           border-radius: 50%;
           background: #E8650A;
-          border: 2px solid #fff;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+          border: 2.5px solid #fff;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.35);
           cursor: pointer;
         }
         input[type='range'].vol-slider::-moz-range-thumb {
-          width: 14px; height: 14px;
+          width: 16px; height: 16px;
           border-radius: 50%;
           background: #E8650A;
-          border: 2px solid #fff;
+          border: 2.5px solid #fff;
           cursor: pointer;
         }
       `}</style>
@@ -241,12 +238,12 @@ export default function MainMenu() {
   );
 }
 
-// ── Tile button ─────────────────────────────────────────────────────────────
-interface TileButtonProps {
+// ── Tile ─────────────────────────────────────────────────────────────────────
+interface TileProps {
   onClick: () => void;
   delay: number;
   label: string;
-  color?: string;           // optional — was previously required, caused TS2741
+  wide?: boolean;
   isVolume?: boolean;
   showVolume?: boolean;
   musicVolume?: number;
@@ -255,74 +252,91 @@ interface TileButtonProps {
   setVoiceVolume?: (v: number) => void;
 }
 
-function TileButton({
-  onClick, delay, label, isVolume, showVolume,
+function Tile({
+  onClick, delay, label, wide,
+  isVolume, showVolume,
   musicVolume, voiceVolume, setMusicVolume, setVoiceVolume,
-}: TileButtonProps) {
+}: TileProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.88 }}
+      initial={{ opacity: 0, scale: 0.84 }}
       animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay, duration: 0.35, type: 'spring', stiffness: 220, damping: 20 }}
-      style={{ width: '100%' }}
+      transition={{ delay, duration: 0.38, type: 'spring', stiffness: 200, damping: 18 }}
+      style={{
+        gridColumn: wide ? '1 / -1' : undefined,
+        width: '100%',
+        height: '100%',
+      }}
     >
       <motion.button
-        whileHover={{ scale: 1.04, filter: 'brightness(1.08)' }}
+        whileHover={{ scale: 1.04, filter: 'brightness(1.1)' }}
         whileTap={{ scale: 0.96 }}
         onClick={onClick}
         style={{
           width: '100%',
-          aspectRatio: isVolume && showVolume ? 'auto' : '1 / 0.72',
-          minHeight: 'clamp(80px, 14vh, 140px)',
-          background: 'linear-gradient(160deg, rgba(180,230,120,0.82) 0%, rgba(120,200,80,0.85) 100%)',
-          border: '3.5px solid rgba(255,255,255,0.55)',
-          borderRadius: 'clamp(10px, 1.8vw, 18px)',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.5)',
+          height: '100%',
+          minHeight: 'clamp(90px, 16vh, 160px)',
+          /* Scene-bleed: semi-transparent so bg shows through like screenshot */
+          background: 'linear-gradient(160deg, rgba(160,218,100,0.72) 0%, rgba(100,185,55,0.78) 55%, rgba(70,150,30,0.82) 100%)',
+          border: '4px solid rgba(255,255,255,0.60)',
+          borderRadius: 'clamp(10px, 1.6vw, 20px)',
+          boxShadow: '0 8px 28px rgba(0,0,0,0.28), inset 0 2px 0 rgba(255,255,255,0.55), inset 0 -2px 0 rgba(0,0,0,0.10)',
           cursor: 'pointer',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           padding: isVolume && showVolume
-            ? 'clamp(10px,1.8vh,18px) clamp(10px,1.8vw,18px)'
-            : 'clamp(8px,1.4vh,14px) clamp(8px,1.4vw,14px)',
-          backdropFilter: 'blur(6px)',
+            ? 'clamp(10px,1.6vh,18px) clamp(12px,1.8vw,20px)'
+            : 'clamp(8px,1.2vh,14px) clamp(8px,1.2vw,14px)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
           gap: '6px',
-          transition: 'box-shadow 0.2s',
           position: 'relative',
           overflow: 'hidden',
+          transition: 'box-shadow 0.18s',
         }}
       >
-        {/* Grass texture overlay */}
+        {/* Inner sky-like gradient to mimic the scene showing through */}
         <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(ellipse at 30% 80%, rgba(80,160,40,0.3) 0%, transparent 60%)',
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(180deg, rgba(180,230,255,0.25) 0%, rgba(120,200,80,0.10) 55%, rgba(60,140,20,0.20) 100%)',
+          pointerEvents: 'none',
+          borderRadius: 'inherit',
+        }} />
+        {/* Grassy ground strip at bottom of tile */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0, left: 0, right: 0,
+          height: '28%',
+          background: 'linear-gradient(180deg, transparent 0%, rgba(60,130,20,0.35) 100%)',
+          borderRadius: '0 0 inherit inherit',
           pointerEvents: 'none',
         }} />
 
         {isVolume && showVolume ? (
-          /* Volume panel inside the tile */
           <div
-            style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 'clamp(8px,1.4vh,14px)', zIndex: 1 }}
+            style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 'clamp(6px,1.2vh,12px)', zIndex: 2 }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{
+            <span style={{
               fontFamily: '"Fredoka One", cursive',
-              fontSize: 'clamp(0.7rem, 1.8vw, 1rem)',
-              color: '#5A2D00',
+              fontSize: 'clamp(0.75rem, 1.9vw, 1.1rem)',
+              color: '#4A2000',
               fontWeight: 900,
               textAlign: 'center',
-              textShadow: '0 1px 0 rgba(255,255,255,0.5)',
+              textShadow: '0 1px 0 rgba(255,255,255,0.6)',
             }}>
-              Volume settings
-            </div>
-            <MiniSlider
+              Volume Settings
+            </span>
+            <VolumeSlider
               icon="🎵"
               label="Game music"
               value={musicVolume ?? 0.5}
               onChange={setMusicVolume ?? (() => {})}
             />
-            <MiniSlider
+            <VolumeSlider
               icon="🎙"
               label="Mina's voice"
               value={voiceVolume ?? 0.8}
@@ -331,29 +345,14 @@ function TileButton({
           </div>
         ) : (
           <span style={{
-            fontFamily: '"Fredoka One", "Baloo 2", cursive',
-            fontSize: 'clamp(0.9rem, 2.4vw, 1.5rem)',
-            color: '#5A2D00',
-            fontWeight: 900,
-            textShadow: '0 1px 0 rgba(255,255,255,0.55)',
-            textAlign: 'center',
-            lineHeight: 1.2,
-            zIndex: 1,
-          }}>
-            {label}
-          </span>
-        )}
-
-        {isVolume && !showVolume && (
-          <span style={{
             fontFamily: '"Fredoka One", cursive',
-            fontSize: 'clamp(0.9rem, 2.4vw, 1.5rem)',
-            color: '#5A2D00',
+            fontSize: 'clamp(1rem, 2.6vw, 1.65rem)',
+            color: '#4A2000',
             fontWeight: 900,
-            textShadow: '0 1px 0 rgba(255,255,255,0.55)',
+            textShadow: '0 2px 0 rgba(255,255,255,0.65), 0 1px 4px rgba(0,0,0,0.15)',
             textAlign: 'center',
             lineHeight: 1.2,
-            zIndex: 1,
+            zIndex: 2,
           }}>
             {label}
           </span>
@@ -363,8 +362,8 @@ function TileButton({
   );
 }
 
-// ── Mini slider inside tile ─────────────────────────────────────────────────
-function MiniSlider({
+// ── Volume slider ─────────────────────────────────────────────────────────────
+function VolumeSlider({
   icon, label, value, onChange,
 }: {
   icon: string;
@@ -374,23 +373,25 @@ function MiniSlider({
 }) {
   const pct = Math.round(value * 100);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontFamily: 'var(--font-body, sans-serif)',
-        fontSize: 'clamp(0.5rem, 1vw, 0.65rem)',
-        color: '#5A2D00',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontFamily: '"Fredoka One", cursive',
+        fontSize: 'clamp(0.55rem, 1.1vw, 0.72rem)',
+        color: '#4A2000',
       }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ fontSize: 'clamp(0.7rem, 1.2vw, 0.85rem)' }}>{icon}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+          <span style={{ fontSize: 'clamp(0.7rem, 1.2vw, 0.9rem)' }}>{icon}</span>
           {label}
         </span>
-        <span style={{ fontWeight: 700, color: '#E8650A', minWidth: '26px', textAlign: 'right' }}>
+        <span style={{ fontWeight: 700, color: '#E8650A', minWidth: '28px', textAlign: 'right' }}>
           {pct}%
         </span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>🔈</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+        <span style={{ fontSize: '0.65rem', opacity: 0.55 }}>🔈</span>
         <input
           type="range"
           className="vol-slider"
@@ -399,10 +400,10 @@ function MiniSlider({
           onChange={e => onChange(parseFloat(e.target.value))}
           style={{
             flex: 1,
-            background: `linear-gradient(to right, #E8650A ${pct}%, rgba(255,255,255,0.4) ${pct}%)`,
+            background: `linear-gradient(to right, #E8650A ${pct}%, rgba(255,255,255,0.45) ${pct}%)`,
           }}
         />
-        <span style={{ fontSize: '0.6rem', opacity: 0.6 }}>🔊</span>
+        <span style={{ fontSize: '0.65rem', opacity: 0.55 }}>🔊</span>
       </div>
     </div>
   );
