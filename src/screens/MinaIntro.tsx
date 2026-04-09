@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { MINA_INTRO_DIALOGUES } from '../data/dialogues';
 import { ASSETS } from '../data/assets';
 import { useMinaBg } from '../hooks/useMinaBg';
+import { useVoiceAudio } from '../components/AudioManager'; // ← FIX: use the hook
 
 // ── Floating particle ──────────────────────────────────────────────────────
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
@@ -61,9 +62,11 @@ export default function MinaIntro() {
   const { goToScene } = useGameStore();
   const [idx, setIdx] = useState(0);
   const [showCursor, setShowCursor] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const minaBg = useMinaBg();
   const [bgSrcIdx, setBgSrcIdx] = useState(0);
+
+  // ✅ FIX: use the hook instead of raw new Audio() — this respects voiceVolume
+  const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
   const current = MINA_INTRO_DIALOGUES[idx];
   const isLast = idx === MINA_INTRO_DIALOGUES.length - 1;
@@ -74,43 +77,18 @@ export default function MinaIntro() {
     return () => clearInterval(t);
   }, []);
 
-  // Play audio for the current line — read directly from the dialogue data
-  // so the URL always matches the text, with no separate array to keep in sync.
+  // Play audio for the current line using the hook (voiceVolume-aware)
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    const src = MINA_INTRO_DIALOGUES[idx].audio;
-    if (!src) return;
-    const audio = new Audio(src);
-    audioRef.current = audio;
-    audio.play().catch(() => {/* autoplay blocked — silent fail */});
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, [idx]);
+    playVoice(MINA_INTRO_DIALOGUES[idx].audio);
+  }, [idx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Stop audio on unmount
   useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-  };
+    return () => stopVoice();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const advance = () => {
-    stopAudio();
+    stopVoice();
     if (isLast) {
       useGameStore.getState().setSection('A');
       goToScene('GRAMMAR_LESSON');
@@ -251,7 +229,7 @@ export default function MinaIntro() {
           }}
           onClick={e => {
             e.stopPropagation();
-            stopAudio();
+            stopVoice();
             useGameStore.getState().setSection('A');
             goToScene('GRAMMAR_LESSON');
           }}
