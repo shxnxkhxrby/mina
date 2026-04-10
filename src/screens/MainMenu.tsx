@@ -12,10 +12,10 @@ const LESSON_LIBRARY = [
     emoji: '📚',
     topic: 'Perfect Tenses',
     lessons: [
-      { title: 'Introduction to Perfect Tenses', text: 'Perfect tenses express actions that have been completed relative to another time point. They use the auxiliary verb "have/has/had" with the past participle.' },
-      { title: 'Present Perfect', text: 'The present perfect (have/has + past participle) connects the past to the present. Example: "She has visited Bustos three times."' },
-      { title: 'Past Perfect', text: 'The past perfect (had + past participle) describes an action completed before another past action. Example: "They had already eaten before the parade started."' },
-      { title: 'Future Perfect', text: 'The future perfect (will have + past participle) describes an action that will be completed before a future time. Example: "By sunset, we will have watched the whole festival."' },
+      { title: 'Introduction to Perfect Tenses of the Verb', text: 'Perfect tenses express actions that have been completed relative to another time point. They use the auxiliary verb "have/has/had" with the past participle.' },
+      { title: 'Present Perfect Tense', text: 'The present perfect (have/has + past participle) connects the past to the present. Example: "She has visited Bustos three times."' },
+      { title: 'Past Perfect Tense', text: 'The past perfect (had + past participle) describes an action completed before another past action. Example: "They had already eaten before the parade started."' },
+      { title: 'Future Perfect Tense', text: 'The future perfect (will have + past participle) describes an action that will be completed before a future time. Example: "By sunset, we will have watched the whole festival."' },
     ],
   },
   {
