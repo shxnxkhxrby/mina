@@ -649,29 +649,28 @@ export default function MainMenu() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.08, type: 'spring', stiffness: 70, damping: 14 }}
           style={{
-            position: 'absolute',
-            right: 'clamp(-60px, -5vw, -20px)',
-            bottom: 0,
+            flex: '0 0 auto',
+            alignSelf: 'flex-end',
+            marginBottom: '-10px',
+            marginRight: 'clamp(-40px, -4vw, -10px)',
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'flex-end',
-            pointerEvents: 'none',
           }}
           className="mina-wrap"
         >
           <motion.img
             src={ASSETS.minaMascot}
             alt="Mina"
-            animate={{ y: [0, -32, 0] }}
+            animate={{ y: [0, -26, 0] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
             style={{
-              height: 'min(200vh, 200vw)',
+              height: 'clamp(780px, 172vh, 1600px)',
               width: 'auto',
-              maxHeight: '100%',
-              minHeight: 'clamp(600px, 140vh, 99999px)',
+              maxWidth: 'clamp(480px, 78vw, 920px)',
               objectFit: 'contain',
               objectPosition: 'bottom',
-              filter: 'drop-shadow(0 24px 52px rgba(0,0,0,0.34))',
+              filter: 'drop-shadow(0 22px 50px rgba(0,0,0,0.32))',
               display: 'block',
             }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -702,9 +701,8 @@ export default function MainMenu() {
             pointer-events: none;
           }
           .mina-wrap img {
-            height: min(190vh, 190vw) !important;
-            min-height: clamp(400px, 110vh, 99999px) !important;
-            max-width: none !important;
+            height: clamp(520px, 130vw, 780px) !important;
+            max-width: 90vw !important;
           }
         }
 
@@ -715,9 +713,8 @@ export default function MainMenu() {
             margin-right: clamp(-24px, -2vw, -8px) !important;
           }
           .mina-wrap img {
-            height: min(195vh, 195vw) !important;
-            min-height: clamp(500px, 120vh, 99999px) !important;
-            max-width: none !important;
+            height: clamp(640px, 128vw, 1000px) !important;
+            max-width: 58vw !important;
           }
         }
 
