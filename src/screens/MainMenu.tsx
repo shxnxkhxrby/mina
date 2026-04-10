@@ -421,53 +421,60 @@ export default function MainMenu() {
           display: 'inline-flex',
           flexDirection: 'column',
           alignItems: 'center',
-          background: 'linear-gradient(170deg, rgba(20,10,0,0.82) 0%, rgba(40,18,0,0.88) 100%)',
-          border: '2.5px solid rgba(245,200,74,0.55)',
+          background: 'linear-gradient(160deg, #F07820 0%, #E8650A 50%, #CF5508 100%)',
+          border: '3.5px solid rgba(255,255,255,0.55)',
           borderRadius: 'clamp(16px,3vw,28px)',
-          padding: 'clamp(10px,1.8vh,18px) clamp(24px,5vw,56px) clamp(8px,1.5vh,14px)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,220,100,0.18)',
+          padding: 'clamp(10px,1.8vh,18px) clamp(28px,5.5vw,60px) clamp(10px,1.6vh,16px)',
+          boxShadow: '0 8px 28px rgba(0,0,0,0.38), inset 0 2px 0 rgba(255,255,255,0.40), inset 0 -4px 0 rgba(0,0,0,0.20)',
         }}>
-          {/* Inner glow border */}
+
+          {/* Sheen highlight — mirrors the Tile buttons */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)',
+            pointerEvents: 'none', borderRadius: 'inherit',
+          }} />
+
+          {/* Inner border inset */}
           <div style={{
             position: 'absolute', inset: '4px',
-            border: '1px solid rgba(245,200,74,0.22)',
+            border: '1px solid rgba(255,255,255,0.18)',
             borderRadius: 'clamp(12px,2.5vw,22px)',
             pointerEvents: 'none',
           }} />
 
           {/* Corner diamonds */}
           {[
-            { top: '7px', left: '10px' },
-            { top: '7px', right: '10px' },
-            { bottom: '7px', left: '10px' },
-            { bottom: '7px', right: '10px' },
+            { top: '8px', left: '12px' },
+            { top: '8px', right: '12px' },
+            { bottom: '8px', left: '12px' },
+            { bottom: '8px', right: '12px' },
           ].map((pos, i) => (
             <div key={i} style={{
               position: 'absolute', ...pos,
               width: 'clamp(5px,0.8vw,7px)', height: 'clamp(5px,0.8vw,7px)',
-              background: '#F5C84A',
+              background: 'rgba(255,255,255,0.75)',
               transform: 'rotate(45deg)',
-              opacity: 0.75,
             }} />
           ))}
 
-          {/* Top rule with star */}
+          {/* Top rule with stars */}
           <div style={{
             display: 'flex', alignItems: 'center',
-            gap: 'clamp(8px,1.5vw,16px)',
-            marginBottom: 'clamp(4px,0.8vh,8px)',
+            gap: 'clamp(6px,1.2vw,14px)',
+            marginBottom: 'clamp(3px,0.6vh,6px)',
             width: '100%', justifyContent: 'center',
           }}>
             <div style={{
-              flex: 1, height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(245,200,74,0.7))',
+              flex: 1, height: '1.5px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6))',
             }} />
-            <span style={{ color: '#F5C84A', fontSize: 'clamp(0.5rem,0.9vw,0.7rem)', opacity: 0.9 }}>★</span>
-            <span style={{ color: 'rgba(245,200,74,0.55)', fontSize: 'clamp(0.38rem,0.65vw,0.52rem)' }}>✦</span>
-            <span style={{ color: '#F5C84A', fontSize: 'clamp(0.5rem,0.9vw,0.7rem)', opacity: 0.9 }}>★</span>
+            <span style={{ color: 'rgba(255,255,255,0.95)', fontSize: 'clamp(0.48rem,0.85vw,0.66rem)' }}>★</span>
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 'clamp(0.36rem,0.6vw,0.5rem)' }}>✦</span>
+            <span style={{ color: 'rgba(255,255,255,0.95)', fontSize: 'clamp(0.48rem,0.85vw,0.66rem)' }}>★</span>
             <div style={{
-              flex: 1, height: '1px',
-              background: 'linear-gradient(90deg, rgba(245,200,74,0.7), transparent)',
+              flex: 1, height: '1.5px',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.6), transparent)',
             }} />
           </div>
 
@@ -485,48 +492,51 @@ export default function MainMenu() {
               color: 'transparent',
               letterSpacing: 'clamp(4px,1vw,10px)',
               whiteSpace: 'nowrap',
-              textShadow: '0 0 30px rgba(240,120,32,0.9), 0 0 60px rgba(240,120,32,0.5)',
+              textShadow: '0 0 24px rgba(255,255,255,0.55), 0 0 48px rgba(255,200,80,0.35)',
               display: 'block',
               pointerEvents: 'none',
             }}>M.I.N.A.</span>
 
+            {/* Main text */}
             <span style={{
               fontFamily: '"Fredoka One", cursive',
               fontSize: 'clamp(2rem,5.5vw,4rem)',
-              background: 'linear-gradient(180deg, #FFD580 0%, #F07820 45%, #CF5508 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              color: '#fff',
               fontWeight: 900,
               letterSpacing: 'clamp(4px,1vw,10px)',
               whiteSpace: 'nowrap',
               display: 'block',
-              filter: 'drop-shadow(2px 3px 0 rgba(0,0,0,0.5))',
+              textShadow: '0 2px 4px rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.15)',
             }}>M.I.N.A.</span>
 
-            {/* Gold underline bar */}
+            {/* White underline bar */}
             <div style={{
               position: 'absolute', bottom: '-2px', left: '5%', right: '5%',
-              height: '2.5px',
-              background: 'linear-gradient(90deg, transparent, #F5C84A 25%, #FFE090 50%, #F5C84A 75%, transparent)',
+              height: '2px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8) 25%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.8) 75%, transparent)',
               borderRadius: '2px',
             }} />
           </motion.div>
 
           {/* Subtitle */}
-          <div style={{ marginTop: 'clamp(5px,1vh,9px)', display: 'flex', alignItems: 'center', gap: 'clamp(6px,1.2vw,12px)' }}>
-            <div style={{ width: 'clamp(14px,2.5vw,24px)', height: '1px', background: 'rgba(245,200,74,0.4)' }} />
+          <div style={{
+            marginTop: 'clamp(6px,1.1vh,10px)',
+            display: 'flex', alignItems: 'center',
+            gap: 'clamp(6px,1.2vw,12px)',
+          }}>
+            <div style={{ width: 'clamp(14px,2.5vw,24px)', height: '1px', background: 'rgba(255,255,255,0.45)' }} />
             <span style={{
               fontFamily: '"Fredoka One", cursive',
               fontSize: 'clamp(0.46rem,0.9vw,0.7rem)',
-              color: 'rgba(255,228,160,0.9)',
+              color: 'rgba(255,255,255,0.92)',
               letterSpacing: 'clamp(3px,0.7vw,7px)',
               textTransform: 'uppercase' as const,
               whiteSpace: 'nowrap',
+              textShadow: '0 1px 3px rgba(0,0,0,0.25)',
             }}>
               Grammar Quest
             </span>
-            <div style={{ width: 'clamp(14px,2.5vw,24px)', height: '1px', background: 'rgba(245,200,74,0.4)' }} />
+            <div style={{ width: 'clamp(14px,2.5vw,24px)', height: '1px', background: 'rgba(255,255,255,0.45)' }} />
           </div>
 
           {/* Bottom rule with dots */}
@@ -537,18 +547,18 @@ export default function MainMenu() {
             width: '100%', justifyContent: 'center',
           }}>
             <div style={{
-              flex: 1, height: '1px',
-              background: 'linear-gradient(90deg, transparent, rgba(245,200,74,0.5))',
+              flex: 1, height: '1.5px',
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5))',
             }} />
-            {['#F5C84A','#E8650A','#F5C84A'].map((c, i) => (
+            {['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.55)', 'rgba(255,255,255,0.9)'].map((c, i) => (
               <div key={i} style={{
                 width: 'clamp(3px,0.5vw,5px)', height: 'clamp(3px,0.5vw,5px)',
-                borderRadius: '50%', background: c, opacity: 0.8,
+                borderRadius: '50%', background: c,
               }} />
             ))}
             <div style={{
-              flex: 1, height: '1px',
-              background: 'linear-gradient(90deg, rgba(245,200,74,0.5), transparent)',
+              flex: 1, height: '1.5px',
+              background: 'linear-gradient(90deg, rgba(255,255,255,0.5), transparent)',
             }} />
           </div>
         </div>
@@ -688,11 +698,16 @@ export default function MainMenu() {
 
         @media (max-width: 560px) {
           .menu-grid {
-            width: 60vw !important;
+            width: 58vw !important;
             height: auto !important;
             margin-left: clamp(10px, 3vw, 20px) !important;
             margin-right: 0 !important;
             z-index: 11;
+            gap: 8px !important;
+          }
+          .menu-grid button {
+            min-height: clamp(64px, 11vh, 100px) !important;
+            font-size: clamp(0.72rem, 3.8vw, 1rem) !important;
           }
           .mina-wrap {
             position: absolute !important;

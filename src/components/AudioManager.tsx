@@ -1,8 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useGameStore } from '../store/gameStore';
 
+//https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775740394/MINASA_BGM_c1dgyc.mp3
+
 const BGM_URL =
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775740394/MINASA_BGM_c1dgyc.mp3';
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775800697/Pufino_-_Enlivening_freetouse.com_hwfxmb.mp3';
 
 // ── Global singleton audio refs (survive re-renders / HMR) ────────────────
 let bgmInstance: HTMLAudioElement | null = null;
