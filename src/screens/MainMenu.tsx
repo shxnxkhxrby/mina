@@ -1,14 +1,355 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { ASSETS } from '../data/assets';
+
+// ── Lessons Library Modal ──────────────────────────────────────────────────
+const LESSON_LIBRARY = [
+  {
+    section: 'A',
+    color: '#E85D26',
+    gradient: 'linear-gradient(135deg,#FF9A5C,#E85D26)',
+    emoji: '📚',
+    topic: 'Perfect Tenses',
+    lessons: [
+      { title: 'Introduction to Perfect Tenses', text: 'Perfect tenses express actions that have been completed relative to another time point. They use the auxiliary verb "have/has/had" with the past participle.' },
+      { title: 'Present Perfect', text: 'The present perfect (have/has + past participle) connects the past to the present. Example: "She has visited Bustos three times."' },
+      { title: 'Past Perfect', text: 'The past perfect (had + past participle) describes an action completed before another past action. Example: "They had already eaten before the parade started."' },
+      { title: 'Future Perfect', text: 'The future perfect (will have + past participle) describes an action that will be completed before a future time. Example: "By sunset, we will have watched the whole festival."' },
+    ],
+  },
+  {
+    section: 'B',
+    color: '#5B7A3D',
+    gradient: 'linear-gradient(135deg,#8BBB60,#5B7A3D)',
+    emoji: '🌿',
+    topic: 'Subject-Verb Agreement',
+    lessons: [
+      { title: 'Core Rule', text: 'A verb must agree with its subject in number. Singular subjects take singular verbs; plural subjects take plural verbs. Example: "The dancer performs" vs "The dancers perform."' },
+      { title: 'Collective Nouns', text: 'Collective nouns (team, group, family) can be singular or plural depending on whether the group acts as a unit or as individuals.' },
+      { title: 'Indefinite Pronouns', text: '"Everyone," "nobody," "each," and "either" are singular. "Both," "few," "many," and "several" are plural. Example: "Everyone is invited to the Minasa Festival."' },
+    ],
+  },
+  {
+    section: 'C',
+    color: '#2E75B6',
+    gradient: 'linear-gradient(135deg,#5BA3E0,#2E75B6)',
+    emoji: '🔷',
+    topic: 'Prepositions',
+    lessons: [
+      { title: 'Prepositions of Place', text: 'Words like in, on, at, under, beside, between describe where something is. Example: "The food stall is beside the main stage."' },
+      { title: 'Prepositions of Time', text: '"In" is used for months, years, and seasons. "On" is used for days and dates. "At" is used for specific times. Example: "The festival happens in December, on a Saturday, at noon."' },
+      { title: 'Prepositions of Movement', text: 'Words like to, from, through, across, along, towards describe direction or movement. Example: "The procession moved through the streets of Bustos."' },
+      { title: 'Common Phrasal Prepositions', text: 'Combinations like "in front of," "because of," "instead of," and "on top of" act as single prepositions. Example: "In front of the church, the dancers performed."' },
+    ],
+  },
+  {
+    section: 'D',
+    color: '#8B1A8B',
+    gradient: 'linear-gradient(135deg,#C060C0,#8B1A8B)',
+    emoji: '🎉',
+    topic: 'Grammar Review — Mixed',
+    lessons: [
+      { title: 'Combining Perfect Tenses & Prepositions', text: 'Use perfect tenses with prepositions to describe completed actions in relation to time and place. Example: "By the time they arrived at the plaza, the dancers had already begun."' },
+      { title: 'Agreement in Complex Sentences', text: 'Maintain subject-verb agreement even when clauses and phrases come between the subject and verb. Example: "The group of musicians, who has been practicing, are ready to perform."' },
+      { title: 'Review: All Grammar Topics', text: 'The Minasa Festival covers Perfect Tenses (Sections A), Subject-Verb Agreement (Section B), and Prepositions (Section C). Mastery means applying all three together naturally in communication.' },
+    ],
+  },
+];
+
+function LessonsLibraryModal({ onClose }: { onClose: () => void }) {
+  const [activeSection, setActiveSection] = useState(0);
+  const [activelesson, setActiveLesson] = useState<number | null>(null);
+  const sec = LESSON_LIBRARY[activeSection];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 100,
+        background: 'rgba(0,0,0,0.72)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(12px,3vw,32px)',
+      }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.88, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.88, y: 30 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+        style={{
+          background: 'linear-gradient(160deg,#FFFDF0,#FFF8D6)',
+          borderRadius: 'clamp(14px,2vw,24px)',
+          border: '3px solid #F5C84A',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+          width: 'min(96vw, 700px)',
+          maxHeight: '88vh',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Modal header */}
+        <div style={{
+          background: 'linear-gradient(135deg,#F07820,#E8650A)',
+          padding: 'clamp(12px,2vh,18px) clamp(16px,2.5vw,24px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexShrink: 0,
+        }}>
+          <div>
+            <div style={{
+              fontFamily: 'var(--font-title)',
+              fontSize: 'clamp(0.9rem,2.2vw,1.35rem)',
+              color: 'white',
+              fontWeight: 900,
+              textShadow: '0 2px 6px rgba(0,0,0,0.3)',
+            }}>
+              📖 Lessons Library
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: 'clamp(0.52rem,1vw,0.7rem)',
+              color: 'rgba(255,255,255,0.85)',
+              marginTop: '2px',
+            }}>
+              Review grammar lessons from M.I.N.A. — Grammar Quest
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              border: '2px solid rgba(255,255,255,0.5)',
+              borderRadius: '50%',
+              width: 'clamp(28px,3.5vw,36px)',
+              height: 'clamp(28px,3.5vw,36px)',
+              color: 'white',
+              fontSize: 'clamp(0.8rem,1.5vw,1rem)',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 700, flexShrink: 0,
+            }}
+          >✕</button>
+        </div>
+
+        {/* Section tabs */}
+        <div style={{
+          display: 'flex', gap: '0',
+          borderBottom: '2px solid #F5C84A',
+          overflowX: 'auto', flexShrink: 0,
+        }}>
+          {LESSON_LIBRARY.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => { setActiveSection(i); setActiveLesson(null); }}
+              style={{
+                flex: '1 0 auto',
+                padding: 'clamp(8px,1.5vh,12px) clamp(8px,1.5vw,16px)',
+                border: 'none',
+                borderBottom: activeSection === i ? `3px solid ${s.color}` : '3px solid transparent',
+                background: activeSection === i ? `${s.color}18` : 'transparent',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-title)',
+                fontSize: 'clamp(0.55rem,1.1vw,0.75rem)',
+                fontWeight: 700,
+                color: activeSection === i ? s.color : '#9A8060',
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {s.emoji} Section {s.section}
+            </button>
+          ))}
+        </div>
+
+        {/* Content area */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(14px,2.5vh,22px) clamp(14px,2.5vw,22px)' }}>
+          {/* Topic header */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            marginBottom: 'clamp(10px,1.8vh,16px)',
+          }}>
+            <div style={{
+              background: sec.gradient,
+              borderRadius: '10px', padding: '6px 14px',
+              fontFamily: 'var(--font-body)', fontWeight: 700,
+              fontSize: 'clamp(0.6rem,1.2vw,0.82rem)',
+              color: 'white',
+              letterSpacing: '0.5px',
+            }}>
+              {sec.emoji} {sec.topic}
+            </div>
+          </div>
+
+          {/* Lesson cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(8px,1.4vh,12px)' }}>
+            {sec.lessons.map((lesson, li) => (
+              <motion.div
+                key={li}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: li * 0.07 }}
+                onClick={() => setActiveLesson(activelesson === li ? null : li)}
+                style={{
+                  background: activelesson === li ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.8)',
+                  border: `2px solid ${activelesson === li ? sec.color : 'rgba(200,160,0,0.22)'}`,
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  transition: 'border-color 0.2s, background 0.2s',
+                  boxShadow: activelesson === li ? `0 4px 16px ${sec.color}30` : '0 2px 6px rgba(0,0,0,0.06)',
+                }}
+              >
+                <div style={{
+                  padding: 'clamp(10px,1.6vh,14px) clamp(12px,2vw,18px)',
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                }}>
+                  <div style={{
+                    width: 'clamp(22px,2.8vw,28px)', height: 'clamp(22px,2.8vw,28px)',
+                    borderRadius: '50%',
+                    background: activelesson === li ? sec.gradient : 'rgba(200,160,0,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 'clamp(0.6rem,1.1vw,0.76rem)',
+                    color: activelesson === li ? 'white' : sec.color,
+                    fontWeight: 700, flexShrink: 0,
+                    transition: 'all 0.2s',
+                  }}>
+                    {li + 1}
+                  </div>
+                  <div style={{
+                    fontFamily: 'var(--font-title)',
+                    fontSize: 'clamp(0.66rem,1.4vw,0.9rem)',
+                    color: activelesson === li ? sec.color : 'var(--olive-brown)',
+                    fontWeight: 700, flex: 1,
+                  }}>
+                    {lesson.title}
+                  </div>
+                  <div style={{
+                    fontSize: 'clamp(0.65rem,1.2vw,0.85rem)',
+                    color: sec.color, opacity: 0.7,
+                    transition: 'transform 0.2s',
+                    transform: activelesson === li ? 'rotate(180deg)' : 'none',
+                    flexShrink: 0,
+                  }}>▼</div>
+                </div>
+                <AnimatePresence>
+                  {activelesson === li && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22 }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div style={{
+                        padding: 'clamp(8px,1.4vh,12px) clamp(12px,2vw,18px) clamp(12px,2vh,16px)',
+                        borderTop: `1px solid ${sec.color}30`,
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'clamp(0.65rem,1.3vw,0.85rem)',
+                        color: '#4A3000',
+                        lineHeight: 1.7,
+                        background: `${sec.color}08`,
+                      }}>
+                        {lesson.text}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: 'clamp(8px,1.4vh,12px) clamp(14px,2.5vw,22px)',
+          borderTop: '2px solid #F5C84A',
+          display: 'flex', justifyContent: 'flex-end',
+          flexShrink: 0,
+          background: 'rgba(255,248,200,0.6)',
+        }}>
+          <motion.button
+            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+            onClick={onClose}
+            style={{
+              background: 'linear-gradient(160deg,#F07820,#E8650A)',
+              border: 'none', borderRadius: '10px',
+              padding: 'clamp(7px,1.2vh,10px) clamp(18px,2.5vw,28px)',
+              fontFamily: 'var(--font-title)',
+              fontSize: 'clamp(0.65rem,1.3vw,0.85rem)',
+              color: 'white', fontWeight: 900, cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(232,100,10,0.4)',
+            }}
+          >
+            Close ✕
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ── Volume Gear Popup ──────────────────────────────────────────────────────
+function VolumeGearPopup({
+  musicVolume, voiceVolume, setMusicVolume, setVoiceVolume, onClose,
+}: {
+  musicVolume: number; voiceVolume: number;
+  setMusicVolume: (v: number) => void;
+  setVoiceVolume: (v: number) => void;
+  onClose: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, y: 10 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+      style={{
+        position: 'absolute',
+        bottom: 'calc(100% + 8px)',
+        left: '0',
+        background: 'linear-gradient(160deg,#F07820,#E8650A)',
+        borderRadius: '14px',
+        border: '2.5px solid rgba(255,255,255,0.45)',
+        boxShadow: '0 8px 28px rgba(0,0,0,0.40), inset 0 2px 0 rgba(255,255,255,0.30)',
+        padding: 'clamp(10px,1.6vh,16px) clamp(14px,2vw,20px)',
+        width: 'clamp(200px,28vw,260px)',
+        zIndex: 50,
+      }}
+      onClick={e => e.stopPropagation()}
+    >
+      <div style={{
+        fontFamily: 'var(--font-title)',
+        fontSize: 'clamp(0.72rem,1.4vw,0.9rem)',
+        color: '#fff',
+        fontWeight: 900,
+        marginBottom: 'clamp(8px,1.2vh,12px)',
+        textAlign: 'center',
+        textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+      }}>
+        ⚙ Volume Settings
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(8px,1.4vh,12px)' }}
+        onClick={e => e.stopPropagation()}>
+        <VolumeSlider icon="🎵" label="Game music" value={musicVolume} onChange={setMusicVolume} />
+        <VolumeSlider icon="🎙" label="Mina's voice" value={voiceVolume} onChange={setVoiceVolume} />
+      </div>
+    </motion.div>
+  );
+}
 
 export default function MainMenu() {
   const {
     goToScene, playerName, setAdvancedMode,
     musicVolume, voiceVolume, setMusicVolume, setVoiceVolume,
   } = useGameStore();
+
   const [showVolume, setShowVolume] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
 
   const handleStoryMode = () => {
     setAdvancedMode(false);
@@ -26,117 +367,99 @@ export default function MainMenu() {
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      width: '100%',
-      height: '100%',
-      overflow: 'hidden',
-      fontFamily: '"Fredoka One", "Baloo 2", cursive',
-    }}>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden',
+        fontFamily: '"Fredoka One", "Baloo 2", cursive',
+      }}
+      onClick={() => showVolume && setShowVolume(false)}
+    >
       {/* Background */}
       <img
         src={ASSETS.logo}
         alt=""
         style={{
-          position: 'absolute',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center',
-          zIndex: 0,
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover', objectPosition: 'center', zIndex: 0,
         }}
         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
 
       {/* Blur + dim overlay */}
       <div style={{
-        position: 'absolute',
-        inset: 0,
-        backdropFilter: 'blur(2.5px)',
-        WebkitBackdropFilter: 'blur(2.5px)',
-        background: 'rgba(0,0,0,0.42)',
-        zIndex: 1,
+        position: 'absolute', inset: 0,
+        backdropFilter: 'blur(2.5px)', WebkitBackdropFilter: 'blur(2.5px)',
+        background: 'rgba(0,0,0,0.42)', zIndex: 1,
       }} />
 
-      {/* Title — M.I.N.A. */}
+      {/* ── CENTERED M.I.N.A. TITLE ────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -18 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.55, ease: 'easeOut' }}
         style={{
           position: 'absolute',
-          top: 'clamp(14px, 3vh, 30px)',
+          top: 'clamp(14px, 3.5vh, 36px)',
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 20,
-          whiteSpace: 'nowrap',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           gap: '0px',
+          pointerEvents: 'none',
         }}
       >
-        {/* Decorative rule */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginBottom: '2px',
-        }}>
+        {/* Top ornament */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', marginBottom: '4px' }}>
           <div style={{
-            width: 'clamp(24px, 5vw, 48px)',
-            height: '2px',
-            background: 'linear-gradient(90deg, transparent, rgba(232,101,10,0.8))',
-            borderRadius: '2px',
+            width: 'clamp(30px,6vw,60px)', height: '1.5px',
+            background: 'linear-gradient(90deg, transparent, rgba(245,200,74,0.9))',
           }} />
+          <span style={{ fontSize: 'clamp(0.55rem,1vw,0.72rem)', color: 'rgba(245,200,74,0.9)', letterSpacing: '3px' }}>✦</span>
           <div style={{
-            width: 'clamp(4px, 0.8vw, 6px)',
-            height: 'clamp(4px, 0.8vw, 6px)',
-            borderRadius: '50%',
-            background: '#F5C84A',
-            boxShadow: '0 0 8px rgba(245,200,74,0.9)',
-          }} />
-          <div style={{
-            width: 'clamp(24px, 5vw, 48px)',
-            height: '2px',
-            background: 'linear-gradient(90deg, rgba(232,101,10,0.8), transparent)',
-            borderRadius: '2px',
+            width: 'clamp(30px,6vw,60px)', height: '1.5px',
+            background: 'linear-gradient(90deg, rgba(245,200,74,0.9), transparent)',
           }} />
         </div>
 
         {/* M.I.N.A. wordmark */}
-        <div style={{ position: 'relative', lineHeight: 1 }}>
+        <motion.div
+          animate={{ scale: [1, 1.012, 1] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'relative', lineHeight: 1 }}
+        >
           <span style={{
             fontFamily: '"Fredoka One", cursive',
-            fontSize: 'clamp(2rem, 5.5vw, 3.6rem)',
-            color: '#E8650A',
+            fontSize: 'clamp(2.2rem,6vw,4.2rem)',
+            color: '#F07820',
             fontWeight: 900,
-            textShadow: '3px 4px 0 rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.4)',
-            letterSpacing: '5px',
+            textShadow: '3px 4px 0 rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.35)',
+            letterSpacing: 'clamp(6px,1.2vw,12px)',
             display: 'block',
           }}>
             M.I.N.A.
           </span>
-          {/* Gold underline accent */}
+          {/* Gold underline */}
           <div style={{
-            position: 'absolute',
-            bottom: '-2px',
-            left: '0',
-            right: '0',
+            position: 'absolute', bottom: '-3px', left: 0, right: 0,
             height: '3px',
-            background: 'linear-gradient(90deg, transparent, #F5C84A 25%, #F5C84A 75%, transparent)',
+            background: 'linear-gradient(90deg, transparent, #F5C84A 20%, #F5C84A 80%, transparent)',
             borderRadius: '2px',
           }} />
-        </div>
+        </motion.div>
 
-        {/* Subtitle tagline */}
+        {/* Subtitle */}
         <span style={{
           fontFamily: '"Fredoka One", cursive',
-          fontSize: 'clamp(0.5rem, 1.1vw, 0.78rem)',
-          color: 'rgba(255,248,220,0.88)',
-          letterSpacing: '5px',
+          fontSize: 'clamp(0.5rem,1vw,0.75rem)',
+          color: 'rgba(255,248,220,0.85)',
+          letterSpacing: 'clamp(4px,0.9vw,8px)',
           textTransform: 'uppercase' as const,
           textShadow: '0 1px 4px rgba(0,0,0,0.6)',
           marginTop: '6px',
@@ -144,22 +467,80 @@ export default function MainMenu() {
         }}>
           Grammar Quest
         </span>
+
+        {/* Bottom ornament */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px,1.6vw,16px)', marginTop: '5px' }}>
+          <div style={{
+            width: 'clamp(22px,4.5vw,44px)', height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(232,101,10,0.6))',
+          }} />
+          <div style={{ display: 'flex', gap: '5px' }}>
+            {['#F5C84A','#E8650A','#F5C84A'].map((c, i) => (
+              <div key={i} style={{
+                width: 'clamp(3px,0.55vw,5px)', height: 'clamp(3px,0.55vw,5px)',
+                borderRadius: '50%', background: c, opacity: 0.85,
+              }} />
+            ))}
+          </div>
+          <div style={{
+            width: 'clamp(22px,4.5vw,44px)', height: '1px',
+            background: 'linear-gradient(90deg, rgba(232,101,10,0.6), transparent)',
+          }} />
+        </div>
       </motion.div>
 
-      {/* Main layout */}
+      {/* ── GEAR ICON (bottom-left) ─────────────────────────────────────── */}
       <div style={{
         position: 'absolute',
-        inset: 0,
-        zIndex: 10,
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 'clamp(80px, 14vh, 120px) 0 clamp(28px, 5vh, 64px)',
+        bottom: 'clamp(12px,2.5vh,24px)',
+        left: 'clamp(12px,2.5vw,24px)',
+        zIndex: 30,
+      }}>
+        <div style={{ position: 'relative' }}>
+          <AnimatePresence>
+            {showVolume && (
+              <VolumeGearPopup
+                musicVolume={musicVolume}
+                voiceVolume={voiceVolume}
+                setMusicVolume={setMusicVolume}
+                setVoiceVolume={setVoiceVolume}
+                onClose={() => setShowVolume(false)}
+              />
+            )}
+          </AnimatePresence>
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 20 }}
+            whileTap={{ scale: 0.93 }}
+            onClick={e => { e.stopPropagation(); setShowVolume(v => !v); }}
+            style={{
+              width: 'clamp(36px,4.5vw,50px)',
+              height: 'clamp(36px,4.5vw,50px)',
+              borderRadius: '50%',
+              background: showVolume
+                ? 'linear-gradient(135deg,#F07820,#CF5508)'
+                : 'rgba(0,0,0,0.55)',
+              border: '2.5px solid rgba(255,255,255,0.45)',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 'clamp(1rem,2vw,1.4rem)',
+              transition: 'background 0.2s',
+            }}
+          >
+            ⚙️
+          </motion.button>
+        </div>
+      </div>
+
+      {/* ── MAIN LAYOUT ────────────────────────────────────────────────── */}
+      <div style={{
+        position: 'absolute', inset: 0, zIndex: 10,
+        display: 'flex', flexDirection: 'row',
+        alignItems: 'center', justifyContent: 'center',
+        padding: 'clamp(90px,16vh,130px) 0 clamp(28px,5vh,64px)',
         boxSizing: 'border-box',
         gap: 0,
       }}>
-
         {/* Tile grid */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -168,12 +549,10 @@ export default function MainMenu() {
           style={{
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gridTemplateRows: '1fr 1fr',
+            gridTemplateRows: 'auto',
             gap: 'clamp(8px, 1.2vw, 16px)',
             width: 'clamp(280px, 38vw, 480px)',
-            height: 'clamp(240px, 40vh, 460px)',
-            flexShrink: 0,
-            zIndex: 11,
+            flexShrink: 0, zIndex: 11,
             marginLeft: 'clamp(16px, 6vw, 80px)',
             marginRight: 'clamp(-40px, -4vw, -16px)',
           }}
@@ -191,20 +570,16 @@ export default function MainMenu() {
 
           <Tile onClick={handleAdvanced} delay={0.30} label="Mastery Checkpoint" />
 
+          {/* Lessons Library tile — replaces Volume Settings tile */}
           <Tile
-            onClick={() => setShowVolume(v => !v)}
+            onClick={() => setShowLibrary(true)}
             delay={0.36}
-            label="Volume Settings"
-            isVolume
-            showVolume={showVolume}
-            musicVolume={musicVolume}
-            voiceVolume={voiceVolume}
-            setMusicVolume={setMusicVolume}
-            setVoiceVolume={setVoiceVolume}
+            label="Lessons Library"
+            icon="📖"
           />
         </motion.div>
 
-        {/* Mina mascot */}
+        {/* Mina mascot — larger */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -222,21 +597,26 @@ export default function MainMenu() {
           <motion.img
             src={ASSETS.minaMascot}
             alt="Mina"
-            animate={{ y: [0, -16, 0] }}
+            animate={{ y: [0, -18, 0] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
             style={{
-              height: 'clamp(380px, 88vh, 900px)',
+              height: 'clamp(440px, 100vh, 1050px)',
               width: 'auto',
-              maxWidth: 'clamp(260px, 48vw, 560px)',
+              maxWidth: 'clamp(300px, 56vw, 660px)',
               objectFit: 'contain',
               objectPosition: 'bottom',
-              filter: 'drop-shadow(0 14px 36px rgba(0,0,0,0.28))',
+              filter: 'drop-shadow(0 16px 40px rgba(0,0,0,0.3))',
               display: 'block',
             }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
         </motion.div>
       </div>
+
+      {/* Lessons Library Modal */}
+      <AnimatePresence>
+        {showLibrary && <LessonsLibraryModal onClose={() => setShowLibrary(false)} />}
+      </AnimatePresence>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
@@ -256,20 +636,20 @@ export default function MainMenu() {
             pointer-events: none;
           }
           .mina-wrap img {
-            height: clamp(220px, 58vw, 340px) !important;
-            max-width: 52vw !important;
+            height: clamp(260px, 64vw, 400px) !important;
+            max-width: 54vw !important;
           }
         }
 
         @media (min-width: 561px) and (max-width: 860px) {
           .menu-grid {
             width: 46vw !important;
-            height: clamp(220px, 44vw, 400px) !important;
+            height: auto !important;
             margin-right: clamp(-24px, -2vw, -8px) !important;
           }
           .mina-wrap img {
-            height: clamp(300px, 62vw, 500px) !important;
-            max-width: 42vw !important;
+            height: clamp(360px, 72vw, 600px) !important;
+            max-width: 46vw !important;
           }
         }
 
@@ -308,19 +688,10 @@ interface TileProps {
   delay: number;
   label: string;
   wide?: boolean;
-  isVolume?: boolean;
-  showVolume?: boolean;
-  musicVolume?: number;
-  voiceVolume?: number;
-  setMusicVolume?: (v: number) => void;
-  setVoiceVolume?: (v: number) => void;
+  icon?: string;
 }
 
-function Tile({
-  onClick, delay, label, wide,
-  isVolume, showVolume,
-  musicVolume, voiceVolume, setMusicVolume, setVoiceVolume,
-}: TileProps) {
+function Tile({ onClick, delay, label, wide, icon }: TileProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.84 }}
@@ -328,8 +699,7 @@ function Tile({
       transition={{ delay, duration: 0.38, type: 'spring', stiffness: 200, damping: 18 }}
       style={{
         gridColumn: wide ? '1 / -1' : undefined,
-        width: '100%',
-        height: '100%',
+        width: '100%', height: '100%',
       }}
     >
       <motion.button
@@ -337,79 +707,38 @@ function Tile({
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
         style={{
-          width: '100%',
-          height: '100%',
+          width: '100%', height: '100%',
           minHeight: 'clamp(80px, 14vh, 140px)',
           background: 'linear-gradient(160deg, #F07820 0%, #E8650A 50%, #CF5508 100%)',
           border: '3.5px solid rgba(255,255,255,0.55)',
           borderRadius: 'clamp(12px, 1.8vw, 22px)',
           boxShadow: '0 6px 22px rgba(0,0,0,0.30), inset 0 2px 0 rgba(255,255,255,0.40), inset 0 -3px 0 rgba(0,0,0,0.18)',
           cursor: 'pointer',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: isVolume && showVolume
-            ? 'clamp(10px, 1.6vh, 18px) clamp(12px, 1.8vw, 20px)'
-            : 'clamp(8px, 1.2vh, 14px) clamp(8px, 1.2vw, 14px)',
-          gap: '6px',
-          position: 'relative',
-          overflow: 'hidden',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          padding: 'clamp(8px, 1.2vh, 14px) clamp(8px, 1.2vw, 14px)',
+          gap: '4px', position: 'relative', overflow: 'hidden',
           transition: 'box-shadow 0.18s',
         }}
       >
         {/* Sheen highlight */}
         <div style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0,
-          height: '45%',
+          position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
           background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)',
-          pointerEvents: 'none',
-          borderRadius: 'inherit',
+          pointerEvents: 'none', borderRadius: 'inherit',
         }} />
-
-        {isVolume && showVolume ? (
-          <div
-            style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 'clamp(6px,1.2vh,12px)', zIndex: 2 }}
-            onClick={e => e.stopPropagation()}
-          >
-            <span style={{
-              fontFamily: '"Fredoka One", cursive',
-              fontSize: 'clamp(0.8rem, 1.9vw, 1.1rem)',
-              color: '#fff',
-              fontWeight: 900,
-              textAlign: 'center',
-              textShadow: '0 1px 3px rgba(0,0,0,0.30)',
-            }}>
-              Volume Settings
-            </span>
-            <VolumeSlider
-              icon="🎵"
-              label="Game music"
-              value={musicVolume ?? 0.5}
-              onChange={setMusicVolume ?? (() => {})}
-            />
-            <VolumeSlider
-              icon="🎙"
-              label="Mina's voice"
-              value={voiceVolume ?? 0.8}
-              onChange={setVoiceVolume ?? (() => {})}
-            />
-          </div>
-        ) : (
-          <span style={{
-            fontFamily: '"Fredoka One", cursive',
-            fontSize: 'clamp(0.9rem, 2.2vw, 1.5rem)',
-            color: '#fff',
-            fontWeight: 900,
-            textShadow: '0 2px 4px rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.15)',
-            textAlign: 'center',
-            lineHeight: 1.2,
-            zIndex: 2,
-          }}>
-            {label}
-          </span>
+        {icon && (
+          <span style={{ fontSize: 'clamp(1rem,2.2vw,1.5rem)', zIndex: 2 }}>{icon}</span>
         )}
+        <span style={{
+          fontFamily: '"Fredoka One", cursive',
+          fontSize: 'clamp(0.9rem, 2.2vw, 1.5rem)',
+          color: '#fff', fontWeight: 900,
+          textShadow: '0 2px 4px rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.15)',
+          textAlign: 'center', lineHeight: 1.2, zIndex: 2,
+        }}>
+          {label}
+        </span>
       </motion.button>
     </motion.div>
   );
@@ -418,18 +747,13 @@ function Tile({
 function VolumeSlider({
   icon, label, value, onChange,
 }: {
-  icon: string;
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
+  icon: string; label: string; value: number; onChange: (v: number) => void;
 }) {
   const pct = Math.round(value * 100);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         fontFamily: '"Fredoka One", cursive',
         fontSize: 'clamp(0.55rem, 1.1vw, 0.75rem)',
         color: 'rgba(255,255,255,0.92)',
@@ -445,8 +769,7 @@ function VolumeSlider({
       <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
         <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>🔈</span>
         <input
-          type="range"
-          className="vol-slider"
+          type="range" className="vol-slider"
           min={0} max={1} step={0.01}
           value={value}
           onChange={e => onChange(parseFloat(e.target.value))}

@@ -76,7 +76,7 @@ async function exportCertificateAsPng(
     ctx.fillText('Perfect Tenses  ·  Subject-Verb Agreement  ·  Prepositions', W/2, 458);
   } else {
     ctx.font = '15px Arial, sans-serif'; ctx.fillStyle = '#4A3000';
-    ctx.fillText('In recognition of his/her successful completion of the MINA Story Mode,', W/2, 375);
+    ctx.fillText('In recognition of his/her successful completion of the M.I.N.A. Story Mode,', W/2, 375);
     ctx.fillText('demonstrating exceptional dedication and mastery of grammar fundamentals.', W/2, 398);
   }
   const bW = 380, bH = 46, bX = (W-bW)/2, bY = 486;
@@ -139,7 +139,7 @@ function printCertificate(
   <div class="certify">This is to certify that</div><div class="name">${playerName}</div>
   ${isAdvanced
     ? `<div class="completed">has successfully completed <strong>${questTitle}</strong></div><div class="subline">Exploring the Minasa Festival in Bustos, Bulacan<br/>Perfect Tenses &middot; Subject-Verb Agreement &middot; Prepositions</div>`
-    : `<div class="completed" style="font-size:15px;line-height:1.6;max-width:80%;text-align:center;">In recognition of his/her successful completion of the <strong>MINA Story Mode</strong>, demonstrating exceptional dedication and mastery of grammar fundamentals.</div>`
+    : `<div class="completed" style="font-size:15px;line-height:1.6;max-width:80%;text-align:center;">In recognition of his/her successful completion of the <strong>M.I.N.A. Story Mode</strong>, demonstrating exceptional dedication and mastery of grammar fundamentals.</div>`
   }
   <div class="badge">🏆 &nbsp;${correct}/${total} &middot; ${pct}% &middot; ${grade}</div>
   <div class="hrule"></div><div class="dateline">${dateStr} &middot; EL306 Language Learning Materials</div></div>
@@ -353,7 +353,7 @@ export default function ScoreSummary() {
               <div style={{ fontFamily:'var(--font-body)', fontSize:'clamp(0.62rem,1.1vw,0.88rem)', color:'#4A3000', lineHeight:1.5 }}>
                 {isAdvancedMode
                   ? <>has successfully completed <strong>Minasa: Grammar Quest — Advanced Mode</strong></>
-                  : <>In recognition of his/her successful completion of the <strong>MINA Story Mode</strong>, demonstrating exceptional dedication and mastery of grammar fundamentals.</>
+                  : <>In recognition of his/her successful completion of the <strong>M.I.N.A. Story Mode</strong>, demonstrating exceptional dedication and mastery of grammar fundamentals.</>
                 }
               </div>
               {isAdvancedMode && (
