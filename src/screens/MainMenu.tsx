@@ -603,6 +603,7 @@ export default function MainMenu() {
         display: 'flex', flexDirection: 'row',
         alignItems: 'center', justifyContent: 'center',
         padding: 'clamp(100px,17vh,140px) 0 clamp(20px,3vh,48px)',
+        paddingRight: 0,
         boxSizing: 'border-box',
         gap: 0,
       }}>
@@ -651,24 +652,25 @@ export default function MainMenu() {
             flex: '0 0 auto',
             alignSelf: 'flex-end',
             marginBottom: '-10px',
+            marginRight: 'clamp(-40px, -4vw, -10px)',
             display: 'flex',
             alignItems: 'flex-end',
-            justifyContent: 'center',
+            justifyContent: 'flex-end',
           }}
           className="mina-wrap"
         >
           <motion.img
             src={ASSETS.minaMascot}
             alt="Mina"
-            animate={{ y: [0, -22, 0] }}
+            animate={{ y: [0, -26, 0] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
             style={{
-              height: 'clamp(500px, 108vh, 1100px)',
+              height: 'clamp(780px, 172vh, 1600px)',
               width: 'auto',
-              maxWidth: 'clamp(340px, 60vw, 700px)',
+              maxWidth: 'clamp(480px, 78vw, 920px)',
               objectFit: 'contain',
               objectPosition: 'bottom',
-              filter: 'drop-shadow(0 18px 44px rgba(0,0,0,0.32))',
+              filter: 'drop-shadow(0 22px 50px rgba(0,0,0,0.32))',
               display: 'block',
             }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -699,8 +701,8 @@ export default function MainMenu() {
             pointer-events: none;
           }
           .mina-wrap img {
-            height: clamp(300px, 72vw, 460px) !important;
-            max-width: 58vw !important;
+            height: clamp(520px, 130vw, 780px) !important;
+            max-width: 90vw !important;
           }
         }
 
@@ -711,8 +713,8 @@ export default function MainMenu() {
             margin-right: clamp(-24px, -2vw, -8px) !important;
           }
           .mina-wrap img {
-            height: clamp(400px, 80vw, 660px) !important;
-            max-width: 48vw !important;
+            height: clamp(640px, 128vw, 1000px) !important;
+            max-width: 58vw !important;
           }
         }
 
