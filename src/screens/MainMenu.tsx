@@ -602,7 +602,7 @@ export default function MainMenu() {
         position: 'absolute', inset: 0, zIndex: 10,
         display: 'flex', flexDirection: 'row',
         alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(90px,16vh,130px) 0 clamp(28px,5vh,64px)',
+        padding: 'clamp(100px,17vh,140px) 0 clamp(20px,3vh,48px)',
         boxSizing: 'border-box',
         gap: 0,
       }}>
@@ -615,11 +615,11 @@ export default function MainMenu() {
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
             gridTemplateRows: 'auto',
-            gap: 'clamp(8px, 1.2vw, 16px)',
-            width: 'clamp(280px, 38vw, 480px)',
+            gap: 'clamp(10px, 1.5vw, 20px)',
+            width: 'clamp(320px, 44vw, 580px)',
             flexShrink: 0, zIndex: 11,
-            marginLeft: 'clamp(16px, 6vw, 80px)',
-            marginRight: 'clamp(-40px, -4vw, -16px)',
+            marginLeft: 'clamp(16px, 5vw, 72px)',
+            marginRight: 'clamp(-50px, -5vw, -20px)',
           }}
           className="menu-grid"
         >
@@ -635,16 +635,14 @@ export default function MainMenu() {
 
           <Tile onClick={handleAdvanced} delay={0.30} label="Mastery Checkpoint" />
 
-          {/* Lessons Library tile — replaces Volume Settings tile */}
           <Tile
             onClick={() => setShowLibrary(true)}
             delay={0.36}
             label="Lessons Library"
-            icon="📖"
           />
         </motion.div>
 
-        {/* Mina mascot — larger */}
+        {/* Mina mascot */}
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -652,7 +650,7 @@ export default function MainMenu() {
           style={{
             flex: '0 0 auto',
             alignSelf: 'flex-end',
-            marginBottom: '-8px',
+            marginBottom: '-10px',
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'center',
@@ -662,15 +660,15 @@ export default function MainMenu() {
           <motion.img
             src={ASSETS.minaMascot}
             alt="Mina"
-            animate={{ y: [0, -18, 0] }}
+            animate={{ y: [0, -22, 0] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
             style={{
-              height: 'clamp(440px, 100vh, 1050px)',
+              height: 'clamp(500px, 108vh, 1100px)',
               width: 'auto',
-              maxWidth: 'clamp(300px, 56vw, 660px)',
+              maxWidth: 'clamp(340px, 60vw, 700px)',
               objectFit: 'contain',
               objectPosition: 'bottom',
-              filter: 'drop-shadow(0 16px 40px rgba(0,0,0,0.3))',
+              filter: 'drop-shadow(0 18px 44px rgba(0,0,0,0.32))',
               display: 'block',
             }}
             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -688,9 +686,9 @@ export default function MainMenu() {
 
         @media (max-width: 560px) {
           .menu-grid {
-            width: 56vw !important;
+            width: 60vw !important;
             height: auto !important;
-            margin-left: clamp(12px, 4vw, 24px) !important;
+            margin-left: clamp(10px, 3vw, 20px) !important;
             margin-right: 0 !important;
             z-index: 11;
           }
@@ -701,20 +699,20 @@ export default function MainMenu() {
             pointer-events: none;
           }
           .mina-wrap img {
-            height: clamp(260px, 64vw, 400px) !important;
-            max-width: 54vw !important;
+            height: clamp(300px, 72vw, 460px) !important;
+            max-width: 58vw !important;
           }
         }
 
         @media (min-width: 561px) and (max-width: 860px) {
           .menu-grid {
-            width: 46vw !important;
+            width: 50vw !important;
             height: auto !important;
             margin-right: clamp(-24px, -2vw, -8px) !important;
           }
           .mina-wrap img {
-            height: clamp(360px, 72vw, 600px) !important;
-            max-width: 46vw !important;
+            height: clamp(400px, 80vw, 660px) !important;
+            max-width: 48vw !important;
           }
         }
 
@@ -753,10 +751,9 @@ interface TileProps {
   delay: number;
   label: string;
   wide?: boolean;
-  icon?: string;
 }
 
-function Tile({ onClick, delay, label, wide, icon }: TileProps) {
+function Tile({ onClick, delay, label, wide }: TileProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.84 }}
@@ -773,15 +770,15 @@ function Tile({ onClick, delay, label, wide, icon }: TileProps) {
         onClick={onClick}
         style={{
           width: '100%', height: '100%',
-          minHeight: 'clamp(80px, 14vh, 140px)',
+          minHeight: 'clamp(100px, 17vh, 180px)',
           background: 'linear-gradient(160deg, #F07820 0%, #E8650A 50%, #CF5508 100%)',
           border: '3.5px solid rgba(255,255,255,0.55)',
-          borderRadius: 'clamp(12px, 1.8vw, 22px)',
-          boxShadow: '0 6px 22px rgba(0,0,0,0.30), inset 0 2px 0 rgba(255,255,255,0.40), inset 0 -3px 0 rgba(0,0,0,0.18)',
+          borderRadius: 'clamp(14px, 2vw, 26px)',
+          boxShadow: '0 8px 28px rgba(0,0,0,0.32), inset 0 2px 0 rgba(255,255,255,0.40), inset 0 -4px 0 rgba(0,0,0,0.20)',
           cursor: 'pointer',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          padding: 'clamp(8px, 1.2vh, 14px) clamp(8px, 1.2vw, 14px)',
+          padding: 'clamp(12px, 1.8vh, 22px) clamp(10px, 1.5vw, 18px)',
           gap: '4px', position: 'relative', overflow: 'hidden',
           transition: 'box-shadow 0.18s',
         }}
@@ -792,12 +789,9 @@ function Tile({ onClick, delay, label, wide, icon }: TileProps) {
           background: 'linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)',
           pointerEvents: 'none', borderRadius: 'inherit',
         }} />
-        {icon && (
-          <span style={{ fontSize: 'clamp(1rem,2.2vw,1.5rem)', zIndex: 2 }}>{icon}</span>
-        )}
         <span style={{
           fontFamily: '"Fredoka One", cursive',
-          fontSize: 'clamp(0.9rem, 2.2vw, 1.5rem)',
+          fontSize: 'clamp(1.05rem, 2.6vw, 1.9rem)',
           color: '#fff', fontWeight: 900,
           textShadow: '0 2px 4px rgba(0,0,0,0.30), 0 1px 0 rgba(0,0,0,0.15)',
           textAlign: 'center', lineHeight: 1.2, zIndex: 2,
