@@ -399,14 +399,14 @@ export default function MainMenu() {
 
       {/* ── CENTERED M.I.N.A. TITLE ────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: 'easeOut' }}
+        initial={{ opacity: 0, y: -28, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         style={{
           position: 'absolute',
-          top: 'clamp(14px, 3.5vh, 36px)',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          top: 'clamp(10px, 2.5vh, 28px)',
+          left: 0,
+          right: 0,
           zIndex: 20,
           display: 'flex',
           flexDirection: 'column',
@@ -415,77 +415,142 @@ export default function MainMenu() {
           pointerEvents: 'none',
         }}
       >
-        {/* Top ornament */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(10px,2vw,20px)', marginBottom: '4px' }}>
-          <div style={{
-            width: 'clamp(30px,6vw,60px)', height: '1.5px',
-            background: 'linear-gradient(90deg, transparent, rgba(245,200,74,0.9))',
-          }} />
-          <span style={{ fontSize: 'clamp(0.55rem,1vw,0.72rem)', color: 'rgba(245,200,74,0.9)', letterSpacing: '3px' }}>✦</span>
-          <div style={{
-            width: 'clamp(30px,6vw,60px)', height: '1.5px',
-            background: 'linear-gradient(90deg, rgba(245,200,74,0.9), transparent)',
-          }} />
-        </div>
-
-        {/* M.I.N.A. wordmark */}
-        <motion.div
-          animate={{ scale: [1, 1.012, 1] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'relative', lineHeight: 1 }}
-        >
-          <span style={{
-            fontFamily: '"Fredoka One", cursive',
-            fontSize: 'clamp(2.2rem,6vw,4.2rem)',
-            color: '#F07820',
-            fontWeight: 900,
-            textShadow: '3px 4px 0 rgba(0,0,0,0.28), 0 1px 0 rgba(255,255,255,0.35)',
-            letterSpacing: 'clamp(6px,1.2vw,12px)',
-            display: 'block',
-          }}>
-            M.I.N.A.
-          </span>
-          {/* Gold underline */}
-          <div style={{
-            position: 'absolute', bottom: '-3px', left: 0, right: 0,
-            height: '3px',
-            background: 'linear-gradient(90deg, transparent, #F5C84A 20%, #F5C84A 80%, transparent)',
-            borderRadius: '2px',
-          }} />
-        </motion.div>
-
-        {/* Subtitle */}
-        <span style={{
-          fontFamily: '"Fredoka One", cursive',
-          fontSize: 'clamp(0.5rem,1vw,0.75rem)',
-          color: 'rgba(255,248,220,0.85)',
-          letterSpacing: 'clamp(4px,0.9vw,8px)',
-          textTransform: 'uppercase' as const,
-          textShadow: '0 1px 4px rgba(0,0,0,0.6)',
-          marginTop: '6px',
-          display: 'block',
+        {/* ── Decorative banner pill ── */}
+        <div style={{
+          position: 'relative',
+          display: 'inline-flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          background: 'linear-gradient(170deg, rgba(20,10,0,0.82) 0%, rgba(40,18,0,0.88) 100%)',
+          border: '2.5px solid rgba(245,200,74,0.55)',
+          borderRadius: 'clamp(16px,3vw,28px)',
+          padding: 'clamp(10px,1.8vh,18px) clamp(24px,5vw,56px) clamp(8px,1.5vh,14px)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,220,100,0.18)',
         }}>
-          Grammar Quest
-        </span>
-
-        {/* Bottom ornament */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(8px,1.6vw,16px)', marginTop: '5px' }}>
+          {/* Inner glow border */}
           <div style={{
-            width: 'clamp(22px,4.5vw,44px)', height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(232,101,10,0.6))',
+            position: 'absolute', inset: '4px',
+            border: '1px solid rgba(245,200,74,0.22)',
+            borderRadius: 'clamp(12px,2.5vw,22px)',
+            pointerEvents: 'none',
           }} />
-          <div style={{ display: 'flex', gap: '5px' }}>
+
+          {/* Corner diamonds */}
+          {[
+            { top: '7px', left: '10px' },
+            { top: '7px', right: '10px' },
+            { bottom: '7px', left: '10px' },
+            { bottom: '7px', right: '10px' },
+          ].map((pos, i) => (
+            <div key={i} style={{
+              position: 'absolute', ...pos,
+              width: 'clamp(5px,0.8vw,7px)', height: 'clamp(5px,0.8vw,7px)',
+              background: '#F5C84A',
+              transform: 'rotate(45deg)',
+              opacity: 0.75,
+            }} />
+          ))}
+
+          {/* Top rule with star */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            gap: 'clamp(8px,1.5vw,16px)',
+            marginBottom: 'clamp(4px,0.8vh,8px)',
+            width: '100%', justifyContent: 'center',
+          }}>
+            <div style={{
+              flex: 1, height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(245,200,74,0.7))',
+            }} />
+            <span style={{ color: '#F5C84A', fontSize: 'clamp(0.5rem,0.9vw,0.7rem)', opacity: 0.9 }}>★</span>
+            <span style={{ color: 'rgba(245,200,74,0.55)', fontSize: 'clamp(0.38rem,0.65vw,0.52rem)' }}>✦</span>
+            <span style={{ color: '#F5C84A', fontSize: 'clamp(0.5rem,0.9vw,0.7rem)', opacity: 0.9 }}>★</span>
+            <div style={{
+              flex: 1, height: '1px',
+              background: 'linear-gradient(90deg, rgba(245,200,74,0.7), transparent)',
+            }} />
+          </div>
+
+          {/* M.I.N.A. wordmark */}
+          <motion.div
+            animate={{ scale: [1, 1.015, 1] }}
+            transition={{ duration: 3.8, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'relative', lineHeight: 1, textAlign: 'center' }}
+          >
+            {/* Glow layer */}
+            <span style={{
+              position: 'absolute', inset: 0,
+              fontFamily: '"Fredoka One", cursive',
+              fontSize: 'clamp(2rem,5.5vw,4rem)',
+              color: 'transparent',
+              letterSpacing: 'clamp(4px,1vw,10px)',
+              whiteSpace: 'nowrap',
+              textShadow: '0 0 30px rgba(240,120,32,0.9), 0 0 60px rgba(240,120,32,0.5)',
+              display: 'block',
+              pointerEvents: 'none',
+            }}>M.I.N.A.</span>
+
+            <span style={{
+              fontFamily: '"Fredoka One", cursive',
+              fontSize: 'clamp(2rem,5.5vw,4rem)',
+              background: 'linear-gradient(180deg, #FFD580 0%, #F07820 45%, #CF5508 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              fontWeight: 900,
+              letterSpacing: 'clamp(4px,1vw,10px)',
+              whiteSpace: 'nowrap',
+              display: 'block',
+              filter: 'drop-shadow(2px 3px 0 rgba(0,0,0,0.5))',
+            }}>M.I.N.A.</span>
+
+            {/* Gold underline bar */}
+            <div style={{
+              position: 'absolute', bottom: '-2px', left: '5%', right: '5%',
+              height: '2.5px',
+              background: 'linear-gradient(90deg, transparent, #F5C84A 25%, #FFE090 50%, #F5C84A 75%, transparent)',
+              borderRadius: '2px',
+            }} />
+          </motion.div>
+
+          {/* Subtitle */}
+          <div style={{ marginTop: 'clamp(5px,1vh,9px)', display: 'flex', alignItems: 'center', gap: 'clamp(6px,1.2vw,12px)' }}>
+            <div style={{ width: 'clamp(14px,2.5vw,24px)', height: '1px', background: 'rgba(245,200,74,0.4)' }} />
+            <span style={{
+              fontFamily: '"Fredoka One", cursive',
+              fontSize: 'clamp(0.46rem,0.9vw,0.7rem)',
+              color: 'rgba(255,228,160,0.9)',
+              letterSpacing: 'clamp(3px,0.7vw,7px)',
+              textTransform: 'uppercase' as const,
+              whiteSpace: 'nowrap',
+            }}>
+              Grammar Quest
+            </span>
+            <div style={{ width: 'clamp(14px,2.5vw,24px)', height: '1px', background: 'rgba(245,200,74,0.4)' }} />
+          </div>
+
+          {/* Bottom rule with dots */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            gap: 'clamp(5px,1vw,10px)',
+            marginTop: 'clamp(4px,0.8vh,8px)',
+            width: '100%', justifyContent: 'center',
+          }}>
+            <div style={{
+              flex: 1, height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(245,200,74,0.5))',
+            }} />
             {['#F5C84A','#E8650A','#F5C84A'].map((c, i) => (
               <div key={i} style={{
-                width: 'clamp(3px,0.55vw,5px)', height: 'clamp(3px,0.55vw,5px)',
-                borderRadius: '50%', background: c, opacity: 0.85,
+                width: 'clamp(3px,0.5vw,5px)', height: 'clamp(3px,0.5vw,5px)',
+                borderRadius: '50%', background: c, opacity: 0.8,
               }} />
             ))}
+            <div style={{
+              flex: 1, height: '1px',
+              background: 'linear-gradient(90deg, rgba(245,200,74,0.5), transparent)',
+            }} />
           </div>
-          <div style={{
-            width: 'clamp(22px,4.5vw,44px)', height: '1px',
-            background: 'linear-gradient(90deg, rgba(232,101,10,0.6), transparent)',
-          }} />
         </div>
       </motion.div>
 
