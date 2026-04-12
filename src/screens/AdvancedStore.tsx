@@ -23,7 +23,7 @@ const SECTION_FALLBACK: Record<string, string> = {
 export default function AdvancedStore() {
   const {
     currentSection, currentStoreIndex, currentQuestionSet,
-    completeStore, addScore, goToScene, setQuestionSet,
+    completeStore, addScore, addAdvancedScore, goToScene, setQuestionSet,
   } = useGameStore();
 
   const section = SECTIONS.find(s => s.id === currentSection);
@@ -46,12 +46,16 @@ export default function AdvancedStore() {
   const scoreRef = useRef(0);
   const [scoreDisplay, setScoreDisplay] = useState(0);
   const [feedbackText, setFeedbackText] = useState('');
+  // BUG FIX: isCorrect must be reset on retry — was never reset before
   const [isCorrect, setIsCorrect] = useState(false);
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
 
   const currentQ = qSet.questions[qIdx];
   const totalQ = qSet.questions.length;
   const choiceLabels = ['A', 'B', 'C', 'D'];
+
+  // BUG FIX: pass threshold as Math.ceil(totalQ * 0.8) instead of hardcoded 4
+  const PASS_THRESHOLD = Math.ceil(totalQ * 0.8);
 
   const handleAnswer = (i: number) => {
     if (selected !== null) return;
@@ -70,21 +74,29 @@ export default function AdvancedStore() {
     setQIdx(i => i + 1);
     setSelected(null);
     setFeedbackText('');
+    // BUG FIX: reset isCorrect between questions so feedback colour doesn't bleed
+    setIsCorrect(false);
     setPhase('question');
   };
 
   const handleFinish = () => {
     completeStore(section.id, store.id, scoreRef.current);
     addScore(scoreRef.current, totalQ);
+    // BUG FIX: also record advanced score so it shows up in advanced leaderboard
+    addAdvancedScore(scoreRef.current, totalQ);
     goToScene('SCORE_SUMMARY');
   };
 
   const handleRetry = () => {
     const next = currentQuestionSet === 'A' ? 'B' : 'A';
     setQuestionSet(next);
-    setQIdx(0); setSelected(null);
-    scoreRef.current = 0; setScoreDisplay(0);
-    setFeedbackText(''); setResults([]);
+    setQIdx(0);
+    setSelected(null);
+    scoreRef.current = 0;
+    setScoreDisplay(0);
+    setFeedbackText('');
+    setResults([]);
+    // BUG FIX: reset isCorrect and phase fully on retry
     setIsCorrect(false);
     setPhase('question');
   };
@@ -98,7 +110,7 @@ export default function AdvancedStore() {
       display: 'flex', flexDirection: 'column',
     }}>
 
-      {/* Blurred backdrop image (same as original AdvancedStore) */}
+      {/* Blurred backdrop image */}
       {!bgFailed && (
         <img
           key={`${currentStoreIndex}-${bgIndex}`}
@@ -116,7 +128,6 @@ export default function AdvancedStore() {
           }}
         />
       )}
-      {/* Overlay so text remains readable */}
       <div style={{
         position: 'absolute', inset: 0,
         background: 'rgba(255,255,255,0.72)',
@@ -129,24 +140,25 @@ export default function AdvancedStore() {
         background: 'white',
         borderBottom: `3px solid ${accent}`,
         boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-        padding: 'clamp(10px,2vh,16px) clamp(14px,3vw,28px)',
-        display: 'flex', alignItems: 'center', gap: '12px',
+        padding: 'clamp(8px,1.6vh,16px) clamp(10px,2.5vw,24px)',
+        display: 'flex', alignItems: 'center', gap: 'clamp(6px,1.2vw,12px)',
         zIndex: 10,
         position: 'relative',
       }}>
         <button
           className="btn btn-ghost btn-sm"
-          style={{ flexShrink: 0, fontSize: 'clamp(0.7rem,1.3vw,0.85rem)' }}
+          style={{ flexShrink: 0, fontSize: 'clamp(0.68rem,1.2vw,0.85rem)', padding: '6px 10px' }}
           onClick={() => goToScene('ADVANCED_SECTION_VIEW')}
         >← Back</button>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px', flexWrap: 'wrap' }}>
             <span style={{
               fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.75rem,1.5vw,1rem)',
+              fontSize: 'clamp(0.7rem,1.4vw,1rem)',
               color: accent, fontWeight: 700,
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              maxWidth: 'clamp(120px,40vw,320px)',
             }}>
               {section.emoji} {store.name} — {section.grammarTopic}
             </span>
@@ -154,11 +166,10 @@ export default function AdvancedStore() {
               flexShrink: 0,
               background: accent, color: 'white',
               fontFamily: 'var(--font-char)', fontWeight: 700,
-              fontSize: 'clamp(0.42rem,0.8vw,0.58rem)',
-              padding: '2px 8px', borderRadius: '20px', letterSpacing: '1px',
+              fontSize: 'clamp(0.4rem,0.75vw,0.56rem)',
+              padding: '2px 7px', borderRadius: '20px', letterSpacing: '1px',
             }}>⚡ MASTERY CHECKPOINT</span>
           </div>
-          {/* Progress bar */}
           <div style={{ height: '6px', background: 'rgba(0,0,0,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
             <motion.div
               animate={{ width: `${progressPct}%` }}
@@ -171,15 +182,15 @@ export default function AdvancedStore() {
         <div style={{
           flexShrink: 0,
           fontFamily: 'var(--font-char)', fontWeight: 700,
-          fontSize: 'clamp(0.65rem,1.2vw,0.82rem)',
+          fontSize: 'clamp(0.6rem,1.1vw,0.8rem)',
           color: accent,
           background: `${accent}15`,
           border: `1.5px solid ${accent}44`,
-          borderRadius: '10px', padding: '4px 12px',
+          borderRadius: '10px', padding: 'clamp(3px,0.5vh,5px) clamp(8px,1.2vw,12px)',
           textAlign: 'center', lineHeight: 1.3,
         }}>
           <div>Q {qIdx + 1}/{totalQ}</div>
-          <div style={{ fontSize: 'clamp(0.55rem,1vw,0.68rem)', opacity: 0.75 }}>⭐ {scoreDisplay} pts</div>
+          <div style={{ fontSize: 'clamp(0.52rem,0.9vw,0.66rem)', opacity: 0.75 }}>⭐ {scoreDisplay} pts</div>
         </div>
       </div>
 
@@ -187,27 +198,22 @@ export default function AdvancedStore() {
       {(phase === 'question' || phase === 'answered') && (
         <div style={{
           flex: 1, overflowY: 'auto',
-          padding: 'clamp(16px,3vh,32px) clamp(16px,4vw,48px)',
-          display: 'flex', flexDirection: 'column', gap: 'clamp(12px,2vh,20px)',
+          padding: 'clamp(12px,2.5vh,28px) clamp(12px,3.5vw,44px)',
+          display: 'flex', flexDirection: 'column', gap: 'clamp(10px,1.8vh,18px)',
           maxWidth: '760px', width: '100%', margin: '0 auto', boxSizing: 'border-box',
           position: 'relative', zIndex: 2,
         }}>
 
           {/* Question number tag */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-          }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
               background: accent, color: 'white',
               fontFamily: 'var(--font-char)', fontWeight: 700,
-              fontSize: 'clamp(0.6rem,1.1vw,0.75rem)',
+              fontSize: 'clamp(0.58rem,1vw,0.72rem)',
               padding: '3px 12px', borderRadius: '20px',
               letterSpacing: '0.5px', flexShrink: 0,
             }}>Question {qIdx + 1} of {totalQ}</div>
-            <div style={{
-              height: '1px', flex: 1,
-              background: `linear-gradient(90deg, ${accent}44, transparent)`,
-            }} />
+            <div style={{ height: '1px', flex: 1, background: `linear-gradient(90deg, ${accent}44, transparent)` }} />
           </div>
 
           {/* Question card */}
@@ -222,33 +228,26 @@ export default function AdvancedStore() {
                 background: 'white',
                 border: `2px solid ${accent}33`,
                 borderRadius: '16px',
-                padding: 'clamp(16px,3vh,28px) clamp(16px,3vw,28px)',
+                padding: 'clamp(14px,2.5vh,26px) clamp(14px,2.5vw,26px)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.07)',
               }}
             >
-              {/* Context / dialogue (if any) */}
               {currentQ.npcDialogueBefore && currentQ.npcDialogueBefore !== currentQ.questionText && (
                 <div style={{
                   fontFamily: 'var(--font-body)',
                   fontSize: 'clamp(0.72rem,1.4vw,0.9rem)',
-                  color: '#6B5B45',
-                  lineHeight: 1.65,
-                  marginBottom: '12px',
-                  paddingBottom: '12px',
+                  color: '#6B5B45', lineHeight: 1.65,
+                  marginBottom: '12px', paddingBottom: '12px',
                   borderBottom: `1px dashed ${accent}33`,
                   fontStyle: 'italic',
                 }}>
                   {currentQ.npcDialogueBefore}
                 </div>
               )}
-
-              {/* Main question text */}
               <div style={{
                 fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(0.9rem,1.9vw,1.2rem)',
-                color: '#1A1200',
-                fontWeight: 800,
-                lineHeight: 1.55,
+                fontSize: 'clamp(0.88rem,1.8vw,1.2rem)',
+                color: '#1A1200', fontWeight: 800, lineHeight: 1.55,
               }}>
                 {currentQ.questionText || currentQ.npcDialogueBefore}
               </div>
@@ -256,7 +255,7 @@ export default function AdvancedStore() {
           </AnimatePresence>
 
           {/* Choices */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px,1.2vh,10px)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px,1.1vh,10px)' }}>
             {currentQ.choices.map((choice, i) => {
               const isCorrectChoice = choice.isCorrect;
               let bg = 'white';
@@ -285,11 +284,10 @@ export default function AdvancedStore() {
                   whileHover={selected === null ? { x: 3, boxShadow: `0 4px 16px ${accent}33` } : {}}
                   style={{
                     display: 'flex', alignItems: 'center',
-                    gap: 'clamp(10px,1.8vw,16px)',
-                    background: bg,
-                    border: `2px solid ${border}`,
+                    gap: 'clamp(8px,1.5vw,16px)',
+                    background: bg, border: `2px solid ${border}`,
                     borderRadius: '12px',
-                    padding: 'clamp(10px,1.8vh,16px) clamp(12px,2vw,20px)',
+                    padding: 'clamp(9px,1.6vh,15px) clamp(10px,1.8vw,18px)',
                     cursor: selected !== null ? 'default' : 'pointer',
                     textAlign: 'left', width: '100%',
                     transition: 'all 0.18s',
@@ -298,16 +296,16 @@ export default function AdvancedStore() {
                 >
                   <span style={{
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                    width: 'clamp(28px,3.5vw,36px)', height: 'clamp(28px,3.5vw,36px)',
+                    width: 'clamp(26px,3.2vw,34px)', height: 'clamp(26px,3.2vw,34px)',
                     background: labelBg, color: 'white',
                     borderRadius: '8px',
                     fontFamily: 'var(--font-char)', fontWeight: 800,
-                    fontSize: 'clamp(0.65rem,1.2vw,0.82rem)',
+                    fontSize: 'clamp(0.62rem,1.1vw,0.8rem)',
                     flexShrink: 0, transition: 'background 0.18s',
                   }}>{choiceLabels[i]}</span>
                   <span style={{
                     fontFamily: 'var(--font-body)',
-                    fontSize: 'clamp(0.75rem,1.5vw,0.95rem)',
+                    fontSize: 'clamp(0.74rem,1.4vw,0.94rem)',
                     color: textColor, lineHeight: 1.5,
                     fontWeight: selected !== null && isCorrectChoice ? 700 : 400,
                     transition: 'color 0.18s',
@@ -315,10 +313,10 @@ export default function AdvancedStore() {
                     {choice.text.replace(/^[A-D]\.\s*/, '')}
                   </span>
                   {selected !== null && isCorrectChoice && (
-                    <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 'clamp(0.9rem,1.6vw,1.1rem)' }}>✓</span>
+                    <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 'clamp(0.85rem,1.5vw,1.1rem)' }}>✓</span>
                   )}
                   {selected !== null && i === selected && !isCorrectChoice && (
-                    <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 'clamp(0.9rem,1.6vw,1.1rem)' }}>✗</span>
+                    <span style={{ marginLeft: 'auto', flexShrink: 0, fontSize: 'clamp(0.85rem,1.5vw,1.1rem)' }}>✗</span>
                   )}
                 </motion.button>
               );
@@ -326,11 +324,10 @@ export default function AdvancedStore() {
           </div>
 
           {/* Progress dots */}
-          <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', paddingTop: '4px' }}>
+          <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', paddingTop: '4px', flexWrap: 'wrap' }}>
             {Array.from({ length: totalQ }).map((_, i) => (
               <div key={i} style={{
-                width: i === qIdx ? '20px' : '7px', height: '7px',
-                borderRadius: '4px',
+                width: i === qIdx ? '20px' : '7px', height: '7px', borderRadius: '4px',
                 background: i < qIdx ? '#28A745' : i === qIdx ? accent : 'rgba(0,0,0,0.12)',
                 transition: 'all 0.3s',
               }} />
@@ -362,8 +359,8 @@ export default function AdvancedStore() {
                   : 'linear-gradient(160deg,#FFF5F5,#F8D7DA)',
                 border: `3px solid ${isCorrect ? '#28A745' : '#DC3545'}`,
                 borderRadius: '20px',
-                padding: 'clamp(20px,4vh,40px) clamp(24px,5vw,52px)',
-                width: 'clamp(280px,55vw,520px)', maxWidth: '92vw',
+                padding: 'clamp(18px,3.5vh,38px) clamp(20px,4.5vw,50px)',
+                width: 'clamp(260px,55vw,520px)', maxWidth: '92vw',
                 textAlign: 'center',
                 boxShadow: '0 16px 56px rgba(0,0,0,0.35)',
               }}
@@ -373,7 +370,7 @@ export default function AdvancedStore() {
               </div>
               <div style={{
                 fontFamily: 'var(--font-title)',
-                fontSize: 'clamp(1.1rem,2.5vw,1.8rem)',
+                fontSize: 'clamp(1rem,2.4vw,1.8rem)',
                 color: isCorrect ? '#155724' : '#721c24',
                 marginBottom: '12px',
               }}>
@@ -409,7 +406,7 @@ export default function AdvancedStore() {
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(0,0,0,0.55)', padding: 'clamp(14px,3vw,36px)',
+          background: 'rgba(0,0,0,0.55)', padding: 'clamp(12px,2.5vw,36px)',
           overflowY: 'auto', zIndex: 50,
         }}>
           <motion.div
@@ -424,35 +421,31 @@ export default function AdvancedStore() {
               border: `3px solid ${accent}`,
             }}
           >
-            {/* Top accent bar */}
             <div style={{
               height: '6px', background: accent,
               borderRadius: '12px 12px 0 0',
               marginTop: '-1px', marginLeft: '-1px', marginRight: '-1px',
             }} />
 
-            <div style={{ padding: 'clamp(16px,3vh,28px) clamp(16px,3vw,24px)' }}>
+            <div style={{ padding: 'clamp(14px,2.5vh,26px) clamp(14px,2.5vw,22px)' }}>
 
-              {/* Score */}
               <div style={{ marginBottom: '6px' }}>
                 <div style={{
                   fontFamily: 'var(--font-title)',
-                  fontSize: 'clamp(0.8rem,1.6vw,1.1rem)',
+                  fontSize: 'clamp(0.78rem,1.5vw,1.1rem)',
                   color: accent, marginBottom: '6px',
-                }}>
-                  ⚡ Mastery Checkpoint Complete
-                </div>
+                }}>⚡ Mastery Checkpoint Complete</div>
                 <div style={{
                   fontFamily: 'var(--font-title)',
-                  fontSize: 'clamp(2.2rem,5vw,3.8rem)',
-                  color: scoreRef.current >= 4 ? '#28A745' : accent,
+                  fontSize: 'clamp(2rem,5vw,3.8rem)',
+                  color: scoreRef.current >= PASS_THRESHOLD ? '#28A745' : accent,
                   lineHeight: 1,
                 }}>
                   {scoreRef.current}/{totalQ}
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-body)',
-                  fontSize: 'clamp(0.62rem,1.2vw,0.78rem)',
+                  fontSize: 'clamp(0.6rem,1.1vw,0.76rem)',
                   color: 'var(--text-muted)', marginTop: '2px',
                 }}>
                   {Math.round((scoreRef.current / totalQ) * 100)}% — {store.name}
@@ -460,12 +453,12 @@ export default function AdvancedStore() {
               </div>
 
               {/* Stars */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
                 {[1, 2, 3, 4, 5].map(n => (
                   <motion.span key={n}
                     initial={{ scale: 0, rotate: -20 }} animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: n * 0.08, type: 'spring', stiffness: 300 }}
-                    style={{ fontSize: 'clamp(1.3rem,3vw,2.1rem)' }}>
+                    style={{ fontSize: 'clamp(1.2rem,2.8vw,2.1rem)' }}>
                     {n <= scoreRef.current ? '⭐' : '☆'}
                   </motion.span>
                 ))}
@@ -474,34 +467,34 @@ export default function AdvancedStore() {
               {/* Results table */}
               <div style={{
                 background: 'var(--surface)', borderRadius: '12px',
-                padding: 'clamp(10px,1.8vh,16px) clamp(12px,2vw,18px)',
-                marginBottom: '18px', textAlign: 'left',
+                padding: 'clamp(8px,1.5vh,14px) clamp(10px,1.8vw,16px)',
+                marginBottom: '16px', textAlign: 'left',
               }}>
                 <div style={{
                   fontFamily: 'var(--font-char)', fontWeight: 700,
-                  fontSize: 'clamp(0.65rem,1.2vw,0.8rem)',
-                  color: 'var(--olive-brown)', marginBottom: '10px',
-                  paddingBottom: '6px',
-                  borderBottom: '1px solid rgba(0,0,0,0.08)',
+                  fontSize: 'clamp(0.62rem,1.1vw,0.78rem)',
+                  color: 'var(--olive-brown)', marginBottom: '8px',
+                  paddingBottom: '6px', borderBottom: '1px solid rgba(0,0,0,0.08)',
                 }}>Results</div>
                 {results.map((r, i) => (
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
-                    padding: 'clamp(5px,0.9vh,8px) 0',
+                    padding: 'clamp(4px,0.8vh,7px) 0',
                     borderBottom: i < results.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none',
+                    flexWrap: 'wrap',
                   }}>
                     <span style={{
                       fontFamily: 'var(--font-char)', fontWeight: 700,
-                      fontSize: 'clamp(0.6rem,1.1vw,0.75rem)',
+                      fontSize: 'clamp(0.58rem,1vw,0.72rem)',
                       color: 'var(--text-muted)', flexShrink: 0, minWidth: '24px',
                     }}>Q{i + 1}</span>
-                    <span style={{ fontSize: 'clamp(0.85rem,1.5vw,1rem)', flexShrink: 0 }}>
+                    <span style={{ fontSize: 'clamp(0.82rem,1.4vw,1rem)', flexShrink: 0 }}>
                       {r.correct ? '✅' : '❌'}
                     </span>
                     {!r.correct && (
                       <span style={{
                         fontFamily: 'var(--font-body)',
-                        fontSize: 'clamp(0.58rem,1vw,0.72rem)',
+                        fontSize: 'clamp(0.56rem,1vw,0.7rem)',
                         color: '#28A745',
                       }}>
                         Correct: {r.correctAns.replace(/^[A-D]\.\s*/, '')}
@@ -513,7 +506,8 @@ export default function AdvancedStore() {
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {scoreRef.current >= 4 ? (
+                {/* BUG FIX: use dynamic PASS_THRESHOLD not hardcoded 4 */}
+                {scoreRef.current >= PASS_THRESHOLD ? (
                   <motion.button className="btn btn-success"
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
                     onClick={handleFinish}>

@@ -16,8 +16,28 @@ export default function NameInput() {
   };
 
   return (
-    <div className="scene" style={{ background: 'linear-gradient(160deg,#FFF8E7,#F0EBD8 50%,#E8D8B8)' }}>
-      <div className="bunting"/>
+    <div className="scene" style={{ background: '#1a0e00' }}>
+
+      {/* Background image — same source as MainMenu */}
+      <img
+        src={ASSETS.logo}
+        alt=""
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover', objectPosition: 'center', zIndex: 0,
+        }}
+        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+      />
+
+      {/* Blur + dim overlay — identical to MainMenu */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        backdropFilter: 'blur(2.5px)', WebkitBackdropFilter: 'blur(2.5px)',
+        background: 'rgba(0,0,0,0.42)', zIndex: 1,
+      }} />
+
+      <div className="bunting" style={{ zIndex: 3 }} />
 
       <div style={{
         position: 'absolute', inset: 0,
@@ -27,6 +47,7 @@ export default function NameInput() {
         justifyContent: 'center',
         padding: 'clamp(54px,10vh,88px) clamp(14px,4vw,48px) clamp(16px,4vh,40px)',
         gap: 'clamp(14px,3vw,32px)',
+        zIndex: 2,
       }}>
         <div style={{
           display: 'flex',
@@ -49,6 +70,7 @@ export default function NameInput() {
               width: 'clamp(280px,90vw,500px)',
               flexShrink: 0,
               padding: 'clamp(24px,4vh,40px) clamp(22px,4vw,38px)',
+              background: 'rgba(255,253,245,0.97)',
             }}
           >
             <div
@@ -116,8 +138,12 @@ export default function NameInput() {
             </div>
           </motion.div>
 
-          {/* Mina mascot */}
+          {/* Mina mascot — hidden on narrow screens to prevent overflow */}
+          <style>{`
+            @media (max-width: 560px) { .mina-col { display: none !important; } }
+          `}</style>
           <motion.div
+            className="mina-col"
             initial={{ opacity: 0, x: 24 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}

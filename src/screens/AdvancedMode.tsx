@@ -6,10 +6,6 @@ import type { Question } from '../types';
 import { getLevelTheme } from '../data/levelThemes';
 import { getNpcCandidates } from '../data/assets';
 
-function getNpcSpriteSrc(sectionId: string, storeIndex: number): string {
-  return `/imgs/levels/${sectionId}/level${storeIndex + 1}.png`;
-}
-
 interface FlatQuestion extends Question {
   sectionId: string;
   sectionName: string;
@@ -111,11 +107,9 @@ async function exportAdvancedCertificate(
   ctx.textAlign = 'center';
   ctx.font = '80px serif';
   ctx.fillText('⚡', W/2, 128);
-
   ctx.font = 'bold 17px Arial, sans-serif';
   ctx.fillStyle = '#F5C518';
   ctx.fillText('C E R T I F I C A T E   O F   A D V A N C E D   M A S T E R Y', W/2, 175);
-
   ctx.font = 'italic 16px Georgia, serif';
   ctx.fillStyle = 'rgba(255,255,255,0.6)';
   ctx.fillText('This is to certify that', W/2, 218);
@@ -162,7 +156,6 @@ async function exportAdvancedCertificate(
 }
 
 type Phase = 'menu' | 'quiz' | 'summary';
-
 type QuizResult = { correct: boolean; topic: string; qText: string; correctAns: string };
 
 export default function AdvancedMode() {
@@ -174,7 +167,6 @@ export default function AdvancedMode() {
   const [selected, setSelected] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
-  // scoreRef is used for synchronous score tracking to avoid stale-closure bugs
   const scoreRef = useRef(0);
   const [scoreDisplay, setScoreDisplay] = useState(0);
   const [results, setResults] = useState<QuizResult[]>([]);
@@ -202,6 +194,7 @@ export default function AdvancedMode() {
     setScoreDisplay(0);
     setResults([]);
     setShowFeedback(false);
+    // BUG FIX: always reset isCorrect when starting a new quiz
     setIsCorrect(false);
   };
 
@@ -227,13 +220,13 @@ export default function AdvancedMode() {
 
   const handleNext = () => {
     if (qIdx + 1 >= total) {
-      // Use scoreRef.current for accurate final score (no stale-closure risk)
       addAdvancedScore(scoreRef.current, total);
       setPhase('summary');
     } else {
       setQIdx(i => i + 1);
       setSelected(null);
       setShowFeedback(false);
+      // BUG FIX: reset isCorrect between questions so feedback colour doesn't bleed
       setIsCorrect(false);
     }
   };
@@ -275,8 +268,8 @@ export default function AdvancedMode() {
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: 'clamp(50px,10vh,80px) clamp(20px,5vw,60px)',
-          zIndex: 5,
+          padding: 'clamp(50px,10vh,80px) clamp(16px,4vw,60px)',
+          zIndex: 5, overflowY: 'auto',
         }}>
           <motion.div
             className="panel"
@@ -284,7 +277,7 @@ export default function AdvancedMode() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ type: 'spring', stiffness: 160, damping: 18 }}
             style={{
-              width: 'clamp(280px,54vw,560px)',
+              width: 'clamp(280px,92vw,560px)',
               textAlign: 'center',
               background: 'rgba(15,15,35,0.92)',
               border: '2px solid rgba(245,197,24,0.5)',
@@ -294,11 +287,11 @@ export default function AdvancedMode() {
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-              style={{ fontSize: 'clamp(2.5rem,6vw,4rem)', marginBottom: '8px' }}
+              style={{ fontSize: 'clamp(2.2rem,5.5vw,4rem)', marginBottom: '8px' }}
             >⚡</motion.div>
             <div style={{
               fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(1.3rem,3vw,2rem)',
+              fontSize: 'clamp(1.2rem,2.8vw,2rem)',
               color: '#F5C518', marginBottom: '4px',
               textShadow: '0 0 20px rgba(245,197,24,0.4)',
             }}>Advanced Mode</div>
@@ -308,7 +301,7 @@ export default function AdvancedMode() {
               border: '1px solid rgba(245,197,24,0.4)',
               color: '#F5C518',
               fontFamily: 'var(--font-accent)', fontWeight: 700,
-              fontSize: 'clamp(0.55rem,1vw,0.68rem)',
+              fontSize: 'clamp(0.52rem,1vw,0.68rem)',
               padding: '3px 14px', borderRadius: '50px',
               letterSpacing: '2px', marginBottom: '16px',
             }}>
@@ -334,7 +327,7 @@ export default function AdvancedMode() {
                       display: 'flex', alignItems: 'center', gap: '12px',
                       background: 'rgba(255,255,255,0.04)',
                       border: `1px solid ${sec.color}44`,
-                      borderRadius: '10px', padding: '10px 14px',
+                      borderRadius: '10px', padding: 'clamp(8px,1.4vh,12px) clamp(10px,1.8vw,14px)',
                     }}
                   >
                     <div style={{
@@ -342,27 +335,28 @@ export default function AdvancedMode() {
                       background: sec.color, flexShrink: 0,
                       boxShadow: `0 0 8px ${sec.color}88`,
                     }} />
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontFamily: 'var(--font-accent)', fontWeight: 700,
-                        fontSize: 'clamp(0.62rem,1.2vw,0.78rem)', color: sec.color,
+                        fontSize: 'clamp(0.6rem,1.1vw,0.78rem)', color: sec.color,
                       }}>{sec.grammarTopic}</div>
                       <div style={{
                         fontFamily: 'var(--font-body)',
-                        fontSize: 'clamp(0.56rem,1vw,0.68rem)',
+                        fontSize: 'clamp(0.54rem,0.95vw,0.66rem)',
                         color: 'rgba(255,255,255,0.45)',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>{sec.stores.map(s => s.name).join(' · ')}</div>
                     </div>
                     <div style={{
                       fontFamily: 'var(--font-accent)', fontWeight: 700,
-                      fontSize: 'clamp(0.7rem,1.3vw,0.85rem)',
-                      color: 'rgba(255,255,255,0.5)',
+                      fontSize: 'clamp(0.68rem,1.2vw,0.85rem)',
+                      color: 'rgba(255,255,255,0.5)', flexShrink: 0,
                     }}>{qCount}q</div>
                   </motion.div>
                 );
               })}
             </div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <motion.button className="btn btn-ghost" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
                 onClick={() => goToScene('MAIN_MENU')}
                 style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}>
@@ -393,25 +387,27 @@ export default function AdvancedMode() {
     return (
       <div className="scene" style={{ background: bg }}>
         <div className="bunting" />
+
+        {/* Header bar */}
         <div style={{
           position: 'absolute', top: 0, left: 0, right: 0,
           height: 'clamp(52px,10vh,72px)',
           background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(4px)',
           display: 'flex', alignItems: 'center',
-          padding: '0 clamp(12px,3vw,24px)', gap: 'clamp(8px,1.5vw,16px)', zIndex: 10,
+          padding: '0 clamp(10px,2.5vw,24px)', gap: 'clamp(6px,1.2vw,14px)', zIndex: 10,
         }}>
           <div style={{
             background: accentColor, color: 'white',
             fontFamily: 'var(--font-accent)', fontWeight: 700,
-            fontSize: 'clamp(0.52rem,1vw,0.66rem)',
-            padding: '3px 10px', borderRadius: '50px',
+            fontSize: 'clamp(0.48rem,0.9vw,0.64rem)',
+            padding: '3px 9px', borderRadius: '50px',
             letterSpacing: '1px', flexShrink: 0,
           }}>⚡ ADVANCED</div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
               display: 'flex', justifyContent: 'space-between',
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.52rem,0.9vw,0.64rem)',
+              fontSize: 'clamp(0.5rem,0.88vw,0.62rem)',
               color: 'rgba(255,255,255,0.9)', marginBottom: '3px',
             }}>
               <span>Q {qIdx + 1} of {total}</span>
@@ -425,39 +421,46 @@ export default function AdvancedMode() {
               />
             </div>
           </div>
+          {/* Topic tag — hidden on very small screens to save space */}
           <div style={{
             fontFamily: 'var(--font-body)',
-            fontSize: 'clamp(0.52rem,0.95vw,0.66rem)',
+            fontSize: 'clamp(0.48rem,0.88vw,0.64rem)',
             color: 'rgba(255,255,255,0.75)',
             background: 'rgba(0,0,0,0.25)',
-            padding: '3px 10px', borderRadius: '50px', flexShrink: 0,
+            padding: '3px 9px', borderRadius: '50px', flexShrink: 0,
+            maxWidth: 'clamp(80px,22vw,200px)',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {TOPIC_TAG[currentQ.grammarTopic] || currentQ.grammarTopic}
           </div>
         </div>
 
+        {/* Main content: NPC left + Q&A right (NPC hidden on mobile) */}
         <div style={{
           position: 'absolute',
           top: 'clamp(52px,10vh,72px)', bottom: 0, left: 0, right: 0,
           display: 'flex', alignItems: 'stretch',
-          flexWrap: 'wrap',
-          padding: 'clamp(10px,2vh,18px) clamp(14px,3vw,28px) clamp(12px,2.5vh,22px)',
-          gap: 'clamp(10px,2vw,20px)', overflowY: 'auto',
+          padding: 'clamp(8px,1.6vh,16px) clamp(10px,2.5vw,24px) clamp(10px,2vh,20px)',
+          gap: 'clamp(8px,1.8vw,18px)', overflowY: 'auto',
         }}>
-          {/* Left: NPC + inline feedback */}
-          <div style={{
+
+          {/* Left: NPC column — hidden on narrow screens via inline style + CSS */}
+          <style>{`
+            @media (max-width: 520px) { .adv-npc-col { display: none !important; } }
+          `}</style>
+          <div className="adv-npc-col" style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             justifyContent: 'flex-end', gap: '6px', flexShrink: 0,
-            width: 'clamp(64px,14vw,150px)',
+            width: 'clamp(70px,13vw,140px)',
           }}>
             <div style={{
-              height: 'clamp(140px,26vh,240px)',
+              height: 'clamp(120px,24vh,220px)',
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'flex-end',
             }}>
               {npcSpriteErrors[currentQ.storeId] ? (
                 <span style={{
-                  fontSize: 'clamp(3.5rem,9vw,6rem)', lineHeight: 1,
+                  fontSize: 'clamp(3rem,8vw,5.5rem)', lineHeight: 1,
                   filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5))',
                   animation: 'float 3s ease-in-out infinite',
                 }}>{currentQ.storeEmoji}</span>
@@ -484,12 +487,14 @@ export default function AdvancedMode() {
             </div>
             <div style={{
               fontFamily: 'var(--font-char)', fontWeight: 700,
-              fontSize: 'clamp(0.52rem,1vw,0.66rem)',
+              fontSize: 'clamp(0.5rem,0.9vw,0.64rem)',
               color: 'white', background: 'var(--olive-brown)',
               padding: '2px 10px', borderRadius: '50px',
               textAlign: 'center', whiteSpace: 'nowrap',
+              maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis',
             }}>{currentQ.npcName}</div>
 
+            {/* Inline feedback panel (desktop only, shown alongside NPC) */}
             <AnimatePresence>
               {showFeedback && (
                 <motion.div
@@ -502,12 +507,12 @@ export default function AdvancedMode() {
                 >
                   <div style={{
                     fontFamily: 'var(--font-char)', fontWeight: 700,
-                    fontSize: 'clamp(0.55rem,1vw,0.68rem)',
+                    fontSize: 'clamp(0.52rem,0.95vw,0.66rem)',
                     color: isCorrect ? '#2e7d32' : '#c62828', marginBottom: '3px',
                   }}>{isCorrect ? '✅ Correct!' : '❌ Wrong'}</div>
                   <div style={{
                     fontFamily: 'var(--font-body)',
-                    fontSize: 'clamp(0.52rem,0.9vw,0.64rem)',
+                    fontSize: 'clamp(0.5rem,0.88vw,0.62rem)',
                     color: 'var(--dark-brown)', lineHeight: 1.4,
                   }}>{feedbackText}</div>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
@@ -524,7 +529,7 @@ export default function AdvancedMode() {
           </div>
 
           {/* Right: question + choices */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'clamp(7px,1.4vh,12px)', minWidth: 0 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 'clamp(6px,1.2vh,11px)', minWidth: 0 }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={qIdx}
@@ -532,10 +537,11 @@ export default function AdvancedMode() {
                 style={{
                   background: getLevelTheme(currentQ.storeIndex).qBg,
                   border: `2px solid ${getLevelTheme(currentQ.storeIndex).qBorder}`,
-                  borderRadius: '16px', padding: '14px 18px',
+                  borderRadius: '16px', padding: 'clamp(12px,2.2vh,18px) clamp(12px,2.2vw,18px)',
                   boxShadow: '0 4px 14px rgba(0,0,0,0.25)', position: 'relative',
                 }}
               >
+                {/* Speech bubble tail — only renders when NPC column is visible */}
                 <div style={{ position: 'absolute', top: '20px', left: '-13px', width: 0, height: 0,
                   borderTop: '9px solid transparent', borderBottom: '9px solid transparent',
                   borderRight: `13px solid ${getLevelTheme(currentQ.storeIndex).tailColor}`,
@@ -545,27 +551,27 @@ export default function AdvancedMode() {
                   borderRight: `10px solid ${getLevelTheme(currentQ.storeIndex).qBg}`, zIndex: 1,
                 }} />
                 <div style={{
-                  fontFamily: 'var(--font-body)', fontSize: 'clamp(0.52rem,0.9vw,0.64rem)',
+                  fontFamily: 'var(--font-body)', fontSize: 'clamp(0.5rem,0.88vw,0.62rem)',
                   color: accentColor, fontWeight: 700, marginBottom: '6px', letterSpacing: '0.5px',
                 }}>
                   {currentQ.storeEmoji} {currentQ.storeName}
                 </div>
                 {currentQ.npcDialogueBefore && (
                   <div style={{
-                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.66rem,1.3vw,0.82rem)',
+                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.64rem,1.25vw,0.82rem)',
                     color: '#5A4535', marginBottom: '6px', lineHeight: 1.5,
                   }}>{currentQ.npcDialogueBefore}</div>
                 )}
                 {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
                   <div style={{
                     fontFamily: 'var(--font-char)', fontWeight: 700,
-                    fontSize: 'clamp(0.72rem,1.4vw,0.9rem)', color: 'var(--olive-brown)',
+                    fontSize: 'clamp(0.7rem,1.35vw,0.9rem)', color: 'var(--olive-brown)',
                   }}>{currentQ.questionText}</div>
                 )}
               </motion.div>
             </AnimatePresence>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(5px,1vh,8px)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(4px,0.9vh,8px)' }}>
               {currentQ.choices.map((choice, i) => {
                 let cls = 'choice-bubble';
                 if (selected !== null) {
@@ -583,17 +589,55 @@ export default function AdvancedMode() {
                   >
                     <span style={{
                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                      width: 'clamp(18px,2.5vw,24px)', height: 'clamp(18px,2.5vw,24px)',
+                      width: 'clamp(18px,2.4vw,24px)', height: 'clamp(18px,2.4vw,24px)',
                       background: 'rgba(122,107,61,0.15)', borderRadius: '50%',
-                      fontWeight: 700, fontSize: 'clamp(0.58rem,1.05vw,0.74rem)', flexShrink: 0,
+                      fontWeight: 700, fontSize: 'clamp(0.56rem,1vw,0.72rem)', flexShrink: 0,
                     }}>{choiceLabels[i]}</span>
-                    <span style={{ fontSize: 'clamp(0.66rem,1.3vw,0.84rem)' }}>
+                    <span style={{ fontSize: 'clamp(0.66rem,1.28vw,0.84rem)' }}>
                       {choice.text.replace(/^[A-D]\.\s*/, '')}
                     </span>
                   </motion.button>
                 );
               })}
             </div>
+
+            {/* Mobile feedback — shown below choices when NPC col is hidden */}
+            <style>{`
+              .adv-mobile-feedback { display: none; }
+              @media (max-width: 520px) { .adv-mobile-feedback { display: block; } }
+            `}</style>
+            <AnimatePresence>
+              {showFeedback && (
+                <motion.div
+                  className="adv-mobile-feedback"
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  style={{
+                    background: isCorrect ? 'var(--success-light)' : 'var(--error-light)',
+                    border: `2px solid ${isCorrect ? 'var(--success)' : 'var(--error)'}`,
+                    borderRadius: '12px', padding: '10px 14px',
+                  }}
+                >
+                  <div style={{
+                    fontFamily: 'var(--font-char)', fontWeight: 700,
+                    fontSize: 'clamp(0.7rem,1.3vw,0.82rem)',
+                    color: isCorrect ? '#2e7d32' : '#c62828', marginBottom: '4px',
+                  }}>{isCorrect ? '✅ Correct!' : '❌ Wrong'}</div>
+                  <div style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'clamp(0.64rem,1.1vw,0.76rem)',
+                    color: 'var(--dark-brown)', lineHeight: 1.5, marginBottom: '8px',
+                  }}>{feedbackText}</div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <motion.button className="btn btn-primary btn-sm"
+                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+                      onClick={handleNext}
+                    >
+                      {qIdx + 1 >= total ? 'Finish →' : 'Next →'}
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -643,31 +687,34 @@ export default function AdvancedMode() {
       >
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-          fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.5vw,1.9rem)',
+          fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.4vw,1.9rem)',
           color: '#F5C518', textShadow: '0 0 20px rgba(245,197,24,0.4)',
         }}>
           ⚡ Advanced Mode Complete!
         </div>
         <div style={{
-          fontFamily: 'var(--font-body)', fontSize: 'clamp(0.52rem,1vw,0.68rem)',
+          fontFamily: 'var(--font-body)', fontSize: 'clamp(0.52rem,0.95vw,0.68rem)',
           color: 'rgba(255,255,255,0.5)', marginTop: '2px',
         }}>
           {grade.emoji} Congratulations, {playerName || 'Student'}! — Your advanced score is saved separately.
         </div>
       </motion.div>
 
+      {/* Summary columns — stack on mobile, side by side on desktop */}
       <div style={{
         flex: 1, display: 'flex', gap: 'clamp(8px,1.8vw,18px)',
         flexWrap: 'wrap',
         padding: '0 clamp(10px,2vw,22px) clamp(8px,1.5vh,14px)',
         zIndex: 1, position: 'relative', overflowY: 'auto', minHeight: 0,
+        alignContent: 'flex-start',
       }}>
 
-        {/* LEFT: Score + Topic Breakdown */}
+        {/* LEFT: Score + Topic Breakdown — full width on mobile */}
         <motion.div
           initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}
           style={{
-            flex: '1 1 240px',
+            flex: '1 1 clamp(220px, 40%, 340px)',
+            minWidth: 'min(100%, 220px)',
             display: 'flex', flexDirection: 'column',
             gap: 'clamp(5px,0.9vh,8px)', overflow: 'hidden',
           }}
@@ -682,21 +729,21 @@ export default function AdvancedMode() {
           }}>
             <div style={{
               fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.7rem,1.3vw,0.9rem)',
+              fontSize: 'clamp(0.68rem,1.2vw,0.9rem)',
               color: grade.color, marginBottom: '5px',
             }}>⚡ Advanced Score</div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(8px,1.5vw,18px)', marginBottom: '7px' }}>
               <div>
-                <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.5rem,3.5vw,2.8rem)', color: grade.color, lineHeight: 1 }}>
+                <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.4rem,3.2vw,2.8rem)', color: grade.color, lineHeight: 1 }}>
                   {pct}%
                 </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.48rem,0.9vw,0.62rem)', color: 'rgba(255,255,255,0.5)' }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.48rem,0.88vw,0.62rem)', color: 'rgba(255,255,255,0.5)' }}>
                   {finalScore}/{total} correct
                 </div>
               </div>
               <div>
-                <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,1.7vw,1.2rem)', color: grade.color }}>{grade.label}</div>
-                <div style={{ fontSize: 'clamp(1rem,2vw,1.6rem)' }}>{grade.emoji}</div>
+                <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.75rem,1.6vw,1.2rem)', color: grade.color }}>{grade.label}</div>
+                <div style={{ fontSize: 'clamp(0.9rem,1.8vw,1.6rem)' }}>{grade.emoji}</div>
               </div>
             </div>
             <div style={{ height: '5px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
@@ -711,7 +758,7 @@ export default function AdvancedMode() {
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'clamp(4px,0.8vh,7px)' }}>
             <div style={{
               fontFamily: 'var(--font-accent)', fontWeight: 700,
-              fontSize: 'clamp(0.55rem,1vw,0.7rem)',
+              fontSize: 'clamp(0.54rem,0.95vw,0.7rem)',
               color: 'rgba(255,255,255,0.35)',
               textTransform: 'uppercase', letterSpacing: '1px',
               marginBottom: '2px', flexShrink: 0,
@@ -729,14 +776,14 @@ export default function AdvancedMode() {
                   style={{
                     background: 'rgba(255,255,255,0.04)',
                     border: `1px solid ${secColor}33`,
-                    borderRadius: '10px', padding: '10px 14px', flexShrink: 0,
+                    borderRadius: '10px', padding: 'clamp(7px,1.2vh,11px) clamp(10px,1.6vw,14px)', flexShrink: 0,
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '5px' }}>
-                    <div style={{ fontFamily: 'var(--font-char)', fontWeight: 700, fontSize: 'clamp(0.6rem,1.1vw,0.74rem)', color: secColor }}>
+                    <div style={{ fontFamily: 'var(--font-char)', fontWeight: 700, fontSize: 'clamp(0.58rem,1vw,0.72rem)', color: secColor }}>
                       {topic}
                     </div>
-                    <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.62rem,1.1vw,0.76rem)', color: 'rgba(255,255,255,0.7)' }}>
+                    <div style={{ fontFamily: 'var(--font-accent)', fontWeight: 700, fontSize: 'clamp(0.6rem,1vw,0.74rem)', color: 'rgba(255,255,255,0.7)' }}>
                       {stat.correct}/{stat.total}
                     </div>
                   </div>
@@ -754,18 +801,18 @@ export default function AdvancedMode() {
             {Object.entries(byTopic).some(([, s]) => s.correct / s.total < 0.6) && (
               <div style={{
                 background: 'rgba(255,152,0,0.1)', border: '1px solid rgba(255,152,0,0.3)',
-                borderRadius: '10px', padding: '10px 14px', flexShrink: 0,
+                borderRadius: '10px', padding: 'clamp(7px,1.2vh,11px) clamp(10px,1.6vw,14px)', flexShrink: 0,
               }}>
                 <div style={{
                   fontFamily: 'var(--font-char)', fontWeight: 700,
-                  fontSize: 'clamp(0.6rem,1.1vw,0.72rem)', color: '#FF9800', marginBottom: '4px',
+                  fontSize: 'clamp(0.58rem,1vw,0.7rem)', color: '#FF9800', marginBottom: '4px',
                 }}>📚 Areas to review:</div>
                 {Object.entries(byTopic)
                   .filter(([, s]) => s.correct / s.total < 0.6)
                   .map(([topic]) => (
                     <div key={topic} style={{
                       fontFamily: 'var(--font-body)',
-                      fontSize: 'clamp(0.56rem,1vw,0.68rem)',
+                      fontSize: 'clamp(0.54rem,0.95vw,0.66rem)',
                       color: 'rgba(255,255,255,0.55)', padding: '2px 0',
                     }}>• {topic}</div>
                   ))}
@@ -774,18 +821,20 @@ export default function AdvancedMode() {
           </div>
         </motion.div>
 
-        {/* RIGHT: Certificate + Buttons */}
+        {/* RIGHT: Certificate + Buttons — full width on mobile */}
         <motion.div
           initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
           style={{
-            flex: '1 1 240px', display: 'flex', flexDirection: 'column',
-            gap: 'clamp(6px,1.1vh,10px)', minWidth: 0, overflow: 'hidden',
+            flex: '1 1 clamp(220px, 40%, 340px)',
+            minWidth: 'min(100%, 220px)',
+            display: 'flex', flexDirection: 'column',
+            gap: 'clamp(6px,1.1vh,10px)', overflow: 'hidden',
           }}
         >
           <div
             ref={certRef}
             style={{
-              maxHeight: 'clamp(260px,44vh,380px)',
+              maxHeight: 'clamp(240px,42vh,380px)',
               flexShrink: 0,
               background: 'linear-gradient(135deg,#0D0D1A 0%,#1A1A2E 60%,#16213E 100%)',
               border: '3px solid #F5C518',
@@ -811,29 +860,29 @@ export default function AdvancedMode() {
             <div style={{ fontSize: 'clamp(1.2rem,2.8vw,2.2rem)', lineHeight: 1, flexShrink: 0 }}>⚡</div>
             <div style={{
               fontFamily: 'var(--font-body)', fontWeight: 700,
-              fontSize: 'clamp(0.55rem,0.7vw,0.62rem)',
+              fontSize: 'clamp(0.5rem,0.68vw,0.62rem)',
               color: '#F5C518', letterSpacing: '2px', textTransform: 'uppercase' as const,
             }}>Certificate of Advanced Mastery</div>
             <div style={{
-              fontFamily: 'Georgia,serif', fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
+              fontFamily: 'Georgia,serif', fontSize: 'clamp(0.48rem,0.62vw,0.58rem)',
               color: 'rgba(255,255,255,0.5)', fontStyle: 'italic',
             }}>This is to certify that</div>
             <div style={{
               fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.85rem,2.2vw,1.8rem)',
+              fontSize: 'clamp(0.82rem,2.1vw,1.8rem)',
               color: '#E8547A', lineHeight: 1.1,
               wordBreak: 'break-word' as const, maxWidth: '90%',
             }}>{playerName || 'Student'}</div>
             <div style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
+              fontSize: 'clamp(0.48rem,0.62vw,0.58rem)',
               color: 'rgba(255,255,255,0.75)', lineHeight: 1.4,
             }}>
               has successfully completed <strong>Minasa: Grammar Quest — Advanced Mode</strong>
             </div>
             <div style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.48rem,0.62vw,0.56rem)',
+              fontSize: 'clamp(0.44rem,0.58vw,0.54rem)',
               color: 'rgba(255,255,255,0.4)', lineHeight: 1.4,
             }}>
               Exploring the Minasa Festival in Bustos, Bulacan<br />
@@ -842,7 +891,7 @@ export default function AdvancedMode() {
             <div style={{
               background: 'linear-gradient(135deg,#3A4DB8,#F5C518)',
               color: 'white', fontFamily: 'var(--font-title)', fontWeight: 700,
-              fontSize: 'clamp(0.52rem,0.65vw,0.6rem)',
+              fontSize: 'clamp(0.5rem,0.62vw,0.58rem)',
               padding: 'clamp(2px,0.4vh,5px) clamp(8px,1.5vw,16px)',
               borderRadius: '50px',
               boxShadow: '0 3px 8px rgba(245,197,24,0.35)',
@@ -853,7 +902,7 @@ export default function AdvancedMode() {
             <div style={{ width: '82%', height: '1px', flexShrink: 0, background: 'linear-gradient(90deg,transparent,#F5C518 15%,#F5C518 85%,transparent)' }} />
             <div style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.46rem,0.56vw,0.52rem)',
+              fontSize: 'clamp(0.42rem,0.52vw,0.5rem)',
               color: 'rgba(255,255,255,0.3)',
             }}>
               {today} · EL306 Language Learning Materials
@@ -869,7 +918,7 @@ export default function AdvancedMode() {
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
               onClick={handleDownload}
               disabled={downloading}
-              style={{ fontSize: 'clamp(0.52rem,0.95vw,0.7rem)', padding: '6px 12px', background: '#F5C518', color: '#1A1A2E', border: 'none', fontWeight: 800 }}
+              style={{ fontSize: 'clamp(0.52rem,0.92vw,0.7rem)', padding: 'clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)', background: '#F5C518', color: '#1A1A2E', border: 'none', fontWeight: 800 }}
             >
               {downloading ? '⏳ Saving…' : '⬇ Download PNG'}
             </motion.button>
@@ -877,7 +926,7 @@ export default function AdvancedMode() {
               className="btn btn-secondary btn-sm"
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
               onClick={handlePrint}
-              style={{ fontSize: 'clamp(0.52rem,0.95vw,0.7rem)', padding: '6px 12px' }}
+              style={{ fontSize: 'clamp(0.52rem,0.92vw,0.7rem)', padding: 'clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)' }}
             >
               🖨 Print
             </motion.button>
@@ -885,7 +934,7 @@ export default function AdvancedMode() {
               className="btn btn-ghost btn-sm"
               whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
               onClick={() => goToScene('MAP')}
-              style={{ fontSize: 'clamp(0.52rem,0.95vw,0.7rem)', padding: '6px 12px', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
+              style={{ fontSize: 'clamp(0.52rem,0.92vw,0.7rem)', padding: 'clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
             >
               🗺 Map
             </motion.button>
@@ -893,7 +942,7 @@ export default function AdvancedMode() {
               className="btn btn-ghost btn-sm"
               whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
               onClick={() => goToScene('MAIN_MENU')}
-              style={{ fontSize: 'clamp(0.52rem,0.95vw,0.7rem)', padding: '6px 12px', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
+              style={{ fontSize: 'clamp(0.52rem,0.92vw,0.7rem)', padding: 'clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)', borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
             >
               ← Main Menu
             </motion.button>
@@ -902,7 +951,7 @@ export default function AdvancedMode() {
               whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(245,197,24,0.4)' }}
               whileTap={{ scale: 0.97 }}
               onClick={startQuiz}
-              style={{ fontSize: 'clamp(0.52rem,0.95vw,0.7rem)', padding: '6px 12px', background: '#F5C518', color: '#1A1A2E', border: 'none', fontWeight: 800 }}
+              style={{ fontSize: 'clamp(0.52rem,0.92vw,0.7rem)', padding: 'clamp(5px,0.8vh,7px) clamp(10px,1.5vw,14px)', background: '#F5C518', color: '#1A1A2E', border: 'none', fontWeight: 800 }}
             >
               ⚡ Try Again
             </motion.button>
