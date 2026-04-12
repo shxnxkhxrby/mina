@@ -16,16 +16,22 @@ export default function NameInput() {
   };
 
   return (
-    <div className="scene" style={{ background: '#1a0e00' }}>
+    <div style={{
+      position: 'fixed', inset: 0,
+      width: '100%', height: '100%',
+      overflow: 'hidden',
+      background: '#1a0e00',
+    }}>
 
-      {/* Background image — same source as MainMenu */}
+      {/* Background image — same source as MainMenu, fills 100% */}
       <img
         src={ASSETS.logo}
         alt=""
         style={{
           position: 'absolute', inset: 0,
           width: '100%', height: '100%',
-          objectFit: 'cover', objectPosition: 'center', zIndex: 0,
+          objectFit: 'cover', objectPosition: 'center',
+          zIndex: 0,
         }}
         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
       />
@@ -37,7 +43,7 @@ export default function NameInput() {
         background: 'rgba(0,0,0,0.42)', zIndex: 1,
       }} />
 
-      <div className="bunting" style={{ zIndex: 3 }} />
+      <div className="bunting" style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 3 }} />
 
       <div style={{
         position: 'absolute', inset: 0,
