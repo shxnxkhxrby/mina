@@ -363,7 +363,7 @@ export default function MainMenu() {
 
   const handleAdvanced = () => {
     setAdvancedMode(true);
-    goToScene('ADVANCED_SECTION');
+    goToScene('ADVANCED_SECTION_VIEW');
   };
 
   return (
