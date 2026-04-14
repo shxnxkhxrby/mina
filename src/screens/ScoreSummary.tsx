@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useGameStore } from '../store/gameStore';
+import { useGameStore, ADVANCED_PASS_SCORE } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { SECTION_D } from '../data/sectionD';
 
@@ -151,10 +151,23 @@ function printCertificate(
 }
 
 export default function ScoreSummary() {
-  const { overallScore, advancedScore, sectionProgress, playerName, goToScene, isAdvancedMode } = useGameStore();
+  const { overallScore, advancedScore, advancedLevelScores, sectionProgress, playerName, goToScene, isAdvancedMode } = useGameStore();
   const [downloading, setDownloading] = useState(false);
 
-  const score = isAdvancedMode ? (advancedScore ?? overallScore) : overallScore;
+  // Advanced mode uses its own independent score, NOT story mode score
+  const score = isAdvancedMode
+    ? (() => {
+        const correct = advancedLevelScores.reduce((a, s) => a + s, 0);
+        const total = advancedLevelScores.length * 20; // 3 levels × 20 questions
+        return { correct, total };
+      })()
+    : overallScore;
+
+  // Check if all 3 advanced levels are passed (≥15/20 each)
+  const allAdvancedLevelsPassed = isAdvancedMode
+    ? advancedLevelScores.every(s => s >= ADVANCED_PASS_SCORE)
+    : true; // story mode has no such gate
+
   // Both story mode and advanced mode write progress to sectionProgress
   const progress = sectionProgress;
 
@@ -174,12 +187,11 @@ export default function ScoreSummary() {
   const handlePrint = () => printCertificate(playerName, score.correct, score.total, pct, grade, today, isAdvancedMode);
 
   const sectionRows = isAdvancedMode
-    ? SECTIONS.map(s => {
-        const prog = progress[s.id] || {};
-        const completed = s.stores.filter(st => prog[st.id]?.completed).length;
-        const pts = s.stores.reduce((a, st) => a + (prog[st.id]?.bestScore || 0), 0);
-        return { emoji: s.emoji, name: `${s.name} — ${s.grammarTopic}`, sub: `${completed}/${s.stores.length} levels · ${pts}/${s.stores.length * 5} pts`, stars: s.stores.map(st => !!prog[st.id]?.completed) };
-      })
+    ? [
+        { emoji: '⏳', name: 'Level 1 — Perfect Tenses',          sub: `Best: ${advancedLevelScores[0]}/20${advancedLevelScores[0] >= ADVANCED_PASS_SCORE ? ' ✓ Passed' : ` (need ${ADVANCED_PASS_SCORE})`}`, stars: Array.from({length:5},(_,n) => n < Math.round((advancedLevelScores[0]/20)*5)) },
+        { emoji: '📍', name: 'Level 2 — Prepositions',             sub: `Best: ${advancedLevelScores[1]}/20${advancedLevelScores[1] >= ADVANCED_PASS_SCORE ? ' ✓ Passed' : ` (need ${ADVANCED_PASS_SCORE})`}`, stars: Array.from({length:5},(_,n) => n < Math.round((advancedLevelScores[1]/20)*5)) },
+        { emoji: '🔗', name: 'Level 3 — Subject-Verb Agreement',   sub: `Best: ${advancedLevelScores[2]}/20${advancedLevelScores[2] >= ADVANCED_PASS_SCORE ? ' ✓ Passed' : ` (need ${ADVANCED_PASS_SCORE})`}`, stars: Array.from({length:5},(_,n) => n < Math.round((advancedLevelScores[2]/20)*5)) },
+      ]
     : [
         ...SECTIONS.map(s => {
           const prog = progress[s.id] || {};
@@ -381,28 +393,58 @@ export default function ScoreSummary() {
 
           {/* Action buttons */}
           <motion.div initial={{opacity:0,x:16}} animate={{opacity:1,x:0}} transition={{delay:0.2}}
-            style={{ display:'flex', gap:'clamp(4px,0.7vw,8px)', flexWrap:'wrap', justifyContent:'center' }}
+            style={{ display:'flex', flexDirection:'column', gap:'clamp(4px,0.7vw,8px)', alignItems:'center' }}
           >
-            <motion.button className="btn btn-primary btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
-              onClick={handleDownloadPng} disabled={downloading}
-              style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px', ...(isAdvancedMode ? { background:advancedAccent, borderColor:advancedAccent } : {}) }}>
-              {downloading ? '⏳ Saving…' : '⬇ Download PNG'}
-            </motion.button>
-            <motion.button className="btn btn-secondary btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
-              onClick={handlePrint}
-              style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px' }}>
-              🖨 Print
-            </motion.button>
-            <motion.button className="btn btn-ghost btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
-              onClick={() => goToScene('MAP')}
-              style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px' }}>
-              🗺 Map
-            </motion.button>
-            <motion.button className="btn btn-ghost btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
-              onClick={() => { useGameStore.getState().resetGame(); useGameStore.getState().goToScene('MAIN_MENU'); }}
-              style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px' }}>
-              🔄 Play Again
-            </motion.button>
+            {/* Advanced mode: only show Download/Print when ALL 3 levels are passed */}
+            {isAdvancedMode && !allAdvancedLevelsPassed && (
+              <div style={{
+                fontFamily:'var(--font-body)', fontSize:'clamp(0.56rem,1vw,0.72rem)',
+                color:'var(--text-muted)', background:'rgba(0,0,0,0.06)',
+                borderRadius:'10px', padding:'8px 14px', textAlign:'center', width:'100%',
+              }}>
+                🔒 Pass all 3 levels (≥{ADVANCED_PASS_SCORE}/20 each) to unlock the certificate.<br/>
+                {advancedLevelScores.map((s, i) => (
+                  <span key={i} style={{ marginRight:'6px' }}>
+                    {['L1','L2','L3'][i]}: {s >= ADVANCED_PASS_SCORE ? '✅' : `${s}/20`}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div style={{ display:'flex', gap:'clamp(4px,0.7vw,8px)', flexWrap:'wrap', justifyContent:'center' }}>
+              {(!isAdvancedMode || allAdvancedLevelsPassed) && (
+                <>
+                  <motion.button className="btn btn-primary btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
+                    onClick={handleDownloadPng} disabled={downloading}
+                    style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px', ...(isAdvancedMode ? { background:advancedAccent, borderColor:advancedAccent } : {}) }}>
+                    {downloading ? '⏳ Saving…' : '⬇ Download PNG'}
+                  </motion.button>
+                  <motion.button className="btn btn-secondary btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
+                    onClick={handlePrint}
+                    style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px' }}>
+                    🖨 Print
+                  </motion.button>
+                </>
+              )}
+              {isAdvancedMode && (
+                <motion.button className="btn btn-ghost btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
+                  onClick={() => goToScene('ADVANCED_SECTION_VIEW')}
+                  style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px' }}>
+                  ← Back to Levels
+                </motion.button>
+              )}
+              {!isAdvancedMode && (
+                <motion.button className="btn btn-ghost btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
+                  onClick={() => goToScene('MAP')}
+                  style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px' }}>
+                  🗺 Map
+                </motion.button>
+              )}
+              <motion.button className="btn btn-ghost btn-sm" whileHover={{scale:1.05}} whileTap={{scale:0.97}}
+                onClick={() => { useGameStore.getState().resetGame(); useGameStore.getState().goToScene('MAIN_MENU'); }}
+                style={{ fontSize:'clamp(0.6rem,1vw,0.76rem)', padding:'7px 12px' }}>
+                🔄 Play Again
+              </motion.button>
+            </div>
           </motion.div>
         </div>
 

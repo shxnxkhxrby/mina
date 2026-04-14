@@ -4,6 +4,9 @@ import type { GameState, SceneName, SectionId } from '../types';
 import { SECTIONS } from '../data/sections';
 import { SECTION_D } from '../data/sectionD';
 
+// Passing score for each advanced level (out of 20)
+export const ADVANCED_PASS_SCORE = 15;
+
 // Merge Section D so allStoresComplete and isStoreUnlocked can find its stores
 const ALL_SECTIONS = [...SECTIONS, SECTION_D];
 
@@ -18,7 +21,9 @@ const initialProgress: GameState['sectionProgress'] = {};
 
 export const useGameStore = create<GameState & {
   advancedScore: { total: number; correct: number };
+  advancedLevelScores: [number, number, number];
   addAdvancedScore: (correct: number, total: number) => void;
+  setAdvancedLevelScore: (level: 0 | 1 | 2, score: number) => void;
   musicVolume: number;
   voiceVolume: number;
   setMusicVolume: (v: number) => void;
@@ -34,6 +39,7 @@ export const useGameStore = create<GameState & {
       sectionProgress: initialProgress,
       overallScore: { total: 0, correct: 0 },
       advancedScore: { total: 0, correct: 0 },
+      advancedLevelScores: [0, 0, 0] as [number, number, number],
       firstPlay: true,
       isAdvancedMode: false,
 
@@ -80,6 +86,13 @@ export const useGameStore = create<GameState & {
         set({ advancedScore: { total: prev.total + total, correct: prev.correct + correct } });
       },
 
+      setAdvancedLevelScore: (level: 0 | 1 | 2, score: number) => {
+        const prev = get().advancedLevelScores;
+        const updated: [number, number, number] = [...prev] as [number, number, number];
+        updated[level] = Math.max(updated[level], score); // keep best score
+        set({ advancedLevelScores: updated });
+      },
+
       isSectionUnlocked: (id) => {
         if (id === 'A') return true;
         if (id === 'B') return allStoresComplete('A', get().sectionProgress);
@@ -106,6 +119,7 @@ export const useGameStore = create<GameState & {
         sectionProgress: {},
         overallScore: { total: 0, correct: 0 },
         advancedScore: { total: 0, correct: 0 },
+        advancedLevelScores: [0, 0, 0],
         firstPlay: true,
         isAdvancedMode: false,
       }),

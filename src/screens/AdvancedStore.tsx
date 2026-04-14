@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGameStore } from '../store/gameStore';
+import { useGameStore, ADVANCED_PASS_SCORE } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
 import { getLevelBgCandidates } from '../data/assets';
 
@@ -688,7 +688,8 @@ const LEVEL_META: Record<number, { title: string; emoji: string; color: string; 
 export default function AdvancedStore() {
   const {
     currentSection, currentStoreIndex,
-    completeStore, addScore, addAdvancedScore, goToScene,
+    completeStore, addScore, addAdvancedScore, setAdvancedLevelScore,
+    advancedLevelScores, goToScene,
   } = useGameStore();
 
   const section = SECTIONS.find(s => s.id === currentSection);
@@ -729,7 +730,7 @@ export default function AdvancedStore() {
   const totalQ = shuffledQuestions.length;
   const currentQ = shuffledQuestions[qIdx];
   const choiceLabels = ['A', 'B', 'C', 'D'];
-  const PASS_THRESHOLD = Math.ceil(totalQ * 0.8);
+  const PASS_THRESHOLD = ADVANCED_PASS_SCORE; // 15 out of 20
 
   const handleAnswer = (i: number) => {
     if (selected !== null) return;
@@ -763,7 +764,9 @@ export default function AdvancedStore() {
     completeStore(section.id, store.id, scoreRef.current);
     addScore(scoreRef.current, totalQ);
     addAdvancedScore(scoreRef.current, totalQ);
-    goToScene('SCORE_SUMMARY');
+    // Save this level's score independently
+    setAdvancedLevelScore(quizIndex as 0 | 1 | 2, scoreRef.current);
+    goToScene('ADVANCED_SECTION_VIEW');
   };
 
   const handleRetry = () => {
@@ -1102,12 +1105,44 @@ export default function AdvancedStore() {
                   style={{ background: meta.color, borderColor: meta.color }}>
                   🔄 Retry
                 </motion.button>
-                {/* Certificate/summary button — only available after quiz is done */}
-                <motion.button className="btn btn-success"
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                  onClick={handleFinish}>
-                  📜 Get Certificate →
-                </motion.button>
+                {/* Certificate button — only available after ALL 3 levels are passed (≥15/20 each) */}
+                {(() => {
+                  // Compute updated scores including current result
+                  const updatedScores: [number, number, number] = [...advancedLevelScores] as [number, number, number];
+                  updatedScores[quizIndex] = Math.max(updatedScores[quizIndex], scoreRef.current);
+                  const allPassed = updatedScores.every(s => s >= ADVANCED_PASS_SCORE);
+                  if (allPassed) {
+                    return (
+                      <motion.button className="btn btn-success"
+                        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+                        onClick={() => {
+                          if (!quizFinished) return;
+                          completeStore(section.id, store.id, scoreRef.current);
+                          addScore(scoreRef.current, totalQ);
+                          addAdvancedScore(scoreRef.current, totalQ);
+                          setAdvancedLevelScore(quizIndex as 0 | 1 | 2, scoreRef.current);
+                          goToScene('SCORE_SUMMARY');
+                        }}>
+                        📜 Get Certificate →
+                      </motion.button>
+                    );
+                  }
+                  // Show which levels still need to be passed
+                  const remaining = updatedScores.filter(s => s < ADVANCED_PASS_SCORE).length;
+                  return (
+                    <div style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 'clamp(0.56rem,1vw,0.7rem)',
+                      color: 'var(--text-muted)',
+                      padding: '8px 14px',
+                      background: 'rgba(0,0,0,0.06)',
+                      borderRadius: '10px',
+                      textAlign: 'center',
+                    }}>
+                      🔒 Pass all 3 levels ({remaining} remaining) to unlock certificate
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </motion.div>
