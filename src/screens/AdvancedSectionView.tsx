@@ -13,7 +13,7 @@ const MASTERY_LEVELS = [
     color: '#E85D26',
     gradient: 'linear-gradient(160deg,#FFE090,#F5C84A 40%,#E8A830)',
     badge: 'Section A Grammar',
-    storeIndex: 0,          // maps to MASTERY_QUIZZES[0] in AdvancedStore
+    storeIndex: 0,
     sectionId: 'A',
     description: '20 questions on perfect tense forms and usage',
   },
@@ -26,7 +26,7 @@ const MASTERY_LEVELS = [
     color: '#2E75B6',
     gradient: 'linear-gradient(160deg,#A0C8F0,#70A8DC 40%,#4088C0)',
     badge: 'Section C Grammar',
-    storeIndex: 1,          // maps to MASTERY_QUIZZES[1] in AdvancedStore
+    storeIndex: 1,
     sectionId: 'C',
     description: '20 questions on prepositions of time and manner',
   },
@@ -39,7 +39,7 @@ const MASTERY_LEVELS = [
     color: '#5B7A3D',
     gradient: 'linear-gradient(160deg,#A8D8A0,#7CBB70 40%,#5B9A50)',
     badge: 'Section B Grammar',
-    storeIndex: 2,          // maps to MASTERY_QUIZZES[2] in AdvancedStore
+    storeIndex: 2,
     sectionId: 'B',
     description: '20 questions on subject-verb agreement rules',
   },
@@ -55,11 +55,9 @@ export default function AdvancedSectionView() {
 
   const [lockedMsg, setLockedMsg] = useState('');
 
-  // A level is "completed" if ALL stores in that level's section are completed
+  // A level is "completed" if any store in that level's section has completed flag
   const isLevelCompleted = (lvl: typeof MASTERY_LEVELS[number]) => {
     const prog = sectionProgress[lvl.sectionId] || {};
-    // In advanced mode each quiz writes to store 0 of its section
-    // We just check bestScore exists and completed flag
     return Object.values(prog).some(p => p?.completed);
   };
 
@@ -68,8 +66,19 @@ export default function AdvancedSectionView() {
     return Math.max(0, ...Object.values(prog).map(p => p?.bestScore ?? 0));
   };
 
-  // All levels are always unlocked in mastery mode — no story gating
-  const handleLevel = (lvl: typeof MASTERY_LEVELS[number]) => {
+  // Level 1 always unlocked; Level 2 requires Level 1 done; Level 3 requires Level 2 done
+  const isLevelUnlocked = (index: number): boolean => {
+    if (index === 0) return true;
+    return isLevelCompleted(MASTERY_LEVELS[index - 1]);
+  };
+
+  const handleLevel = (lvl: typeof MASTERY_LEVELS[number], index: number) => {
+    if (!isLevelUnlocked(index)) {
+      const prevLevel = MASTERY_LEVELS[index - 1];
+      setLockedMsg(`Complete Level ${prevLevel.level} (${prevLevel.title}) first!`);
+      setTimeout(() => setLockedMsg(''), 2500);
+      return;
+    }
     setSection(lvl.sectionId as any);
     setStoreIndex(lvl.storeIndex);
     goToScene('ADVANCED_STORE');
@@ -174,6 +183,7 @@ export default function AdvancedSectionView() {
       >
         {MASTERY_LEVELS.map((lvl, i) => {
           const completed = isLevelCompleted(lvl);
+          const unlocked = isLevelUnlocked(i);
           const best = getBestScore(lvl);
 
           return (
@@ -182,13 +192,15 @@ export default function AdvancedSectionView() {
               initial={{ opacity: 0, y: 40, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: i * 0.12, type: 'spring', stiffness: 200, damping: 18 }}
-              whileHover={{ y: -8, scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => handleLevel(lvl)}
+              whileHover={unlocked ? { y: -8, scale: 1.03 } : {}}
+              whileTap={unlocked ? { scale: 0.97 } : {}}
+              onClick={() => handleLevel(lvl, i)}
               style={{
-                cursor: 'pointer',
+                cursor: unlocked ? 'pointer' : 'not-allowed',
                 width: 'clamp(200px,28vw,300px)',
                 flexShrink: 0,
+                opacity: unlocked ? 1 : 0.5,
+                filter: unlocked ? 'none' : 'grayscale(60%)',
               }}
             >
               {/* Card */}
@@ -197,7 +209,13 @@ export default function AdvancedSectionView() {
                   background: completed
                     ? 'rgba(255,248,200,0.08)'
                     : 'rgba(255,255,255,0.05)',
-                  border: `2.5px solid ${completed ? lvl.color : `${lvl.color}66`}`,
+                  border: `2.5px solid ${
+                    !unlocked
+                      ? 'rgba(255,255,255,0.15)'
+                      : completed
+                      ? lvl.color
+                      : `${lvl.color}66`
+                  }`,
                   borderRadius: '20px',
                   overflow: 'hidden',
                   boxShadow: completed
@@ -211,7 +229,7 @@ export default function AdvancedSectionView() {
                 <div
                   style={{
                     height: 'clamp(100px,18vw,180px)',
-                    background: lvl.gradient,
+                    background: unlocked ? lvl.gradient : 'linear-gradient(160deg,#3A3A4A,#2A2A3A)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -225,11 +243,13 @@ export default function AdvancedSectionView() {
                       position: 'absolute',
                       width: '120%',
                       height: '120%',
-                      background: `radial-gradient(circle at 50% 60%, ${lvl.color}55 0%, transparent 70%)`,
+                      background: unlocked
+                        ? `radial-gradient(circle at 50% 60%, ${lvl.color}55 0%, transparent 70%)`
+                        : 'none',
                     }}
                   />
 
-                  {/* Level number + emoji */}
+                  {/* Level number + emoji or lock */}
                   <div style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
                     <div
                       style={{
@@ -250,12 +270,12 @@ export default function AdvancedSectionView() {
                         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
                       }}
                     >
-                      {lvl.emoji}
+                      {unlocked ? lvl.emoji : '🔒'}
                     </div>
                   </div>
 
                   {/* Completion badge */}
-                  {completed && (
+                  {completed && unlocked && (
                     <div
                       style={{
                         position: 'absolute',
@@ -274,6 +294,28 @@ export default function AdvancedSectionView() {
                       ✓ DONE
                     </div>
                   )}
+
+                  {/* Locked badge */}
+                  {!unlocked && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        background: 'rgba(255,255,255,0.15)',
+                        color: 'rgba(255,255,255,0.7)',
+                        fontFamily: 'var(--font-char)',
+                        fontWeight: 800,
+                        fontSize: 'clamp(0.42rem,0.8vw,0.58rem)',
+                        padding: '2px 8px',
+                        borderRadius: '20px',
+                        letterSpacing: '0.5px',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                      }}
+                    >
+                      🔒 LOCKED
+                    </div>
+                  )}
                 </div>
 
                 {/* Card body */}
@@ -290,7 +332,7 @@ export default function AdvancedSectionView() {
                       style={{
                         fontFamily: 'var(--font-title)',
                         fontSize: 'clamp(0.82rem,1.6vw,1.15rem)',
-                        color: 'white',
+                        color: unlocked ? 'white' : 'rgba(255,255,255,0.4)',
                         fontWeight: 700,
                         marginBottom: '2px',
                       }}
@@ -301,7 +343,7 @@ export default function AdvancedSectionView() {
                       style={{
                         fontFamily: 'var(--font-body)',
                         fontSize: 'clamp(0.52rem,0.95vw,0.68rem)',
-                        color: `${lvl.color}cc`,
+                        color: unlocked ? `${lvl.color}cc` : 'rgba(255,255,255,0.25)',
                       }}
                     >
                       {lvl.subtitle}
@@ -312,15 +354,17 @@ export default function AdvancedSectionView() {
                     style={{
                       fontFamily: 'var(--font-body)',
                       fontSize: 'clamp(0.5rem,0.9vw,0.64rem)',
-                      color: 'rgba(255,255,255,0.45)',
+                      color: unlocked ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.2)',
                       lineHeight: 1.4,
                     }}
                   >
-                    {lvl.description}
+                    {unlocked
+                      ? lvl.description
+                      : `Complete Level ${i} — ${MASTERY_LEVELS[i - 1]?.title} to unlock`}
                   </div>
 
-                  {/* Stars row */}
-                  {completed && (
+                  {/* Stars row (only if completed) */}
+                  {completed && unlocked && (
                     <div style={{ display: 'flex', gap: '2px' }}>
                       {[1, 2, 3, 4, 5].map(n => (
                         <span key={n} style={{ fontSize: 'clamp(0.58rem,1.1vw,0.82rem)' }}>
@@ -332,11 +376,13 @@ export default function AdvancedSectionView() {
 
                   {/* CTA button */}
                   <motion.div
-                    whileHover={{ scale: 1.04 }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={unlocked ? { scale: 1.04 } : {}}
+                    whileTap={unlocked ? { scale: 0.97 } : {}}
                     style={{
                       marginTop: '4px',
-                      background: completed
+                      background: !unlocked
+                        ? 'rgba(255,255,255,0.08)'
+                        : completed
                         ? `linear-gradient(135deg, ${lvl.color}cc, ${lvl.color})`
                         : `linear-gradient(135deg, ${lvl.color}, ${lvl.color}dd)`,
                       borderRadius: '12px',
@@ -344,19 +390,24 @@ export default function AdvancedSectionView() {
                       textAlign: 'center',
                       fontFamily: 'var(--font-title)',
                       fontSize: 'clamp(0.64rem,1.2vw,0.88rem)',
-                      color: 'white',
+                      color: unlocked ? 'white' : 'rgba(255,255,255,0.3)',
                       fontWeight: 700,
                       letterSpacing: '0.5px',
-                      boxShadow: `0 4px 14px ${lvl.color}55`,
+                      boxShadow: unlocked ? `0 4px 14px ${lvl.color}55` : 'none',
+                      border: !unlocked ? '1px solid rgba(255,255,255,0.12)' : 'none',
                     }}
                   >
-                    {completed ? '🔄 Retry Quiz →' : '▶ Start Quiz →'}
+                    {!unlocked
+                      ? '🔒 Locked'
+                      : completed
+                      ? '🔄 Retry Quiz →'
+                      : '▶ Start Quiz →'}
                   </motion.div>
                 </div>
               </div>
 
-              {/* Bounce arrow when not completed */}
-              {!completed && (
+              {/* Bounce arrow when unlocked and not completed */}
+              {unlocked && !completed && (
                 <motion.div
                   animate={{ y: [0, -5, 0] }}
                   transition={{ repeat: Infinity, duration: 1.3, ease: 'easeInOut' }}
@@ -399,7 +450,7 @@ export default function AdvancedSectionView() {
         )}
       </AnimatePresence>
 
-      {/* Footer nav */}
+      {/* Footer nav — no Map button */}
       <div
         style={{
           position: 'relative',
@@ -414,13 +465,6 @@ export default function AdvancedSectionView() {
           flexShrink: 0,
         }}
       >
-        <button
-          className="btn btn-ghost btn-sm"
-          onClick={() => goToScene('MAP')}
-          style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
-        >
-          ← Map
-        </button>
         <button
           className="btn btn-ghost btn-sm"
           onClick={() => goToScene('MAIN_MENU')}
