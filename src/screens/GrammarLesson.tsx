@@ -90,37 +90,37 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
 
   if (sectionId === 'A') {
     pages.push({
-      badge: '📚 PERFECT TENSES', badgeColor: ['#FF7A1A', '#E85D10'], title: 'Introduction',
+      badge: '📚 PERFECT TENSES', badgeColor: ['#3B82F6', '#2563EB'], title: 'Introduction',
       render: (_lesson, showCursor) => (
         <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.88rem,2vw,1.15rem)', color: '#4A2800', lineHeight: 1.75, fontStyle: 'italic' }}>
-          {_lesson.intro}<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#E85D10', fontStyle: 'normal' }}>▌</span>
+          {_lesson.intro}<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2563EB', fontStyle: 'normal' }}>▌</span>
         </div>
       ),
     });
     pages.push({
-      badge: '⏮ PAST PERFECT', badgeColor: ['#C0392B', '#96281B'], title: 'Past Perfect Tense',
+      badge: '⏮ PAST PERFECT', badgeColor: ['#2563EB', '#1D4ED8'], title: 'Past Perfect Tense',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Past Perfect Tense<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#C0392B' }}>▌</span>
+            Past Perfect Tense<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2563EB' }}>▌</span>
           </div>
-          <div style={{ background: 'rgba(192,57,43,0.08)', border: '2.5px solid #C0392B', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
-            <strong style={{ color: '#C0392B' }}>📖 Rule:</strong> {_lesson.rule}
+          <div style={{ background: 'rgba(37,99,235,0.08)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
+            <strong style={{ color: '#2563EB' }}>📖 Rule:</strong> {_lesson.rule}
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #FDECEA 0%, #F9CCCA 100%)', border: '2.5px solid #C0392B', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#7B1C14', textAlign: 'center' as const }}>
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#1E3A8A', textAlign: 'center' as const }}>
             had + past participle
           </div>
         </>
       ),
     });
     pages.push({
-      badge: '⏮ PAST PERFECT', badgeColor: ['#C0392B', '#96281B'], title: 'Past Perfect — Example',
+      badge: '⏮ PAST PERFECT', badgeColor: ['#2563EB', '#1D4ED8'], title: 'Past Perfect — Example',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Past Perfect — Example<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#C0392B' }}>▌</span>
+            Past Perfect — Example<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2563EB' }}>▌</span>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #FDECEA 0%, #F9CCCA 100%)', border: '2.5px solid #C0392B', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#7B1C14', textAlign: 'center' as const, marginBottom: '10px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#1E3A8A', textAlign: 'center' as const, marginBottom: '10px' }}>
             had + past participle
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.78rem,1.65vw,0.98rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
@@ -130,29 +130,29 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
       ),
     });
     pages.push({
-      badge: '⏺ PRESENT PERFECT', badgeColor: ['#27AE60', '#1E8449'], title: 'Present Perfect Tense',
+      badge: '⏺ PRESENT PERFECT', badgeColor: ['#2563EB', '#1D4ED8'], title: 'Present Perfect Tense',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Present Perfect Tense<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#27AE60' }}>▌</span>
+            Present Perfect Tense<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2563EB' }}>▌</span>
           </div>
-          <div style={{ background: 'rgba(39,174,96,0.08)', border: '2.5px solid #27AE60', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
-            <strong style={{ color: '#27AE60' }}>📖 Rule:</strong> {_lesson.rule2}
+          <div style={{ background: 'rgba(37,99,235,0.08)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
+            <strong style={{ color: '#2563EB' }}>📖 Rule:</strong> {_lesson.rule2}
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #E8F8EE 0%, #C8F0D8 100%)', border: '2.5px solid #27AE60', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#1A5C30', textAlign: 'center' as const }}>
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #BFDBFE 100%)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#1E3A8A', textAlign: 'center' as const }}>
             have / has + past participle
           </div>
         </>
       ),
     });
     pages.push({
-      badge: '⏺ PRESENT PERFECT', badgeColor: ['#27AE60', '#1E8449'], title: 'Present Perfect — Example',
+      badge: '⏺ PRESENT PERFECT', badgeColor: ['#2563EB', '#1D4ED8'], title: 'Present Perfect — Example',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Present Perfect — Example<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#27AE60' }}>▌</span>
+            Present Perfect — Example<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2563EB' }}>▌</span>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #E8F8EE 0%, #C8F0D8 100%)', border: '2.5px solid #27AE60', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#1A5C30', textAlign: 'center' as const, marginBottom: '10px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #BFDBFE 100%)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.95rem,2vw,1.25rem)', fontWeight: 700, color: '#1E3A8A', textAlign: 'center' as const, marginBottom: '10px' }}>
             have / has + past participle
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.78rem,1.65vw,0.98rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
@@ -211,14 +211,14 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
     });
   } else if (sectionId === 'B') {
     pages.push({
-      badge: '📚 RULE 1', badgeColor: ['#FF7A1A', '#E85D10'], title: 'Rule of Proximity',
+      badge: '📚 RULE 1', badgeColor: ['#3B82F6', '#2563EB'], title: 'Rule of Proximity',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Rule 1: Proximity &amp; Intervening Phrases<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#E85D10' }}>▌</span>
+            Rule 1: Proximity &amp; Intervening Phrases<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2563EB' }}>▌</span>
           </div>
-          <div style={{ background: 'rgba(232,93,16,0.08)', border: '2.5px solid #E85D10', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6 }}>
-            <strong style={{ color: '#E85D10' }}>📖 Rule 1:</strong> {_lesson.rule}
+          <div style={{ background: 'rgba(37,99,235,0.08)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6 }}>
+            <strong style={{ color: '#2563EB' }}>📖 Rule 1:</strong> {_lesson.rule}
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.78rem,1.65vw,0.98rem)', color: '#5A3A00', marginTop: '8px', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
             💬 {_lesson.examples[0]}
@@ -227,14 +227,14 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
       ),
     });
     pages.push({
-      badge: '✏️ RULE 2', badgeColor: ['#3A9E5C', '#217A42'], title: 'Quantifiers',
+      badge: '✏️ RULE 2', badgeColor: ['#3B82F6', '#2563EB'], title: 'Quantifiers',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Quantifier Rule<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3A9E5C' }}>▌</span>
+            Quantifier Rule<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3B82F6' }}>▌</span>
           </div>
-          <div style={{ background: 'rgba(58,158,92,0.08)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
-            <strong style={{ color: '#3A9E5C' }}>📖 Rule 2:</strong> {_lesson.rule2}
+          <div style={{ background: 'rgba(59,130,246,0.08)', border: '2.5px solid #3B82F6', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
+            <strong style={{ color: '#3B82F6' }}>📖 Rule 2:</strong> {_lesson.rule2}
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.78rem,1.65vw,0.98rem)', color: '#5A3A00', lineHeight: 1.55, background: 'rgba(255,248,220,0.8)', borderRadius: '10px', padding: '8px 12px' }}>
             💬 {_lesson.examples[1]}
@@ -290,27 +290,27 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
       ),
     });
     pages.push({
-      badge: '✏️ PREPOSITIONS OF MANNER', badgeColor: ['#3A9E5C', '#217A42'], title: 'Prepositions of Manner',
+      badge: '✏️ PREPOSITIONS OF MANNER', badgeColor: ['#3B82F6', '#2563EB'], title: 'Prepositions of Manner',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Prepositions of Manner<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3A9E5C' }}>▌</span>
+            Prepositions of Manner<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3B82F6' }}>▌</span>
           </div>
-          <div style={{ background: 'rgba(58,158,92,0.08)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
-            <strong style={{ color: '#3A9E5C' }}>📖 Rule:</strong> {_lesson.rule2}
+          <div style={{ background: 'rgba(59,130,246,0.08)', border: '2.5px solid #3B82F6', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.82rem,1.8vw,1.05rem)', color: '#2A1800', lineHeight: 1.6, marginBottom: '10px' }}>
+            <strong style={{ color: '#3B82F6' }}>📖 Rule:</strong> {_lesson.rule2}
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #E8F8EE 0%, #C8F0D8 100%)', border: '2.5px solid #3A9E5C', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.88rem,1.9vw,1.12rem)', fontWeight: 700, color: '#1A5C30', whiteSpace: 'pre-line' as const, textAlign: 'center' as const }}>
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #BFDBFE 100%)', border: '2.5px solid #3B82F6', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-char)', fontSize: 'clamp(0.88rem,1.9vw,1.12rem)', fontWeight: 700, color: '#1E3A8A', whiteSpace: 'pre-line' as const, textAlign: 'center' as const }}>
             {_lesson.formula}
           </div>
         </>
       ),
     });
     pages.push({
-      badge: '✏️ MANNER', badgeColor: ['#3A9E5C', '#217A42'], title: 'Prepositions of Manner — Examples',
+      badge: '✏️ MANNER', badgeColor: ['#3B82F6', '#2563EB'], title: 'Prepositions of Manner — Examples',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '10px' }}>
-            Prepositions of Manner — Examples<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3A9E5C' }}>▌</span>
+            Prepositions of Manner — Examples<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3B82F6' }}>▌</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '6px' }}>
             {[_lesson.examples[3], _lesson.examples[4], _lesson.examples[5]].filter(Boolean).map((ex: string, i: number) => (
@@ -348,9 +348,9 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '7px' }}>
             {([
-              { icon: '⏱', label: 'Perfect Tenses', desc: 'Past perfect (had danced) · Present perfect (have danced) · Future perfect (will have danced)', color: '#C0392B' },
+              { icon: '⏱', label: 'Perfect Tenses', desc: 'Past perfect (had danced) · Present perfect (have danced) · Future perfect (will have danced)', color: '#2563EB' },
               { icon: '👥', label: 'Subject-Verb Agreement', desc: 'Proximity rule · Indefinite pronouns (each, everyone) · Noncount & plural-only nouns', color: '#2980B9' },
-              { icon: '📍', label: 'Prepositions of Time & Manner', desc: 'at midnight · in the morning · on Sunday · with passion · by bike', color: '#3A9E5C' },
+              { icon: '📍', label: 'Prepositions of Time & Manner', desc: 'at midnight · in the morning · on Sunday · with passion · by bike', color: '#3B82F6' },
             ] as const).map((item, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.85)', borderRadius: '10px', padding: '8px 12px', display: 'flex', gap: '10px', alignItems: 'flex-start', border: `2px solid ${item.color}33` }}>
                 <span style={{ fontSize: 'clamp(1rem,2vw,1.3rem)', flexShrink: 0 }}>{item.icon}</span>
@@ -376,9 +376,9 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column' as const, gap: '8px' }}>
             {([
-              { name: 'Christine', school: 'Aguinaldo J. Santos National High School', theme: '🎯 Discipline', color: '#C0392B' },
+              { name: 'Christine', school: 'Aguinaldo J. Santos National High School', theme: '🎯 Discipline', color: '#2563EB' },
               { name: 'Kathleen', school: 'Alexis G. Santos National High School', theme: '🎨 Creativity', color: '#2980B9' },
-              { name: 'Christian', school: 'Dr. Pablito Mendoza Sr. High School', theme: '🤝 Unity', color: '#3A9E5C' },
+              { name: 'Christian', school: 'Dr. Pablito Mendoza Sr. High School', theme: '🤝 Unity', color: '#3B82F6' },
             ] as const).map((d, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.9)', borderRadius: '10px', padding: '9px 13px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', border: `2px solid ${d.color}33` }}>
                 <div style={{ minWidth: 0 }}>
@@ -394,27 +394,27 @@ function buildLessonPages(lesson: any, sectionId: string): LessonPage[] {
     });
   } else {
     pages.push({
-      badge: '📚 LESSON', badgeColor: ['#FF7A1A', '#E85D10'], title: 'Grammar Rule',
+      badge: '📚 LESSON', badgeColor: ['#3B82F6', '#2563EB'], title: 'Grammar Rule',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1.1rem,2.8vw,1.9rem)', color: '#2A1800', fontWeight: 900, lineHeight: 1.35, marginBottom: '10px' }}>
-            {_lesson.topic}<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#E85D10' }}>▌</span>
+            {_lesson.topic}<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#2563EB' }}>▌</span>
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.85rem,1.9vw,1.1rem)', color: '#6B4A00', fontStyle: 'italic', marginBottom: '12px', lineHeight: 1.5 }}>{_lesson.intro}</div>
-          <div style={{ background: 'rgba(232,93,16,0.1)', border: '2.5px solid #E85D10', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.85rem,1.9vw,1.05rem)', color: '#2A1800', lineHeight: 1.6 }}>
-            <strong style={{ color: '#E85D10' }}>📖 Rule:</strong> {_lesson.rule}
+          <div style={{ background: 'rgba(37,99,235,0.1)', border: '2.5px solid #2563EB', borderRadius: '12px', padding: '10px 14px', fontFamily: 'var(--font-body)', fontSize: 'clamp(0.85rem,1.9vw,1.05rem)', color: '#2A1800', lineHeight: 1.6 }}>
+            <strong style={{ color: '#2563EB' }}>📖 Rule:</strong> {_lesson.rule}
           </div>
         </>
       ),
     });
     pages.push({
-      badge: '✏️ FORMULA', badgeColor: ['#3A9E5C', '#217A42'], title: 'The Formula',
+      badge: '✏️ FORMULA', badgeColor: ['#3B82F6', '#2563EB'], title: 'The Formula',
       render: (_lesson, showCursor) => (
         <>
           <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(1rem,2.2vw,1.4rem)', color: '#2A1800', fontWeight: 800, marginBottom: '14px' }}>
-            Remember this formula!<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3A9E5C' }}>▌</span>
+            Remember this formula!<span style={{ opacity: showCursor ? 1 : 0, marginLeft: '4px', color: '#3B82F6' }}>▌</span>
           </div>
-          <div style={{ background: 'linear-gradient(135deg, #E8F8EE 0%, #C8F0D8 100%)', border: '3px solid #3A9E5C', borderRadius: '14px', padding: '14px 18px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.4vw,1.45rem)', fontWeight: 700, color: '#1A5C30', textAlign: 'center' as const, whiteSpace: 'pre-line' as const }}>
+          <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #BFDBFE 100%)', border: '3px solid #3B82F6', borderRadius: '14px', padding: '14px 18px', fontFamily: 'var(--font-char)', fontSize: 'clamp(1rem,2.4vw,1.45rem)', fontWeight: 700, color: '#1E3A8A', textAlign: 'center' as const, whiteSpace: 'pre-line' as const }}>
             {_lesson.formula}
           </div>
         </>
