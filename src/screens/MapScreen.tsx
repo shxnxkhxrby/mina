@@ -60,6 +60,13 @@ export default function MapScreen() {
   };
 
   const handleZone = (id: string) => {
+    // ── Advanced / Mastery mode: ALL zones lead to the level selector ──
+    if (isAdvancedMode) {
+      goToScene('ADVANCED_SECTION_VIEW');
+      return;
+    }
+
+    // ── Story mode ──────────────────────────────────────────────────────
     if (id === 'D') {
       if (!isDSectionUnlocked()) {
         setTooltip('Complete Sections A, B, and C to unlock the Festival!');
@@ -67,7 +74,7 @@ export default function MapScreen() {
         return;
       }
       setSection('D' as any);
-      goToScene(isAdvancedMode ? 'ADVANCED_SECTION_VIEW' : 'SECTION_D_VIDEO');
+      goToScene('SECTION_D_VIDEO');
       return;
     }
     const sId = id as SectionId;
@@ -78,7 +85,7 @@ export default function MapScreen() {
       return;
     }
     setSection(sId);
-    goToScene(isAdvancedMode ? 'ADVANCED_SECTION_VIEW' : 'GRAMMAR_LESSON');
+    goToScene('GRAMMAR_LESSON');
   };
 
   const getStars = (id: string) => {
@@ -105,6 +112,116 @@ export default function MapScreen() {
 
   const dUnlocked = isDSectionUnlocked();
 
+  // In advanced mode, show a single "Enter Mastery" button instead of zone cards
+  if (isAdvancedMode) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        <img
+          src={ASSETS.map}
+          alt="Bustos Map"
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'center',
+          }}
+        />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.55) 100%)',
+          pointerEvents: 'none',
+        }} />
+
+        <div className="bunting" />
+
+        {/* Advanced mode header */}
+        <div style={{
+          position: 'absolute',
+          top: 'clamp(38px,7vh,60px)',
+          left: '50%', transform: 'translateX(-50%)',
+          zIndex: 10, textAlign: 'center',
+          width: '100%', pointerEvents: 'none',
+        }}>
+          <div style={{
+            display: 'inline-block',
+            background: 'rgba(15,15,35,0.92)', border: '2px solid #F5C518',
+            borderRadius: '50px', padding: '4px 20px',
+            fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,2vw,1.3rem)',
+            color: '#F5C518', whiteSpace: 'nowrap',
+            pointerEvents: 'auto',
+          }}>⚡ Mastery Checkpoint Mode</div>
+          <div style={{
+            fontFamily: 'var(--font-body)', fontSize: 'clamp(0.54rem,1.1vw,0.72rem)',
+            color: 'rgba(255,248,231,0.9)', marginTop: '3px',
+            textShadow: '1px 1px 3px rgba(0,0,0,0.8)',
+          }}>
+            {playerName ? `Welcome back, ${playerName}!` : 'No story · No guides · Pure grammar'}
+          </div>
+        </div>
+
+        {/* Single centered CTA */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          zIndex: 10, gap: '18px',
+        }}>
+          <motion.div
+            initial={{ scale: 0.85, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          >
+            <motion.button
+              whileHover={{ scale: 1.06, boxShadow: '0 0 32px rgba(245,197,24,0.5)' }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => goToScene('ADVANCED_SECTION_VIEW')}
+              style={{
+                background: 'linear-gradient(135deg,#1A1A2E,#0D0D1A)',
+                border: '3px solid #F5C518',
+                borderRadius: '20px',
+                padding: 'clamp(18px,3vh,32px) clamp(36px,7vw,72px)',
+                fontFamily: 'var(--font-title)',
+                fontSize: 'clamp(1rem,2.5vw,1.8rem)',
+                color: '#F5C518',
+                cursor: 'pointer',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(245,197,24,0.2)',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', gap: '8px',
+              }}
+            >
+              <span style={{ fontSize: 'clamp(2rem,5vw,3.5rem)' }}>⚡</span>
+              <span>Enter Mastery Checkpoint</span>
+              <span style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'clamp(0.56rem,1.1vw,0.74rem)',
+                color: 'rgba(245,197,24,0.7)',
+                fontWeight: 400,
+              }}>Level 1 · Level 2 · Level 3</span>
+            </motion.button>
+          </motion.div>
+        </div>
+
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => goToScene('MAIN_MENU')}
+          style={{
+            position: 'absolute', top: 'clamp(38px,7vh,60px)',
+            left: 'clamp(10px,2vw,16px)', zIndex: 20,
+            borderColor: 'rgba(255,255,255,0.3)', color: 'rgba(255,255,255,0.8)',
+          }}>
+          ← Menu
+        </button>
+      </div>
+    );
+  }
+
+  // ── Story mode map (unchanged) ──────────────────────────────────────────
   return (
     <div
       style={{
@@ -153,28 +270,11 @@ export default function MapScreen() {
           color: 'rgba(255,248,231,0.9)', marginTop: '3px',
           textShadow: '1px 1px 3px rgba(0,0,0,0.8)',
         }}>
-          {isAdvancedMode
-            ? '⚡ Advanced Mode — Select a section'
-            : `Welcome, ${playerName}! Tap a zone to explore 🌸`}
+          {`Welcome, ${playerName}! Tap a zone to explore 🌸`}
         </div>
       </div>
 
-      {isAdvancedMode && (
-        <div style={{
-          position: 'absolute', top: 'clamp(38px,7vh,60px)',
-          right: 'clamp(10px,2vw,16px)', zIndex: 20,
-        }}>
-          <div style={{
-            background: 'rgba(232,93,38,0.92)', border: '2px solid #FFD700',
-            borderRadius: '20px', padding: '3px 12px',
-            fontFamily: 'var(--font-char)', fontWeight: 700,
-            fontSize: 'clamp(0.52rem,1vw,0.68rem)', color: 'white', letterSpacing: '1px',
-          }}>⚡ ADVANCED</div>
-        </div>
-      )}
-
       {/* Zone markers — absolute on large screens, responsive grid on small */}
-      {/* Large screen: absolute positioned on map */}
       <div className="map-zones-desktop">
         {allZones.map(zone => {
           const pos = ZONE_POSITIONS[zone.id];

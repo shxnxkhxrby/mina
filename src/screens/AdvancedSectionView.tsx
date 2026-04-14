@@ -1,126 +1,111 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
-import { SECTIONS } from '../data/sections';
-import { ASSETS } from '../data/assets';
 
-function getSpriteSrc(sectionId: string, storeIndex: number): string {
-  return `/imgs/levels/${sectionId}/level${storeIndex + 1}.png`;
-}
+// ── The three mastery levels (no story sections, no stores) ──────────────
+const MASTERY_LEVELS = [
+  {
+    id: 'perfect_tenses',
+    level: 1,
+    title: 'Perfect Tenses',
+    subtitle: 'Past · Present · Future Perfect',
+    emoji: '⏳',
+    color: '#E85D26',
+    gradient: 'linear-gradient(160deg,#FFE090,#F5C84A 40%,#E8A830)',
+    badge: 'Section A Grammar',
+    storeIndex: 0,          // maps to MASTERY_QUIZZES[0] in AdvancedStore
+    sectionId: 'A',
+    description: '20 questions on perfect tense forms and usage',
+  },
+  {
+    id: 'prepositions',
+    level: 2,
+    title: 'Prepositions',
+    subtitle: 'Time · Manner · Method',
+    emoji: '📍',
+    color: '#2E75B6',
+    gradient: 'linear-gradient(160deg,#A0C8F0,#70A8DC 40%,#4088C0)',
+    badge: 'Section C Grammar',
+    storeIndex: 1,          // maps to MASTERY_QUIZZES[1] in AdvancedStore
+    sectionId: 'C',
+    description: '20 questions on prepositions of time and manner',
+  },
+  {
+    id: 'subject_verb',
+    level: 3,
+    title: 'Subject-Verb Agreement',
+    subtitle: 'Proximity · Quantifiers · Nouns',
+    emoji: '🔗',
+    color: '#5B7A3D',
+    gradient: 'linear-gradient(160deg,#A8D8A0,#7CBB70 40%,#5B9A50)',
+    badge: 'Section B Grammar',
+    storeIndex: 2,          // maps to MASTERY_QUIZZES[2] in AdvancedStore
+    sectionId: 'B',
+    description: '20 questions on subject-verb agreement rules',
+  },
+];
 
-function getSectionBg(sectionId: string): string {
-  return (ASSETS as Record<string, string>)[`section${sectionId}`] ?? '';
-}
-
-const FALLBACK_GRADIENT: Record<string, string> = {
-  A: 'linear-gradient(160deg,#FFE090,#F5C84A 40%,#E8A830)',
-  B: 'linear-gradient(160deg,#A8D8A0,#7CBB70 40%,#5B9A50)',
-  C: 'linear-gradient(160deg,#A0C8F0,#70A8DC 40%,#4088C0)',
-  D: 'linear-gradient(160deg,#E0A0F0,#B060D0 40%,#8B1A8B)',
-};
+const SCENE_BG = 'linear-gradient(160deg,#0D0D1A 0%,#1A1A2E 50%,#16213E 100%)';
 
 export default function AdvancedSectionView() {
   const {
-    currentSection, setStoreIndex, goToScene,
-    sectionProgress, setQuestionSet,
+    setStoreIndex, setSection, goToScene,
+    sectionProgress, playerName,
   } = useGameStore();
 
   const [lockedMsg, setLockedMsg] = useState('');
-  const [spriteErrors, setSpriteErrors] = useState<Record<number, boolean>>({});
-  const [bgImgFailed, setBgImgFailed] = useState(false);
 
-  // ── Guard: section must exist ────────────────────────────────────────────
-  const section = SECTIONS.find(s => s.id === currentSection);
-  if (!section) {
-    // Graceful fallback — go back to MAP instead of blank screen
-    return (
-      <div style={{
-        position: 'fixed', inset: 0,
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        background: FALLBACK_GRADIENT.A,
-        gap: '16px',
-      }}>
-        <div style={{ fontFamily: 'var(--font-title)', fontSize: '1.4rem', color: 'white' }}>
-          Section not found
-        </div>
-        <button
-          className="btn btn-ghost btn-sm"
-          onClick={() => goToScene('MAP')}
-        >
-          ← Back to Map
-        </button>
-      </div>
-    );
-  }
-
-  const bg = getSectionBg(section.id);
-  const prog = sectionProgress[section.id] || {};
-  const showBgImage = !!bg && !bgImgFailed;
-
-  // ── Store unlock logic ───────────────────────────────────────────────────
-  // In Advanced Mode: store[0] is always unlocked.
-  // store[i] is unlocked if store[i-1] is completed (bestScore exists & completed).
-  const isAdvancedStoreUnlocked = (storeIndex: number): boolean => {
-    if (storeIndex === 0) return true;
-    const prevStore = section.stores[storeIndex - 1];
-    if (!prevStore) return false;
-    return !!(prog[prevStore.id]?.completed);
+  // A level is "completed" if ALL stores in that level's section are completed
+  const isLevelCompleted = (lvl: typeof MASTERY_LEVELS[number]) => {
+    const prog = sectionProgress[lvl.sectionId] || {};
+    // In advanced mode each quiz writes to store 0 of its section
+    // We just check bestScore exists and completed flag
+    return Object.values(prog).some(p => p?.completed);
   };
 
-  const handleStore = (i: number) => {
-    if (!isAdvancedStoreUnlocked(i)) {
-      const prevStoreName = section.stores[i - 1]?.name ?? 'the previous level';
-      setLockedMsg(`Complete ${prevStoreName} first!`);
-      setTimeout(() => setLockedMsg(''), 2500);
-      return;
-    }
-    setStoreIndex(i);
-    setQuestionSet('A');
+  const getBestScore = (lvl: typeof MASTERY_LEVELS[number]): number => {
+    const prog = sectionProgress[lvl.sectionId] || {};
+    return Math.max(0, ...Object.values(prog).map(p => p?.bestScore ?? 0));
+  };
+
+  // All levels are always unlocked in mastery mode — no story gating
+  const handleLevel = (lvl: typeof MASTERY_LEVELS[number]) => {
+    setSection(lvl.sectionId as any);
+    setStoreIndex(lvl.storeIndex);
     goToScene('ADVANCED_STORE');
   };
 
   return (
     <div
       style={{
-        position: 'fixed',
-        inset: 0,
-        width: '100%',
-        height: '100%',
+        position: 'fixed', inset: 0,
+        width: '100%', height: '100%',
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        background: SCENE_BG,
       }}
     >
-      {/* Background */}
-      {showBgImage ? (
-        <img
-          src={bg}
-          alt={section.name}
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'center top',
-          }}
-          onError={() => setBgImgFailed(true)}
-        />
-      ) : (
-        <div
-          style={{
-            position: 'absolute', inset: 0,
-            background: FALLBACK_GRADIENT[section.id] ?? FALLBACK_GRADIENT.A,
-          }}
-        />
-      )}
-
-      {/* Bottom vignette */}
-      <div
-        style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.65) 100%)',
-          pointerEvents: 'none',
-        }}
-      />
+      {/* Star field */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        {Array.from({ length: 40 }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: `${(i % 3) + 1}px`,
+              height: `${(i % 3) + 1}px`,
+              borderRadius: '50%',
+              background: 'white',
+              opacity: 0.15 + (i % 5) * 0.08,
+              top: `${(i * 2.4) % 92}%`,
+              left: `${(i * 2.7) % 100}%`,
+              animation: `float ${3 + (i % 4)}s ease-in-out infinite`,
+              animationDelay: `${(i * 0.3) % 3}s`,
+            }}
+          />
+        ))}
+      </div>
 
       <div className="bunting" />
 
@@ -131,215 +116,259 @@ export default function AdvancedSectionView() {
           zIndex: 10,
           textAlign: 'center',
           paddingTop: 'clamp(44px,8vh,70px)',
-          paddingBottom: '6px',
+          paddingBottom: '10px',
           flexShrink: 0,
         }}
       >
         <div
           style={{
-            fontFamily: 'var(--font-title)',
-            fontSize: 'clamp(1rem,2.8vw,1.9rem)',
-            color: 'white',
-            textShadow: '2px 3px 0 rgba(0,0,0,0.5)',
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+            background: 'rgba(245,197,24,0.12)',
+            border: '1.5px solid rgba(245,197,24,0.4)',
+            borderRadius: '50px',
+            padding: '4px 18px',
+            marginBottom: '8px',
           }}
         >
-          {section.emoji} {section.name} — {section.location}
+          <span style={{ fontSize: 'clamp(0.6rem,1.2vw,0.78rem)', color: '#F5C518', fontFamily: 'var(--font-char)', fontWeight: 700, letterSpacing: '2px' }}>
+            ⚡ MASTERY CHECKPOINT
+          </span>
+        </div>
+
+        <div
+          style={{
+            fontFamily: 'var(--font-title)',
+            fontSize: 'clamp(1.1rem,2.8vw,2rem)',
+            color: 'white',
+            textShadow: '0 0 24px rgba(245,197,24,0.3)',
+          }}
+        >
+          Choose Your Level
         </div>
         <div
           style={{
             fontFamily: 'var(--font-body)',
-            fontSize: 'clamp(0.6rem,1.3vw,0.82rem)',
-            color: 'rgba(255,248,231,0.95)',
+            fontSize: 'clamp(0.6rem,1.2vw,0.78rem)',
+            color: 'rgba(255,255,255,0.5)',
             marginTop: '4px',
-            background: 'rgba(0,0,0,0.35)',
-            borderRadius: '20px', padding: '3px 14px',
-            display: 'inline-block',
           }}
         >
-          ⚡ Advanced Mode · <strong>{section.grammarTopic}</strong>
+          {playerName ? `Welcome back, ${playerName}!` : 'No guides · No lessons · Pure grammar'} — Answer all 20 questions to unlock your certificate
         </div>
       </div>
 
-      {/* Store cards */}
+      {/* Level cards */}
       <div
         style={{
           flex: 1,
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
           zIndex: 10,
-          paddingBottom: 'clamp(52px,10vh,88px)',
-          paddingLeft: 'clamp(8px,2vw,20px)',
-          paddingRight: 'clamp(8px,2vw,20px)',
-          overflowX: 'auto',
-          overflowY: 'visible',
-          gap: 'clamp(8px,1.8vw,22px)',
+          padding: 'clamp(16px,3vh,36px) clamp(14px,3vw,40px)',
+          gap: 'clamp(12px,2.5vw,28px)',
+          flexWrap: 'wrap',
+          overflowY: 'auto',
         }}
       >
-        {section.stores.map((store, i) => {
-          const unlocked = isAdvancedStoreUnlocked(i);
-          const completed = !!(prog[store.id]?.completed);
-          const bestScore = prog[store.id]?.bestScore ?? 0;
-          const spriteSrc = getSpriteSrc(section.id, i);
-          const showEmoji = spriteErrors[i];
+        {MASTERY_LEVELS.map((lvl, i) => {
+          const completed = isLevelCompleted(lvl);
+          const best = getBestScore(lvl);
 
           return (
             <motion.div
-              key={store.id}
+              key={lvl.id}
+              initial={{ opacity: 0, y: 40, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: i * 0.12, type: 'spring', stiffness: 200, damping: 18 }}
+              whileHover={{ y: -8, scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => handleLevel(lvl)}
               style={{
+                cursor: 'pointer',
+                width: 'clamp(200px,28vw,300px)',
                 flexShrink: 0,
-                zIndex: 10,
-                cursor: unlocked ? 'pointer' : 'not-allowed',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
               }}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.15, type: 'spring', stiffness: 200 }}
-              onClick={() => handleStore(i)}
-              whileHover={unlocked ? { y: -10, scale: 1.06 } : {}}
-              whileTap={unlocked ? { scale: 0.96 } : {}}
             >
+              {/* Card */}
               <div
                 style={{
-                  width: 'clamp(150px,22vw,240px)',
                   background: completed
-                    ? 'rgba(255,248,220,0.97)'
-                    : unlocked
-                    ? 'rgba(255,255,255,0.96)'
-                    : 'rgba(200,200,200,0.85)',
-                  borderRadius: '18px',
-                  border: completed
-                    ? '3px solid #F5C84A'
-                    : unlocked
-                    ? '3px solid var(--teal)'
-                    : '3px solid #aaa',
-                  boxShadow: unlocked
-                    ? '0 10px 32px rgba(0,0,0,0.4), 0 2px 0 rgba(255,255,255,0.3) inset'
-                    : '0 4px 12px rgba(0,0,0,0.2)',
-                  padding: 'clamp(10px,1.8vh,18px) clamp(8px,1.5vw,14px)',
-                  display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', gap: '6px',
-                  position: 'relative', overflow: 'hidden',
+                    ? 'rgba(255,248,200,0.08)'
+                    : 'rgba(255,255,255,0.05)',
+                  border: `2.5px solid ${completed ? lvl.color : `${lvl.color}66`}`,
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  boxShadow: completed
+                    ? `0 0 32px ${lvl.color}44, 0 8px 24px rgba(0,0,0,0.5)`
+                    : `0 8px 24px rgba(0,0,0,0.4)`,
+                  backdropFilter: 'blur(10px)',
+                  position: 'relative',
                 }}
               >
-                {completed && (
+                {/* Gradient top strip */}
+                <div
+                  style={{
+                    height: 'clamp(100px,18vw,180px)',
+                    background: lvl.gradient,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {/* Glow circle */}
                   <div
                     style={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(135deg, rgba(255,215,0,0.14) 0%, transparent 50%, rgba(255,215,0,0.08) 100%)',
-                      pointerEvents: 'none',
+                      position: 'absolute',
+                      width: '120%',
+                      height: '120%',
+                      background: `radial-gradient(circle at 50% 60%, ${lvl.color}55 0%, transparent 70%)`,
                     }}
                   />
-                )}
 
-                {/* Level badge */}
-                <div
-                  style={{
-                    position: 'absolute', top: '6px', right: '6px',
-                    background: unlocked ? 'var(--teal)' : '#aaa',
-                    color: 'white', borderRadius: '8px', padding: '1px 7px',
-                    fontFamily: 'var(--font-char)', fontWeight: 700,
-                    fontSize: 'clamp(0.44rem,0.9vw,0.58rem)', letterSpacing: '0.5px',
-                  }}
-                >
-                  LVL {i + 1}
-                </div>
+                  {/* Level number + emoji */}
+                  <div style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-title)',
+                        fontSize: 'clamp(0.58rem,1.1vw,0.78rem)',
+                        color: 'rgba(255,255,255,0.85)',
+                        letterSpacing: '3px',
+                        textTransform: 'uppercase',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      Level {lvl.level}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 'clamp(2.6rem,5.5vw,4rem)',
+                        lineHeight: 1,
+                        filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
+                      }}
+                    >
+                      {lvl.emoji}
+                    </div>
+                  </div>
 
-                {/* Sprite / emoji */}
-                <div
-                  style={{
-                    width: 'clamp(100px,18vw,160px)',
-                    height: 'clamp(100px,18vw,160px)',
-                    borderRadius: '14px', overflow: 'hidden',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: showEmoji ? 'transparent' : 'rgba(0,0,0,0.04)',
-                    filter: unlocked ? 'none' : 'grayscale(0.7)',
-                    flexShrink: 0,
-                  }}
-                >
-                  {showEmoji ? (
-                    <span style={{ fontSize: 'clamp(2.5rem,6vw,4.5rem)', lineHeight: 1 }}>
-                      {store.emoji}
-                    </span>
-                  ) : (
-                    <img
-                      src={spriteSrc}
-                      alt={store.npcName}
-                      onError={() => setSpriteErrors(prev => ({ ...prev, [i]: true }))}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
-                    />
+                  {/* Completion badge */}
+                  {completed && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '8px',
+                        right: '8px',
+                        background: '#F5C518',
+                        color: '#1A1200',
+                        fontFamily: 'var(--font-char)',
+                        fontWeight: 800,
+                        fontSize: 'clamp(0.42rem,0.8vw,0.58rem)',
+                        padding: '2px 8px',
+                        borderRadius: '20px',
+                        letterSpacing: '0.5px',
+                      }}
+                    >
+                      ✓ DONE
+                    </div>
                   )}
                 </div>
 
-                {/* Store name */}
+                {/* Card body */}
                 <div
                   style={{
-                    fontFamily: 'var(--font-title)',
-                    fontSize: 'clamp(0.64rem,1.3vw,0.88rem)',
-                    color: unlocked ? 'var(--olive-brown)' : '#888',
-                    textAlign: 'center', fontWeight: 700,
+                    padding: 'clamp(12px,2vh,20px) clamp(14px,2.2vw,22px)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
                   }}
                 >
-                  {store.name}
-                </div>
-
-                {/* Description tag */}
-                <div
-                  style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: 'clamp(0.5rem,0.95vw,0.64rem)',
-                    color: 'white',
-                    background: unlocked ? 'var(--teal)' : '#aaa',
-                    borderRadius: '20px', padding: '2px 9px',
-                    textAlign: 'center',
-                  }}
-                >
-                  {store.description}
-                </div>
-
-                {/* Stars */}
-                {completed && (
-                  <div style={{ display: 'flex', gap: '1px', justifyContent: 'center' }}>
-                    {[1, 2, 3, 4, 5].map(n => (
-                      <span key={n} style={{ fontSize: 'clamp(0.52rem,1vw,0.78rem)' }}>
-                        {n <= bestScore ? '⭐' : '☆'}
-                      </span>
-                    ))}
+                  <div>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-title)',
+                        fontSize: 'clamp(0.82rem,1.6vw,1.15rem)',
+                        color: 'white',
+                        fontWeight: 700,
+                        marginBottom: '2px',
+                      }}
+                    >
+                      {lvl.title}
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'clamp(0.52rem,0.95vw,0.68rem)',
+                        color: `${lvl.color}cc`,
+                      }}
+                    >
+                      {lvl.subtitle}
+                    </div>
                   </div>
-                )}
 
-                {/* Lock overlay */}
-                {!unlocked && (
                   <div
                     style={{
-                      position: 'absolute', inset: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'rgba(0,0,0,0.22)', borderRadius: '16px',
-                      fontSize: 'clamp(1.6rem,3.5vw,2.6rem)',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 'clamp(0.5rem,0.9vw,0.64rem)',
+                      color: 'rgba(255,255,255,0.45)',
+                      lineHeight: 1.4,
                     }}
                   >
-                    🔒
+                    {lvl.description}
                   </div>
-                )}
+
+                  {/* Stars row */}
+                  {completed && (
+                    <div style={{ display: 'flex', gap: '2px' }}>
+                      {[1, 2, 3, 4, 5].map(n => (
+                        <span key={n} style={{ fontSize: 'clamp(0.58rem,1.1vw,0.82rem)' }}>
+                          {n <= best ? '⭐' : '☆'}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* CTA button */}
+                  <motion.div
+                    whileHover={{ scale: 1.04 }}
+                    whileTap={{ scale: 0.97 }}
+                    style={{
+                      marginTop: '4px',
+                      background: completed
+                        ? `linear-gradient(135deg, ${lvl.color}cc, ${lvl.color})`
+                        : `linear-gradient(135deg, ${lvl.color}, ${lvl.color}dd)`,
+                      borderRadius: '12px',
+                      padding: 'clamp(8px,1.4vh,12px)',
+                      textAlign: 'center',
+                      fontFamily: 'var(--font-title)',
+                      fontSize: 'clamp(0.64rem,1.2vw,0.88rem)',
+                      color: 'white',
+                      fontWeight: 700,
+                      letterSpacing: '0.5px',
+                      boxShadow: `0 4px 14px ${lvl.color}55`,
+                    }}
+                  >
+                    {completed ? '🔄 Retry Quiz →' : '▶ Start Quiz →'}
+                  </motion.div>
+                </div>
               </div>
 
-              {/* Bounce arrow */}
-              {unlocked && !completed && (
+              {/* Bounce arrow when not completed */}
+              {!completed && (
                 <motion.div
                   animate={{ y: [0, -5, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                  transition={{ repeat: Infinity, duration: 1.3, ease: 'easeInOut' }}
                   style={{
                     textAlign: 'center',
-                    fontSize: 'clamp(0.8rem,1.6vw,1.1rem)',
-                    marginTop: '5px', color: 'white',
-                    textShadow: '0 1px 4px rgba(0,0,0,0.7)',
-                    filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.8))',
+                    fontSize: 'clamp(0.7rem,1.3vw,0.95rem)',
+                    marginTop: '6px',
+                    color: 'rgba(255,255,255,0.6)',
+                    filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.3))',
                   }}
                 >
-                  ▼ Enter
+                  ▼ Tap to begin
                 </motion.div>
               )}
             </motion.div>
@@ -370,18 +399,34 @@ export default function AdvancedSectionView() {
         )}
       </AnimatePresence>
 
-      {/* Nav */}
+      {/* Footer nav */}
       <div
         style={{
-          position: 'absolute',
-          bottom: 'clamp(10px,2vh,22px)',
-          left: 0, right: 0,
-          display: 'flex', justifyContent: 'center', gap: '10px',
+          position: 'relative',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '10px',
+          padding: 'clamp(10px,2vh,20px)',
           zIndex: 10,
+          flexShrink: 0,
         }}
       >
-        <button className="btn btn-ghost btn-sm" onClick={() => goToScene('MAP')}>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => goToScene('MAP')}
+          style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
+        >
           ← Map
+        </button>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => goToScene('MAIN_MENU')}
+          style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)' }}
+        >
+          ← Main Menu
         </button>
       </div>
     </div>

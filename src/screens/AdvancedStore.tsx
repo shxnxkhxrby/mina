@@ -7,7 +7,6 @@ import { getLevelBgCandidates } from '../data/assets';
 type Phase = 'question' | 'answered' | 'done';
 
 // ── Mastery Checkpoint question bank ─────────────────────────────────────
-// 3 quizzes × 20 questions each, drawn from the provided curriculum text.
 
 interface MCQuestion {
   questionText: string;
@@ -238,10 +237,9 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
   // ── Quiz 2: Prepositions (20 questions) ──────────────────────────────────
   {
     id: 'prepositions',
-    title: 'Preposition Quiz',
+    title: 'Prepositions Mastery Quiz',
     topic: 'Prepositions of Time and Manner',
     questions: [
-      // Level 1 — Easy (7)
       {
         questionText: 'Our English class starts __________ 8:30 AM sharp.',
         choices: [
@@ -306,7 +304,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
           { text: 'in', isCorrect: false },
         ],
         feedbackCorrect: '"By Monday" means no later than Monday — a deadline.',
-        feedbackWrong: '"By" sets a deadline → "by Monday" (not "on Monday", which just means that day).',
+        feedbackWrong: '"By" sets a deadline → "by Monday" (not "on Monday").',
       },
       {
         questionText: 'The student solved the difficult math problem __________ himself.',
@@ -319,7 +317,6 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackCorrect: '"By himself" = alone, without help (manner).',
         feedbackWrong: '"By himself" expresses manner (unaided) → use "by".',
       },
-      // Level 2 — Average (8)
       {
         questionText: 'The students watched the documentary __________ great interest.',
         choices: [
@@ -408,7 +405,6 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackCorrect: '"Throughout" = from beginning to end of a period.',
         feedbackWrong: '"Throughout" means for the entire duration → "throughout the entire lecture".',
       },
-      // Level 3 — Difficult (5)
       {
         questionText: 'The students arrived __________ the venue __________ a very organized manner.',
         choices: [
@@ -470,10 +466,9 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
   // ── Quiz 3: Subject-Verb Agreement (20 questions) ────────────────────────
   {
     id: 'subject_verb',
-    title: 'Grammar Quiz',
+    title: 'Subject-Verb Agreement Mastery Quiz',
     topic: 'Subject-Verb Agreement',
     questions: [
-      // Level 1 — Easy (8)
       {
         questionText: 'Neither the students nor the teacher ( is / are ) ready for the exam.',
         choices: [
@@ -546,7 +541,6 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackCorrect: '"Each" is always singular → "receives".',
         feedbackWrong: '"Each" is always singular → "receives".',
       },
-      // Level 2 — Average (7)
       {
         questionText: 'The furniture in the faculty room __________ to be dusted. (need)',
         choices: [
@@ -617,7 +611,6 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackCorrect: '"Both" is always plural → "are".',
         feedbackWrong: '"Both" is plural → "are".',
       },
-      // Level 3 — Difficult (5) — choose the corrected sentence
       {
         questionText: 'Which is the CORRECTED version? "Either the students or the monitor are responsible for the classroom\'s cleanliness."',
         choices: [
@@ -686,18 +679,10 @@ function shuffleChoices(choices: { text: string; isCorrect: boolean }[]) {
   return shuffleArray(choices);
 }
 
-const SECTION_ACCENT: Record<string, string> = {
-  A: '#E85D26',
-  B: '#3A9E5C',
-  C: '#3A4DB8',
-  D: '#8B1A8B',
-};
-
-const SECTION_FALLBACK: Record<string, string> = {
-  A: 'linear-gradient(135deg,#FFE090,#F5C84A)',
-  B: 'linear-gradient(135deg,#A8D8A0,#5B9A50)',
-  C: 'linear-gradient(135deg,#A0C8F0,#4088C0)',
-  D: 'linear-gradient(135deg,#E0A0F0,#8B1A8B)',
+const LEVEL_META: Record<number, { title: string; emoji: string; color: string; bg: string }> = {
+  0: { title: 'Level 1 — Perfect Tenses',         emoji: '⏳', color: '#E85D26', bg: 'linear-gradient(160deg,#FFF3D0,#FFE090 50%,#F5C84A)' },
+  1: { title: 'Level 2 — Prepositions',             emoji: '📍', color: '#2E75B6', bg: 'linear-gradient(160deg,#D0E8FF,#A0C8F0 50%,#70A8DC)' },
+  2: { title: 'Level 3 — Subject-Verb Agreement',   emoji: '🔗', color: '#5B7A3D', bg: 'linear-gradient(160deg,#D4EED0,#A8D8A0 50%,#7CBB70)' },
 };
 
 export default function AdvancedStore() {
@@ -711,11 +696,10 @@ export default function AdvancedStore() {
   const store = section.stores[currentStoreIndex];
   if (!store) return null;
 
-  // storeIndex 0 → Perfect Tenses, 1 → Prepositions, 2 → Subject-Verb Agreement
-  const masteryQuiz = MASTERY_QUIZZES[currentStoreIndex] ?? MASTERY_QUIZZES[0];
-
-  const accent = SECTION_ACCENT[section.id] ?? '#E85D26';
-  const fallbackBg = SECTION_FALLBACK[section.id] ?? SECTION_FALLBACK.A;
+  // storeIndex 0 → Perfect Tenses, 1 → Prepositions, 2 → SVA
+  const quizIndex = currentStoreIndex;
+  const masteryQuiz = MASTERY_QUIZZES[quizIndex] ?? MASTERY_QUIZZES[0];
+  const meta = LEVEL_META[quizIndex] ?? LEVEL_META[0];
 
   const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
   const [bgIndex, setBgIndex] = useState(0);
@@ -739,9 +723,11 @@ export default function AdvancedStore() {
   const [feedbackText, setFeedbackText] = useState('');
   const [isCorrect, setIsCorrect] = useState(false);
   const [results, setResults] = useState<{ correct: boolean; correctAns: string }[]>([]);
+  // Guard: only allow navigating to summary after quiz is genuinely finished
+  const [quizFinished, setQuizFinished] = useState(false);
 
-  const currentQ = shuffledQuestions[qIdx];
   const totalQ = shuffledQuestions.length;
+  const currentQ = shuffledQuestions[qIdx];
   const choiceLabels = ['A', 'B', 'C', 'D'];
   const PASS_THRESHOLD = Math.ceil(totalQ * 0.8);
 
@@ -758,7 +744,12 @@ export default function AdvancedStore() {
   };
 
   const handleNext = () => {
-    if (qIdx + 1 >= totalQ) { setPhase('done'); return; }
+    if (qIdx + 1 >= totalQ) {
+      // All questions answered — mark quiz done
+      setQuizFinished(true);
+      setPhase('done');
+      return;
+    }
     setQIdx(i => i + 1);
     setSelected(null);
     setFeedbackText('');
@@ -766,7 +757,9 @@ export default function AdvancedStore() {
     setPhase('question');
   };
 
+  // Only called from the results screen — after quiz is done
   const handleFinish = () => {
+    if (!quizFinished) return; // safety guard
     completeStore(section.id, store.id, scoreRef.current);
     addScore(scoreRef.current, totalQ);
     addAdvancedScore(scoreRef.current, totalQ);
@@ -781,6 +774,7 @@ export default function AdvancedStore() {
     setFeedbackText('');
     setResults([]);
     setIsCorrect(false);
+    setQuizFinished(false);
     setPhase('question');
   };
 
@@ -789,7 +783,7 @@ export default function AdvancedStore() {
   return (
     <div style={{
       position: 'fixed', inset: 0, width: '100%', height: '100%',
-      background: fallbackBg, overflow: 'hidden',
+      background: meta.bg, overflow: 'hidden',
       display: 'flex', flexDirection: 'column',
     }}>
 
@@ -816,10 +810,10 @@ export default function AdvancedStore() {
         zIndex: 1, pointerEvents: 'none',
       }} />
 
-      {/* Header */}
+      {/* ── Header ── */}
       <div style={{
         flexShrink: 0, background: 'white',
-        borderBottom: `3px solid ${accent}`,
+        borderBottom: `3px solid ${meta.color}`,
         boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
         padding: 'clamp(8px,1.6vh,16px) clamp(10px,2.5vw,24px)',
         display: 'flex', alignItems: 'center', gap: 'clamp(6px,1.2vw,12px)',
@@ -829,38 +823,36 @@ export default function AdvancedStore() {
           className="btn btn-ghost btn-sm"
           style={{ flexShrink: 0, fontSize: 'clamp(0.68rem,1.2vw,0.85rem)', padding: '6px 10px' }}
           onClick={() => goToScene('ADVANCED_SECTION_VIEW')}
-        >← Back</button>
+        >← Levels</button>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px', flexWrap: 'wrap' }}>
             <span style={{
               fontFamily: 'var(--font-title)', fontSize: 'clamp(0.7rem,1.4vw,1rem)',
-              color: accent, fontWeight: 700,
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-              maxWidth: 'clamp(120px,40vw,320px)',
+              color: meta.color, fontWeight: 700,
             }}>
-              {section.emoji} {masteryQuiz.title}
+              {meta.emoji} {meta.title}
             </span>
             <span style={{
-              flexShrink: 0, background: accent, color: 'white',
+              flexShrink: 0, background: meta.color, color: 'white',
               fontFamily: 'var(--font-char)', fontWeight: 700,
               fontSize: 'clamp(0.4rem,0.75vw,0.56rem)',
               padding: '2px 7px', borderRadius: '20px', letterSpacing: '1px',
-            }}>⚡ MASTERY CHECKPOINT</span>
+            }}>⚡ MASTERY</span>
           </div>
           <div style={{ height: '6px', background: 'rgba(0,0,0,0.08)', borderRadius: '4px', overflow: 'hidden' }}>
             <motion.div
               animate={{ width: `${progressPct}%` }}
               transition={{ duration: 0.4 }}
-              style={{ height: '100%', background: accent, borderRadius: '4px' }}
+              style={{ height: '100%', background: meta.color, borderRadius: '4px' }}
             />
           </div>
         </div>
 
         <div style={{
           flexShrink: 0, fontFamily: 'var(--font-char)', fontWeight: 700,
-          fontSize: 'clamp(0.6rem,1.1vw,0.8rem)', color: accent,
-          background: `${accent}15`, border: `1.5px solid ${accent}44`,
+          fontSize: 'clamp(0.6rem,1.1vw,0.8rem)', color: meta.color,
+          background: `${meta.color}15`, border: `1.5px solid ${meta.color}44`,
           borderRadius: '10px', padding: 'clamp(3px,0.5vh,5px) clamp(8px,1.2vw,12px)',
           textAlign: 'center', lineHeight: 1.3,
         }}>
@@ -869,7 +861,7 @@ export default function AdvancedStore() {
         </div>
       </div>
 
-      {/* Question area */}
+      {/* ── Question area ── */}
       {(phase === 'question' || phase === 'answered') && (
         <div style={{
           flex: 1, overflowY: 'auto',
@@ -880,7 +872,7 @@ export default function AdvancedStore() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{
-              background: accent, color: 'white',
+              background: meta.color, color: 'white',
               fontFamily: 'var(--font-char)', fontWeight: 700,
               fontSize: 'clamp(0.58rem,1vw,0.72rem)',
               padding: '3px 12px', borderRadius: '20px', flexShrink: 0,
@@ -889,7 +881,7 @@ export default function AdvancedStore() {
               fontFamily: 'var(--font-body)', fontSize: 'clamp(0.54rem,0.9vw,0.66rem)',
               color: 'rgba(0,0,0,0.4)', flexShrink: 0,
             }}>{masteryQuiz.topic}</div>
-            <div style={{ height: '1px', flex: 1, background: `linear-gradient(90deg, ${accent}44, transparent)` }} />
+            <div style={{ height: '1px', flex: 1, background: `linear-gradient(90deg, ${meta.color}44, transparent)` }} />
           </div>
 
           <AnimatePresence mode="wait">
@@ -898,7 +890,7 @@ export default function AdvancedStore() {
               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.22 }}
               style={{
-                background: 'white', border: `2px solid ${accent}33`,
+                background: 'white', border: `2px solid ${meta.color}33`,
                 borderRadius: '16px',
                 padding: 'clamp(14px,2.5vh,26px) clamp(14px,2.5vw,26px)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.07)',
@@ -917,7 +909,7 @@ export default function AdvancedStore() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px,1.1vh,10px)' }}>
             {currentQ.choices.map((choice, i) => {
               const isCorrectChoice = choice.isCorrect;
-              let bg = 'white', border = 'rgba(0,0,0,0.12)', labelBg = accent, textColor = '#1A1200', opacity = 1;
+              let bg = 'white', border = 'rgba(0,0,0,0.12)', labelBg = meta.color, textColor = '#1A1200', opacity = 1;
               if (selected !== null) {
                 if (isCorrectChoice) { bg = '#D4EDDA'; border = '#28A745'; labelBg = '#28A745'; textColor = '#155724'; }
                 else if (i === selected) { bg = '#F8D7DA'; border = '#DC3545'; labelBg = '#DC3545'; textColor = '#721c24'; }
@@ -928,7 +920,7 @@ export default function AdvancedStore() {
                   disabled={selected !== null} onClick={() => handleAnswer(i)}
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity, x: 0, transition: { delay: i * 0.06 } }}
-                  whileHover={selected === null ? { x: 3, boxShadow: `0 4px 16px ${accent}33` } : {}}
+                  whileHover={selected === null ? { x: 3, boxShadow: `0 4px 16px ${meta.color}33` } : {}}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 'clamp(8px,1.5vw,16px)',
                     background: bg, border: `2px solid ${border}`, borderRadius: '12px',
@@ -957,11 +949,12 @@ export default function AdvancedStore() {
             })}
           </div>
 
+          {/* Progress dots */}
           <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', paddingTop: '4px', flexWrap: 'wrap' }}>
             {Array.from({ length: totalQ }).map((_, i) => (
               <div key={i} style={{
                 width: i === qIdx ? '20px' : '7px', height: '7px', borderRadius: '4px',
-                background: i < qIdx ? '#28A745' : i === qIdx ? accent : 'rgba(0,0,0,0.12)',
+                background: i < qIdx ? '#28A745' : i === qIdx ? meta.color : 'rgba(0,0,0,0.12)',
                 transition: 'all 0.3s',
               }} />
             ))}
@@ -969,7 +962,7 @@ export default function AdvancedStore() {
         </div>
       )}
 
-      {/* Feedback overlay */}
+      {/* ── Feedback overlay ── */}
       <AnimatePresence>
         {phase === 'answered' && (
           <motion.div
@@ -1013,7 +1006,7 @@ export default function AdvancedStore() {
                 className="btn btn-primary"
                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
                 onClick={handleNext}
-                style={{ minWidth: '130px', background: isCorrect ? '#28A745' : accent, borderColor: isCorrect ? '#28A745' : accent }}
+                style={{ minWidth: '130px', background: isCorrect ? '#28A745' : meta.color, borderColor: isCorrect ? '#28A745' : meta.color }}
               >
                 {qIdx + 1 >= totalQ ? 'See Results →' : 'Next Question →'}
               </motion.button>
@@ -1022,8 +1015,8 @@ export default function AdvancedStore() {
         )}
       </AnimatePresence>
 
-      {/* Done / Results overlay */}
-      {phase === 'done' && (
+      {/* ── Results overlay (only shown after ALL questions answered) ── */}
+      {phase === 'done' && quizFinished && (
         <div style={{
           position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
           justifyContent: 'center', background: 'rgba(0,0,0,0.55)',
@@ -1036,27 +1029,26 @@ export default function AdvancedStore() {
             style={{
               width: 'clamp(280px,90vw,520px)', maxWidth: '94vw',
               maxHeight: '88vh', overflowY: 'auto',
-              textAlign: 'center', margin: '0 auto', border: `3px solid ${accent}`,
+              textAlign: 'center', margin: '0 auto', border: `3px solid ${meta.color}`,
             }}
           >
-            <div style={{ height: '6px', background: accent, borderRadius: '12px 12px 0 0', marginTop: '-1px', marginLeft: '-1px', marginRight: '-1px' }} />
+            <div style={{ height: '6px', background: meta.color, borderRadius: '12px 12px 0 0', marginTop: '-1px', marginLeft: '-1px', marginRight: '-1px' }} />
             <div style={{ padding: 'clamp(14px,2.5vh,26px) clamp(14px,2.5vw,22px)' }}>
+
               <div style={{ marginBottom: '6px' }}>
-                <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,1.5vw,1.1rem)', color: accent, marginBottom: '4px' }}>
-                  ⚡ Mastery Checkpoint Complete
-                </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.62rem,1.1vw,0.78rem)', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                  {masteryQuiz.title}
+                <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,1.5vw,1.1rem)', color: meta.color, marginBottom: '4px' }}>
+                  {meta.emoji} {meta.title} — Complete!
                 </div>
                 <div style={{
                   fontFamily: 'var(--font-title)', lineHeight: 1,
                   fontSize: 'clamp(2rem,5vw,3.8rem)',
-                  color: scoreRef.current >= PASS_THRESHOLD ? '#28A745' : accent,
+                  color: scoreRef.current >= PASS_THRESHOLD ? '#28A745' : meta.color,
                 }}>
                   {scoreRef.current}/{totalQ}
                 </div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.6rem,1.1vw,0.76rem)', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  {Math.round((scoreRef.current / totalQ) * 100)}% — {store.name}
+                  {Math.round((scoreRef.current / totalQ) * 100)}% correct
+                  {scoreRef.current >= PASS_THRESHOLD ? ' — 🎉 Passed!' : ` — Need ${PASS_THRESHOLD}/${totalQ} to pass`}
                 </div>
               </div>
 
@@ -1071,16 +1063,18 @@ export default function AdvancedStore() {
                 ))}
               </div>
 
+              {/* Per-question results */}
               <div style={{
                 background: 'var(--surface)', borderRadius: '12px',
                 padding: 'clamp(8px,1.5vh,14px) clamp(10px,1.8vw,16px)',
                 marginBottom: '16px', textAlign: 'left',
+                maxHeight: '240px', overflowY: 'auto',
               }}>
                 <div style={{
                   fontFamily: 'var(--font-char)', fontWeight: 700,
                   fontSize: 'clamp(0.62rem,1.1vw,0.78rem)', color: 'var(--olive-brown)',
                   marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid rgba(0,0,0,0.08)',
-                }}>Results</div>
+                }}>Question Results ({results.length}/{totalQ} answered)</div>
                 {results.map((r, i) => (
                   <div key={i} style={{
                     display: 'flex', alignItems: 'center', gap: '10px',
@@ -1099,23 +1093,21 @@ export default function AdvancedStore() {
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {scoreRef.current >= PASS_THRESHOLD ? (
-                  <motion.button className="btn btn-success"
-                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                    onClick={handleFinish}>✅ Continue →</motion.button>
-                ) : (
-                  <>
-                    <button className="btn btn-ghost btn-sm" onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>
-                      ← Back to Section
-                    </button>
-                    <motion.button className="btn btn-primary btn-sm"
-                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                      onClick={handleRetry}
-                      style={{ background: accent, borderColor: accent }}>
-                      🔄 Try Again
-                    </motion.button>
-                  </>
-                )}
+                <button className="btn btn-ghost btn-sm" onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>
+                  ← Back to Levels
+                </button>
+                <motion.button className="btn btn-primary btn-sm"
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+                  onClick={handleRetry}
+                  style={{ background: meta.color, borderColor: meta.color }}>
+                  🔄 Retry
+                </motion.button>
+                {/* Certificate/summary button — only available after quiz is done */}
+                <motion.button className="btn btn-success"
+                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+                  onClick={handleFinish}>
+                  📜 Get Certificate →
+                </motion.button>
               </div>
             </div>
           </motion.div>
