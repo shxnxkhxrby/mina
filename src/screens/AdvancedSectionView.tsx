@@ -57,10 +57,10 @@ export default function AdvancedSectionView() {
 
   const [lockedMsg, setLockedMsg] = useState('');
 
-  // ── FIX: a level is "completed" if its advancedLevelScores entry is > 0 ──
-  // This is reliably set by handleFinish and the Get Certificate path in AdvancedStore.
+  // A level is "completed" (and unlocks the next) only if the player scored ≥ 15/20
+  const PASS_SCORE = 15;
   const isLevelCompleted = (index: number): boolean => {
-    return advancedLevelScores[index] > 0;
+    return advancedLevelScores[index] >= PASS_SCORE;
   };
 
   // ── FIX: best score comes directly from advancedLevelScores ──────────────
