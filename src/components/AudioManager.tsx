@@ -6,6 +6,34 @@ import { useGameStore } from '../store/gameStore';
 const BGM_URL =
   'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775800697/Pufino_-_Enlivening_freetouse.com_hwfxmb.mp3';
 
+// ── BGM behaviour per scene ───────────────────────────────────────────────
+//   'mute'  → pause BGM entirely (video scenes with their own audio/music)
+//   'duck'  → lower BGM to DUCK_RATIO of the user's set volume (voiceover scenes)
+//   'normal'→ full user-set volume (everything else)
+
+const DUCK_RATIO = 0.25; // BGM plays at 25 % of user volume while ducked
+
+type BgmMode = 'normal' | 'duck' | 'mute';
+
+function getBgmMode(scene: string): BgmMode {
+  switch (scene) {
+    // Video scenes — silence BGM completely
+    case 'VIDEO_INTRO':
+    case 'SECTION_D_VIDEO':
+      return 'mute';
+
+    // Voiceover / Mina appearance scenes — duck BGM
+    case 'TEACHER_INTRO':
+    case 'MINA_INTRO':
+    case 'STORYLINE':
+    case 'GRAMMAR_LESSON':
+      return 'duck';
+
+    default:
+      return 'normal';
+  }
+}
+
 // ── Global singleton audio refs (survive re-renders / HMR) ────────────────
 let bgmInstance: HTMLAudioElement | null = null;
 
@@ -21,6 +49,7 @@ function getBgm(): HTMLAudioElement {
 // ── AudioManager component — mount ONCE in App.tsx ────────────────────────
 export default function AudioManager() {
   const musicVolume = useGameStore(s => s.musicVolume);
+  const currentScene = useGameStore(s => s.currentScene);
   const startedRef = useRef(false);
 
   // Start BGM on first user interaction if not already playing
@@ -32,7 +61,6 @@ export default function AudioManager() {
       if (startedRef.current) return;
       startedRef.current = true;
       bgm.play().catch(() => {});
-      // Remove all listeners once started
       document.removeEventListener('click', startBgm);
       document.removeEventListener('keydown', startBgm);
       document.removeEventListener('touchstart', startBgm);
@@ -55,11 +83,41 @@ export default function AudioManager() {
     };
   }, []);
 
-  // Sync volume whenever it changes in the store
+  // React to scene changes — mute, duck, or restore BGM
   useEffect(() => {
     const bgm = getBgm();
-    bgm.volume = Math.max(0, Math.min(1, musicVolume));
-  }, [musicVolume]);
+    const mode = getBgmMode(currentScene);
+
+    if (mode === 'mute') {
+      // Pause the BGM entirely for video scenes
+      bgm.pause();
+    } else if (mode === 'duck') {
+      // Lower to DUCK_RATIO of the user's chosen volume
+      bgm.volume = Math.max(0, Math.min(1, musicVolume * DUCK_RATIO));
+      // Resume in case it was paused by a previous mute scene
+      if (startedRef.current && bgm.paused) {
+        bgm.play().catch(() => {});
+      }
+    } else {
+      // Normal — restore full user volume and resume if needed
+      bgm.volume = Math.max(0, Math.min(1, musicVolume));
+      if (startedRef.current && bgm.paused) {
+        bgm.play().catch(() => {});
+      }
+    }
+  }, [currentScene, musicVolume]);
+
+  // Sync volume whenever the user's slider changes (respects current mode)
+  useEffect(() => {
+    const bgm = getBgm();
+    const mode = getBgmMode(currentScene);
+
+    if (mode === 'mute') return; // keep paused, no volume update needed
+    const target = mode === 'duck'
+      ? musicVolume * DUCK_RATIO
+      : musicVolume;
+    bgm.volume = Math.max(0, Math.min(1, target));
+  }, [musicVolume, currentScene]);
 
   return null; // purely side-effect component
 }
