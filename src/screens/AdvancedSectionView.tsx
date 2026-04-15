@@ -50,26 +50,28 @@ const SCENE_BG = 'linear-gradient(160deg,#0D0D1A 0%,#1A1A2E 50%,#16213E 100%)';
 export default function AdvancedSectionView() {
   const {
     setStoreIndex, setSection, goToScene,
-    sectionProgress, playerName,
+    playerName,
+    // ── FIX: use advancedLevelScores for unlock/completion, not sectionProgress ──
+    advancedLevelScores,
   } = useGameStore();
 
   const [lockedMsg, setLockedMsg] = useState('');
 
-  // A level is "completed" if any store in that level's section has completed flag
-  const isLevelCompleted = (lvl: typeof MASTERY_LEVELS[number]) => {
-    const prog = sectionProgress[lvl.sectionId] || {};
-    return Object.values(prog).some(p => p?.completed);
+  // ── FIX: a level is "completed" if its advancedLevelScores entry is > 0 ──
+  // This is reliably set by handleFinish and the Get Certificate path in AdvancedStore.
+  const isLevelCompleted = (index: number): boolean => {
+    return advancedLevelScores[index] > 0;
   };
 
-  const getBestScore = (lvl: typeof MASTERY_LEVELS[number]): number => {
-    const prog = sectionProgress[lvl.sectionId] || {};
-    return Math.max(0, ...Object.values(prog).map(p => p?.bestScore ?? 0));
+  // ── FIX: best score comes directly from advancedLevelScores ──────────────
+  const getBestScore = (index: number): number => {
+    return advancedLevelScores[index] ?? 0;
   };
 
-  // Level 1 always unlocked; Level 2 requires Level 1 done; Level 3 requires Level 2 done
+  // Level 1 always unlocked; Level N requires Level N-1 completed
   const isLevelUnlocked = (index: number): boolean => {
     if (index === 0) return true;
-    return isLevelCompleted(MASTERY_LEVELS[index - 1]);
+    return isLevelCompleted(index - 1);
   };
 
   const handleLevel = (lvl: typeof MASTERY_LEVELS[number], index: number) => {
@@ -182,9 +184,9 @@ export default function AdvancedSectionView() {
         }}
       >
         {MASTERY_LEVELS.map((lvl, i) => {
-          const completed = isLevelCompleted(lvl);
+          const completed = isLevelCompleted(i);
           const unlocked = isLevelUnlocked(i);
-          const best = getBestScore(lvl);
+          const best = getBestScore(i);
 
           return (
             <motion.div
@@ -228,27 +230,11 @@ export default function AdvancedSectionView() {
                 {/* Gradient top strip */}
                 <div
                   style={{
-                    height: 'clamp(100px,18vw,180px)',
-                    background: unlocked ? lvl.gradient : 'linear-gradient(160deg,#3A3A4A,#2A2A3A)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    background: lvl.gradient,
+                    padding: 'clamp(14px,2.5vh,24px) clamp(14px,2.2vw,22px) clamp(10px,1.8vh,18px)',
                     position: 'relative',
-                    overflow: 'hidden',
                   }}
                 >
-                  {/* Glow circle */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      width: '120%',
-                      height: '120%',
-                      background: unlocked
-                        ? `radial-gradient(circle at 50% 60%, ${lvl.color}55 0%, transparent 70%)`
-                        : 'none',
-                    }}
-                  />
-
                   {/* Level number + emoji or lock */}
                   <div style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
                     <div
@@ -363,15 +349,25 @@ export default function AdvancedSectionView() {
                       : `Complete Level ${i} — ${MASTERY_LEVELS[i - 1]?.title} to unlock`}
                   </div>
 
-                  {/* Stars row (only if completed) */}
+                  {/* Best score + stars row (only if attempted) */}
                   {completed && unlocked && (
-                    <div style={{ display: 'flex', gap: '2px' }}>
-                      {[1, 2, 3, 4, 5].map(n => (
-                        <span key={n} style={{ fontSize: 'clamp(0.58rem,1.1vw,0.82rem)' }}>
-                          {n <= best ? '⭐' : '☆'}
-                        </span>
-                      ))}
-                    </div>
+                    <>
+                      <div style={{
+                        fontFamily: 'var(--font-body)',
+                        fontSize: 'clamp(0.5rem,0.9vw,0.64rem)',
+                        color: best >= 15 ? '#4ade80' : 'rgba(255,255,255,0.5)',
+                        fontWeight: 700,
+                      }}>
+                        Best: {best}/20{best >= 15 ? ' ✓ Passed' : ` (need 15)`}
+                      </div>
+                      <div style={{ display: 'flex', gap: '2px' }}>
+                        {[1, 2, 3, 4, 5].map(n => (
+                          <span key={n} style={{ fontSize: 'clamp(0.58rem,1.1vw,0.82rem)' }}>
+                            {n <= Math.round((best / 20) * 5) ? '⭐' : '☆'}
+                          </span>
+                        ))}
+                      </div>
+                    </>
                   )}
 
                   {/* CTA button */}
@@ -450,7 +446,7 @@ export default function AdvancedSectionView() {
         )}
       </AnimatePresence>
 
-      {/* Footer nav — no Map button */}
+      {/* Footer nav */}
       <div
         style={{
           position: 'relative',

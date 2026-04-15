@@ -706,14 +706,17 @@ export default function AdvancedStore() {
   const [bgIndex, setBgIndex] = useState(0);
   const [bgFailed, setBgFailed] = useState(false);
 
-  // Randomize questions + choices once per mount
+  // ── FIX 1: retryKey forces useMemo to re-shuffle on every retry ──────────
+  const [retryKey, setRetryKey] = useState(0);
+
+  // Randomize questions + choices once per mount (and again on each retry)
   const shuffledQuestions = useMemo(
     () => shuffleArray(masteryQuiz.questions).map(q => ({
       ...q,
       choices: shuffleChoices(q.choices),
     })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [masteryQuiz.id],
+    [masteryQuiz.id, retryKey],
   );
 
   const [phase, setPhase] = useState<Phase>('question');
@@ -758,18 +761,19 @@ export default function AdvancedStore() {
     setPhase('question');
   };
 
-  // Only called from the results screen — after quiz is done
+  // ── FIX 2: save progress before going back so next level unlocks ─────────
   const handleFinish = () => {
-    if (!quizFinished) return; // safety guard
+    if (!quizFinished) return;
     completeStore(section.id, store.id, scoreRef.current);
     addScore(scoreRef.current, totalQ);
     addAdvancedScore(scoreRef.current, totalQ);
-    // Save this level's score independently
     setAdvancedLevelScore(quizIndex as 0 | 1 | 2, scoreRef.current);
     goToScene('ADVANCED_SECTION_VIEW');
   };
 
   const handleRetry = () => {
+    // ── FIX 1 (cont): bump retryKey so questions are re-shuffled ────────────
+    setRetryKey(k => k + 1);
     setQIdx(0);
     setSelected(null);
     scoreRef.current = 0;
@@ -1096,7 +1100,8 @@ export default function AdvancedStore() {
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <button className="btn btn-ghost btn-sm" onClick={() => goToScene('ADVANCED_SECTION_VIEW')}>
+                {/* ── FIX 2 (cont): "← Back to Levels" now saves progress first ── */}
+                <button className="btn btn-ghost btn-sm" onClick={handleFinish}>
                   ← Back to Levels
                 </button>
                 <motion.button className="btn btn-primary btn-sm"
