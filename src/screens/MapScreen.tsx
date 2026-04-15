@@ -202,7 +202,7 @@ export default function MapScreen() {
                 fontSize: 'clamp(0.56rem,1.1vw,0.74rem)',
                 color: 'rgba(245,197,24,0.7)',
                 fontWeight: 400,
-              }}>Level 1 · Level 2 · Level 3</span>
+              }}>Section 1 · Section 2 · Section 3</span>
             </motion.button>
           </motion.div>
         </div>

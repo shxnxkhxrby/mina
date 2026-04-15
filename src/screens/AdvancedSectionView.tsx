@@ -77,7 +77,7 @@ export default function AdvancedSectionView() {
   const handleLevel = (lvl: typeof MASTERY_LEVELS[number], index: number) => {
     if (!isLevelUnlocked(index)) {
       const prevLevel = MASTERY_LEVELS[index - 1];
-      setLockedMsg(`Complete Level ${prevLevel.level} (${prevLevel.title}) first!`);
+      setLockedMsg(`Complete Section ${prevLevel.level} (${prevLevel.title}) first!`);
       setTimeout(() => setLockedMsg(''), 2500);
       return;
     }
@@ -154,7 +154,7 @@ export default function AdvancedSectionView() {
             textShadow: '0 0 24px rgba(245,197,24,0.3)',
           }}
         >
-          Choose Your Level
+          Choose Your Section
         </div>
         <div
           style={{
@@ -247,7 +247,7 @@ export default function AdvancedSectionView() {
                         marginBottom: '4px',
                       }}
                     >
-                      Level {lvl.level}
+                      Section {lvl.level}
                     </div>
                     <div
                       style={{
@@ -346,7 +346,7 @@ export default function AdvancedSectionView() {
                   >
                     {unlocked
                       ? lvl.description
-                      : `Complete Level ${i} — ${MASTERY_LEVELS[i - 1]?.title} to unlock`}
+                      : `Complete Section ${i} — ${MASTERY_LEVELS[i - 1]?.title} to unlock`}
                   </div>
 
                   {/* Best score + stars row (only if attempted) */}

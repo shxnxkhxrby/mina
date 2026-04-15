@@ -177,7 +177,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
       },
       // Level 3 — Difficult (5)
       {
-        questionText: '(Present Perfect) The students are happy because they __________ (clean) the whole campus.',
+        questionText: 'The students are happy because they __________ (clean) the whole campus.',
         choices: [
           { text: 'have cleaned', isCorrect: true },
           { text: 'had cleaned', isCorrect: false },
@@ -188,7 +188,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: 'Present Perfect = have/has + past participle → "have cleaned" (plural subject "they").',
       },
       {
-        questionText: '(Past Perfect) I couldn\'t enter the room because I __________ (forget) my key.',
+        questionText: 'I couldn\'t enter the room because I __________ (forget) my key.',
         choices: [
           { text: 'had forgotten', isCorrect: true },
           { text: 'have forgotten', isCorrect: false },
@@ -199,7 +199,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: 'The forgetting happened before "couldn\'t enter" → Past Perfect "had forgotten".',
       },
       {
-        questionText: '(Future Perfect) By the end of this semester, our class __________ (read) ten different stories.',
+        questionText: 'By the end of this semester, our class __________ (read) ten different stories.',
         choices: [
           { text: 'will have read', isCorrect: true },
           { text: 'have read', isCorrect: false },
@@ -210,7 +210,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"By the end of this semester" is a future point → Future Perfect "will have read".',
       },
       {
-        questionText: '(Past Perfect) The janitor __________ (lock) the gate before I arrived at school.',
+        questionText: 'The janitor __________ (lock) the gate before I arrived at school.',
         choices: [
           { text: 'had locked', isCorrect: true },
           { text: 'has locked', isCorrect: false },
@@ -221,7 +221,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Before I arrived" signals past-before-past → Past Perfect "had locked".',
       },
       {
-        questionText: '(Future Perfect) I __________ (finish) my research paper by the time the deadline arrives.',
+        questionText: 'I __________ (finish) my research paper by the time the deadline arrives.',
         choices: [
           { text: 'will have finished', isCorrect: true },
           { text: 'have finished', isCorrect: false },
@@ -680,9 +680,9 @@ function shuffleChoices(choices: { text: string; isCorrect: boolean }[]) {
 }
 
 const LEVEL_META: Record<number, { title: string; emoji: string; color: string; bg: string }> = {
-  0: { title: 'Level 1 — Perfect Tenses',         emoji: '⏳', color: '#E85D26', bg: 'linear-gradient(160deg,#FFF3D0,#FFE090 50%,#F5C84A)' },
-  1: { title: 'Level 2 — Prepositions',             emoji: '📍', color: '#2E75B6', bg: 'linear-gradient(160deg,#D0E8FF,#A0C8F0 50%,#70A8DC)' },
-  2: { title: 'Level 3 — Subject-Verb Agreement',   emoji: '🔗', color: '#5B7A3D', bg: 'linear-gradient(160deg,#D4EED0,#A8D8A0 50%,#7CBB70)' },
+  0: { title: 'Section 1 — Perfect Tenses',         emoji: '⏳', color: '#E85D26', bg: 'linear-gradient(160deg,#FFF3D0,#FFE090 50%,#F5C84A)' },
+  1: { title: 'Section 2 — Prepositions',             emoji: '📍', color: '#2E75B6', bg: 'linear-gradient(160deg,#D0E8FF,#A0C8F0 50%,#70A8DC)' },
+  2: { title: 'Section 3 — Subject-Verb Agreement',   emoji: '🔗', color: '#5B7A3D', bg: 'linear-gradient(160deg,#D4EED0,#A8D8A0 50%,#7CBB70)' },
 };
 
 export default function AdvancedStore() {
@@ -830,7 +830,7 @@ export default function AdvancedStore() {
           className="btn btn-ghost btn-sm"
           style={{ flexShrink: 0, fontSize: 'clamp(0.68rem,1.2vw,0.85rem)', padding: '6px 10px' }}
           onClick={() => goToScene('ADVANCED_SECTION_VIEW')}
-        >← Levels</button>
+        >← Sections</button>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '5px', flexWrap: 'wrap' }}>
@@ -1100,9 +1100,9 @@ export default function AdvancedStore() {
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {/* ── FIX 2 (cont): "← Back to Levels" now saves progress first ── */}
+                {/* ── FIX 2 (cont): "← Back to Sections" now saves progress first ── */}
                 <button className="btn btn-ghost btn-sm" onClick={handleFinish}>
-                  ← Back to Levels
+                  ← Back to Sections
                 </button>
                 <motion.button className="btn btn-primary btn-sm"
                   whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
