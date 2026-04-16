@@ -4,63 +4,107 @@ import { useGameStore } from '../store/gameStore';
 import { ASSETS } from '../data/assets';
 
 // ── Lessons Library Modal ──────────────────────────────────────────────────
-const LESSON_LIBRARY = [
+
+// Helper: try multiple extensions in order
+function tryExts(base: string, exts = ['png', 'jpg', 'jpeg', 'webp', 'gif']) {
+  return exts.map(e => `${base}.${e}`);
+}
+
+const LESSON_SECTIONS = [
   {
-    section: 'A',
+    id: 'A',
     color: '#E85D26',
     gradient: 'linear-gradient(135deg,#FF9A5C,#E85D26)',
-    emoji: '📚',
-    topic: 'Perfect Tenses',
-    lessons: [
-      { title: 'Introduction to Perfect Tenses of the Verb', text: 'Perfect tenses express actions that have been completed relative to another time point. They use the auxiliary verb "have/has/had" with the past participle.' },
-      { title: 'Present Perfect Tense', text: 'The present perfect (have/has + past participle) connects the past to the present. Example: "She has visited Bustos three times."' },
-      { title: 'Past Perfect Tense', text: 'The past perfect (had + past participle) describes an action completed before another past action. Example: "They had already eaten before the parade started."' },
-      { title: 'Future Perfect Tense', text: 'The future perfect (will have + past participle) describes an action that will be completed before a future time. Example: "By sunset, we will have watched the whole festival."' },
-    ],
+    emoji: '⏳',
+    topic: 'Perfect Tenses of the Verb',
+    // public/imgs/lessons/lesson1/ptotv1.png … ptotv7.png
+    slides: Array.from({ length: 7 }, (_, i) =>
+      tryExts(`/imgs/lessons/lesson1/ptotv${i + 1}`)
+    ),
   },
   {
-    section: 'B',
-    color: '#5B7A3D',
-    gradient: 'linear-gradient(135deg,#8BBB60,#5B7A3D)',
-    emoji: '🌿',
-    topic: 'Subject-Verb Agreement',
-    lessons: [
-      { title: 'Core Rule', text: 'A verb must agree with its subject in number. Singular subjects take singular verbs; plural subjects take plural verbs. Example: "The dancer performs" vs "The dancers perform."' },
-      { title: 'Collective Nouns', text: 'Collective nouns (team, group, family) can be singular or plural depending on whether the group acts as a unit or as individuals.' },
-      { title: 'Indefinite Pronouns', text: '"Everyone," "nobody," "each," and "either" are singular. "Both," "few," "many," and "several" are plural. Example: "Everyone is invited to the Minasa Festival."' },
-    ],
-  },
-  {
-    section: 'C',
+    id: 'C',
     color: '#2E75B6',
     gradient: 'linear-gradient(135deg,#5BA3E0,#2E75B6)',
-    emoji: '🔷',
+    emoji: '📍',
     topic: 'Prepositions',
-    lessons: [
-      { title: 'Prepositions of Place', text: 'Words like in, on, at, under, beside, between describe where something is. Example: "The food stall is beside the main stage."' },
-      { title: 'Prepositions of Time', text: '"In" is used for months, years, and seasons. "On" is used for days and dates. "At" is used for specific times. Example: "The festival happens in December, on a Saturday, at noon."' },
-      { title: 'Prepositions of Movement', text: 'Words like to, from, through, across, along, towards describe direction or movement. Example: "The procession moved through the streets of Bustos."' },
-      { title: 'Common Phrasal Prepositions', text: 'Combinations like "in front of," "because of," "instead of," and "on top of" act as single prepositions. Example: "In front of the church, the dancers performed."' },
-    ],
+    // public/imgs/lessons/lesson2/prepositions1.png … prepositions20.png
+    slides: Array.from({ length: 20 }, (_, i) =>
+      tryExts(`/imgs/lessons/lesson2/prepositions${i + 1}`)
+    ),
   },
   {
-    section: 'D',
-    color: '#8B1A8B',
-    gradient: 'linear-gradient(135deg,#C060C0,#8B1A8B)',
-    emoji: '🎉',
-    topic: 'Grammar Review — Mixed',
-    lessons: [
-      { title: 'Combining Perfect Tenses & Prepositions', text: 'Use perfect tenses with prepositions to describe completed actions in relation to time and place. Example: "By the time they arrived at the plaza, the dancers had already begun."' },
-      { title: 'Agreement in Complex Sentences', text: 'Maintain subject-verb agreement even when clauses and phrases come between the subject and verb. Example: "The group of musicians, who has been practicing, are ready to perform."' },
-      { title: 'Review: All Grammar Topics', text: 'The Minasa Festival covers Perfect Tenses (Sections A), Subject-Verb Agreement (Section B), and Prepositions (Section C). Mastery means applying all three together naturally in communication.' },
-    ],
+    id: 'B',
+    color: '#5B7A3D',
+    gradient: 'linear-gradient(135deg,#8BBB60,#5B7A3D)',
+    emoji: '🔗',
+    topic: 'Subject-Verb Agreement',
+    // public/imgs/lessons/lesson3/sva1.png … sva7.png
+    slides: Array.from({ length: 7 }, (_, i) =>
+      tryExts(`/imgs/lessons/lesson3/sva${i + 1}`)
+    ),
   },
 ];
 
+function SlideImage({ candidates }: { candidates: string[] }) {
+  const [idx, setIdx] = useState(0);
+  const [failed, setFailed] = useState(false);
+
+  const handleError = () => {
+    if (idx + 1 < candidates.length) {
+      setIdx(i => i + 1);
+    } else {
+      setFailed(true);
+    }
+  };
+
+  if (failed) {
+    return (
+      <div style={{
+        width: '100%', height: '100%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        color: 'rgba(0,0,0,0.3)', fontSize: '0.75rem', fontFamily: 'var(--font-body)',
+      }}>
+        Image not found
+      </div>
+    );
+  }
+
+  return (
+    <img
+      key={candidates[idx]}
+      src={candidates[idx]}
+      alt="Lesson slide"
+      onError={handleError}
+      style={{
+        width: '100%', height: '100%',
+        objectFit: 'contain',
+        display: 'block',
+        borderRadius: '8px',
+      }}
+    />
+  );
+}
+
 function LessonsLibraryModal({ onClose }: { onClose: () => void }) {
-  const [activeSection, setActiveSection] = useState(0);
-  const [activelesson, setActiveLesson] = useState<number | null>(null);
-  const sec = LESSON_LIBRARY[activeSection];
+  const [activeSec, setActiveSec] = useState(0);
+  const [slideIdx, setSlideIdx] = useState(0);
+
+  const sec = LESSON_SECTIONS[activeSec];
+  const total = sec.slides.length;
+
+  const goPrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlideIdx(i => Math.max(0, i - 1));
+  };
+  const goNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSlideIdx(i => Math.min(total - 1, i + 1));
+  };
+  const switchSection = (i: number) => {
+    setActiveSec(i);
+    setSlideIdx(0);
+  };
 
   return (
     <motion.div
@@ -71,7 +115,7 @@ function LessonsLibraryModal({ onClose }: { onClose: () => void }) {
         position: 'fixed', inset: 0, zIndex: 100,
         background: 'rgba(0,0,0,0.72)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(12px,3vw,32px)',
+        padding: 'clamp(8px,2vw,24px)',
       }}
       onClick={onClose}
     >
@@ -85,200 +129,181 @@ function LessonsLibraryModal({ onClose }: { onClose: () => void }) {
           borderRadius: 'clamp(14px,2vw,24px)',
           border: '3px solid #F5C84A',
           boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-          width: 'min(96vw, 700px)',
-          maxHeight: '88vh',
+          width: 'min(96vw, 720px)',
+          maxHeight: '92vh',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
         }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Modal header */}
+        {/* Header */}
         <div style={{
           background: 'linear-gradient(135deg,#F07820,#E8650A)',
-          padding: 'clamp(12px,2vh,18px) clamp(16px,2.5vw,24px)',
+          padding: 'clamp(10px,1.8vh,16px) clamp(14px,2.5vw,22px)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
           <div>
             <div style={{
               fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.9rem,2.2vw,1.35rem)',
-              color: 'white',
-              fontWeight: 900,
+              fontSize: 'clamp(0.9rem,2.2vw,1.3rem)',
+              color: 'white', fontWeight: 900,
               textShadow: '0 2px 6px rgba(0,0,0,0.3)',
-            }}>
-              📖 Lessons Library
-            </div>
+            }}>📖 Lessons Library</div>
             <div style={{
               fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.52rem,1vw,0.7rem)',
-              color: 'rgba(255,255,255,0.85)',
-              marginTop: '2px',
-            }}>
-              Review grammar lessons from M.I.N.A. — Grammar Quest
-            </div>
+              fontSize: 'clamp(0.5rem,1vw,0.68rem)',
+              color: 'rgba(255,255,255,0.85)', marginTop: '2px',
+            }}>Review grammar lessons from M.I.N.A. — Grammar Quest</div>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: '2px solid rgba(255,255,255,0.5)',
-              borderRadius: '50%',
-              width: 'clamp(28px,3.5vw,36px)',
-              height: 'clamp(28px,3.5vw,36px)',
-              color: 'white',
-              fontSize: 'clamp(0.8rem,1.5vw,1rem)',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontWeight: 700, flexShrink: 0,
-            }}
-          >✕</button>
+          <button onClick={onClose} style={{
+            background: 'rgba(255,255,255,0.2)',
+            border: '2px solid rgba(255,255,255,0.5)',
+            borderRadius: '50%',
+            width: 'clamp(28px,3.5vw,36px)', height: 'clamp(28px,3.5vw,36px)',
+            color: 'white', fontSize: 'clamp(0.8rem,1.5vw,1rem)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 700, flexShrink: 0,
+          }}>✕</button>
         </div>
 
-        {/* Section tabs */}
+        {/* Section tabs — 3 only */}
         <div style={{
-          display: 'flex', gap: '0',
-          borderBottom: '2px solid #F5C84A',
+          display: 'flex', borderBottom: '2px solid #F5C84A',
           overflowX: 'auto', flexShrink: 0,
         }}>
-          {LESSON_LIBRARY.map((s, i) => (
+          {LESSON_SECTIONS.map((s, i) => (
             <button
               key={i}
-              onClick={() => { setActiveSection(i); setActiveLesson(null); }}
+              onClick={() => switchSection(i)}
               style={{
                 flex: '1 0 auto',
-                padding: 'clamp(8px,1.5vh,12px) clamp(8px,1.5vw,16px)',
+                padding: 'clamp(8px,1.4vh,12px) clamp(8px,1.5vw,16px)',
                 border: 'none',
-                borderBottom: activeSection === i ? `3px solid ${s.color}` : '3px solid transparent',
-                background: activeSection === i ? `${s.color}18` : 'transparent',
+                borderBottom: activeSec === i ? `3px solid ${s.color}` : '3px solid transparent',
+                background: activeSec === i ? `${s.color}18` : 'transparent',
                 cursor: 'pointer',
                 fontFamily: 'var(--font-title)',
                 fontSize: 'clamp(0.55rem,1.1vw,0.75rem)',
                 fontWeight: 700,
-                color: activeSection === i ? s.color : '#9A8060',
+                color: activeSec === i ? s.color : '#9A8060',
                 transition: 'all 0.2s',
                 whiteSpace: 'nowrap',
               }}
             >
-              {s.emoji} Section {s.section}
+              {s.emoji} {s.topic}
             </button>
           ))}
         </div>
 
-        {/* Content area */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(14px,2.5vh,22px) clamp(14px,2.5vw,22px)' }}>
-          {/* Topic header */}
+        {/* Slideshow area */}
+        <div style={{
+          flex: 1, display: 'flex', flexDirection: 'column',
+          overflow: 'hidden', minHeight: 0,
+        }}>
+          {/* Slide counter pill */}
           <div style={{
-            display: 'flex', alignItems: 'center', gap: '10px',
-            marginBottom: 'clamp(10px,1.8vh,16px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            gap: '8px', padding: 'clamp(6px,1vh,10px) clamp(10px,2vw,18px)',
+            flexShrink: 0,
           }}>
             <div style={{
-              background: sec.gradient,
-              borderRadius: '10px', padding: '6px 14px',
+              background: sec.gradient, color: 'white',
+              borderRadius: '50px', padding: '3px 14px',
               fontFamily: 'var(--font-body)', fontWeight: 700,
-              fontSize: 'clamp(0.6rem,1.2vw,0.82rem)',
-              color: 'white',
+              fontSize: 'clamp(0.52rem,1vw,0.7rem)',
               letterSpacing: '0.5px',
             }}>
-              {sec.emoji} {sec.topic}
+              {sec.emoji} Slide {slideIdx + 1} of {total}
             </div>
           </div>
 
-          {/* Lesson cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(8px,1.4vh,12px)' }}>
-            {sec.lessons.map((lesson, li) => (
-              <motion.div
-                key={li}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: li * 0.07 }}
-                onClick={() => setActiveLesson(activelesson === li ? null : li)}
+          {/* Image frame */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${activeSec}-${slideIdx}`}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.22 }}
+              style={{
+                flex: 1, minHeight: 0,
+                margin: '0 clamp(10px,2vw,20px)',
+                background: 'rgba(255,255,255,0.85)',
+                borderRadius: '12px',
+                border: `2px solid ${sec.color}44`,
+                boxShadow: `0 4px 18px ${sec.color}22`,
+                overflow: 'hidden',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <SlideImage candidates={sec.slides[slideIdx]} />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Dot indicators */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: 'clamp(3px,0.5vw,6px)',
+            padding: 'clamp(6px,1vh,10px) clamp(10px,2vw,18px)',
+            flexShrink: 0,
+          }}>
+            {Array.from({ length: total }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlideIdx(i)}
                 style={{
-                  background: activelesson === li ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.8)',
-                  border: `2px solid ${activelesson === li ? sec.color : 'rgba(200,160,0,0.22)'}`,
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  overflow: 'hidden',
-                  transition: 'border-color 0.2s, background 0.2s',
-                  boxShadow: activelesson === li ? `0 4px 16px ${sec.color}30` : '0 2px 6px rgba(0,0,0,0.06)',
+                  width: slideIdx === i ? 'clamp(16px,2vw,20px)' : 'clamp(7px,1vw,9px)',
+                  height: 'clamp(7px,1vw,9px)',
+                  borderRadius: '50px',
+                  background: slideIdx === i ? sec.color : `${sec.color}44`,
+                  border: 'none', cursor: 'pointer', padding: 0,
+                  transition: 'all 0.2s',
+                  flexShrink: 0,
                 }}
-              >
-                <div style={{
-                  padding: 'clamp(10px,1.6vh,14px) clamp(12px,2vw,18px)',
-                  display: 'flex', alignItems: 'center', gap: '10px',
-                }}>
-                  <div style={{
-                    width: 'clamp(22px,2.8vw,28px)', height: 'clamp(22px,2.8vw,28px)',
-                    borderRadius: '50%',
-                    background: activelesson === li ? sec.gradient : 'rgba(200,160,0,0.2)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 'clamp(0.6rem,1.1vw,0.76rem)',
-                    color: activelesson === li ? 'white' : sec.color,
-                    fontWeight: 700, flexShrink: 0,
-                    transition: 'all 0.2s',
-                  }}>
-                    {li + 1}
-                  </div>
-                  <div style={{
-                    fontFamily: 'var(--font-title)',
-                    fontSize: 'clamp(0.66rem,1.4vw,0.9rem)',
-                    color: activelesson === li ? sec.color : 'var(--olive-brown)',
-                    fontWeight: 700, flex: 1,
-                  }}>
-                    {lesson.title}
-                  </div>
-                  <div style={{
-                    fontSize: 'clamp(0.65rem,1.2vw,0.85rem)',
-                    color: sec.color, opacity: 0.7,
-                    transition: 'transform 0.2s',
-                    transform: activelesson === li ? 'rotate(180deg)' : 'none',
-                    flexShrink: 0,
-                  }}>▼</div>
-                </div>
-                <AnimatePresence>
-                  {activelesson === li && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.22 }}
-                      style={{ overflow: 'hidden' }}
-                    >
-                      <div style={{
-                        padding: 'clamp(8px,1.4vh,12px) clamp(12px,2vw,18px) clamp(12px,2vh,16px)',
-                        borderTop: `1px solid ${sec.color}30`,
-                        fontFamily: 'var(--font-body)',
-                        fontSize: 'clamp(0.65rem,1.3vw,0.85rem)',
-                        color: '#4A3000',
-                        lineHeight: 1.7,
-                        background: `${sec.color}08`,
-                      }}>
-                        {lesson.text}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+              />
             ))}
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Footer nav */}
         <div style={{
           padding: 'clamp(8px,1.4vh,12px) clamp(14px,2.5vw,22px)',
           borderTop: '2px solid #F5C84A',
-          display: 'flex', justifyContent: 'flex-end',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: '8px',
           flexShrink: 0,
           background: 'rgba(255,248,200,0.6)',
         }}>
+          <motion.button
+            whileHover={{ scale: slideIdx > 0 ? 1.05 : 1 }}
+            whileTap={{ scale: slideIdx > 0 ? 0.95 : 1 }}
+            onClick={goPrev}
+            disabled={slideIdx === 0}
+            style={{
+              background: slideIdx > 0 ? sec.gradient : 'rgba(0,0,0,0.08)',
+              border: 'none', borderRadius: '10px',
+              padding: 'clamp(7px,1.2vh,10px) clamp(14px,2vw,22px)',
+              fontFamily: 'var(--font-title)',
+              fontSize: 'clamp(0.65rem,1.3vw,0.85rem)',
+              color: slideIdx > 0 ? 'white' : 'rgba(0,0,0,0.25)',
+              fontWeight: 900, cursor: slideIdx > 0 ? 'pointer' : 'default',
+              boxShadow: slideIdx > 0 ? `0 4px 14px ${sec.color}44` : 'none',
+              transition: 'all 0.2s',
+            }}
+          >
+            ← Prev
+          </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
             onClick={onClose}
             style={{
               background: 'linear-gradient(160deg,#F07820,#E8650A)',
               border: 'none', borderRadius: '10px',
-              padding: 'clamp(7px,1.2vh,10px) clamp(18px,2.5vw,28px)',
+              padding: 'clamp(7px,1.2vh,10px) clamp(14px,2vw,22px)',
               fontFamily: 'var(--font-title)',
               fontSize: 'clamp(0.65rem,1.3vw,0.85rem)',
               color: 'white', fontWeight: 900, cursor: 'pointer',
@@ -286,6 +311,26 @@ function LessonsLibraryModal({ onClose }: { onClose: () => void }) {
             }}
           >
             Close ✕
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: slideIdx < total - 1 ? 1.05 : 1 }}
+            whileTap={{ scale: slideIdx < total - 1 ? 0.95 : 1 }}
+            onClick={goNext}
+            disabled={slideIdx === total - 1}
+            style={{
+              background: slideIdx < total - 1 ? sec.gradient : 'rgba(0,0,0,0.08)',
+              border: 'none', borderRadius: '10px',
+              padding: 'clamp(7px,1.2vh,10px) clamp(14px,2vw,22px)',
+              fontFamily: 'var(--font-title)',
+              fontSize: 'clamp(0.65rem,1.3vw,0.85rem)',
+              color: slideIdx < total - 1 ? 'white' : 'rgba(0,0,0,0.25)',
+              fontWeight: 900, cursor: slideIdx < total - 1 ? 'pointer' : 'default',
+              boxShadow: slideIdx < total - 1 ? `0 4px 14px ${sec.color}44` : 'none',
+              transition: 'all 0.2s',
+            }}
+          >
+            Next →
           </motion.button>
         </div>
       </motion.div>
