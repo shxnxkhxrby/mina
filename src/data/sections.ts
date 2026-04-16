@@ -228,7 +228,7 @@ export const SECTIONS: Section[] = [
         ]
       },
       {
-        id: 'C3', name: 'Karen', npcName: 'Karen', emoji: '👩‍🎤', description: 'Integrated: Time & Manner',
+        id: 'C3', name: 'Bhea', npcName: 'Bhea', emoji: '👩‍🎤', description: 'Integrated: Time & Manner',
         questionSets: [
           { id: 'A', questions: [
             { id:'C3A1', npcDialogueBefore:"Now let's see if you can combine both time and manner!", questionText:'"What time did the ride begin and how did the riders travel?"', choices:[{text:'A. It began at 6 AM by bike.',isCorrect:true},{text:'B. It began in 6 AM by bike.',isCorrect:false},{text:'C. It began at 6 AM in bike.',isCorrect:false},{text:'D. It began on 6 AM by bike.',isCorrect:false}], feedbackCorrect:"Exactly! You combined time and manner perfectly. AT = exact time, BY = mode of travel.", feedbackWrong:"The correct answer is 'at 6 AM by bike.' AT = exact time; BY = mode of travel.", grammarRule:"AT + exact time; BY + mode of travel" },
