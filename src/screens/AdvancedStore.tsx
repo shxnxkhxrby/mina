@@ -470,7 +470,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
     topic: 'Subject-Verb Agreement',
     questions: [
       {
-        questionText: 'Neither the students nor the teacher ( is / are ) ready for the exam.',
+        questionText: 'Neither the students nor the teacher __________ ready for the exam.',
         choices: [
           { text: 'is', isCorrect: true },
           { text: 'are', isCorrect: false },
@@ -479,7 +479,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: 'With "neither…nor", the verb agrees with the closest subject. "Teacher" is singular → "is".',
       },
       {
-        questionText: 'Everyone in the English Club ( wants / want ) to join the outreach program.',
+        questionText: 'Everyone in the English Club __________ to join the outreach program.',
         choices: [
           { text: 'wants', isCorrect: true },
           { text: 'want', isCorrect: false },
@@ -488,7 +488,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Everyone" is always singular → "wants".',
       },
       {
-        questionText: 'The information found in these modules ( is / are ) very helpful.',
+        questionText: 'The information found in these modules __________ very helpful.',
         choices: [
           { text: 'is', isCorrect: true },
           { text: 'are', isCorrect: false },
@@ -497,7 +497,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Information" is uncountable/singular → "is".',
       },
       {
-        questionText: 'Many of the applicants ( has / have ) submitted their requirements.',
+        questionText: 'Many of the applicants __________ submitted their requirements.',
         choices: [
           { text: 'have', isCorrect: true },
           { text: 'has', isCorrect: false },
@@ -506,7 +506,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Many" is plural → "have", not "has".',
       },
       {
-        questionText: 'The proceeds from the school fair ( was / were ) given to the charity.',
+        questionText: 'The proceeds from the school fair __________ given to the charity.',
         choices: [
           { text: 'were', isCorrect: true },
           { text: 'was', isCorrect: false },
@@ -515,7 +515,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Proceeds" is always plural → "were".',
       },
       {
-        questionText: 'Either the principal or the teachers ( leads / lead ) the morning assembly.',
+        questionText: 'Either the principal or the teachers __________ the morning assembly.',
         choices: [
           { text: 'lead', isCorrect: true },
           { text: 'leads', isCorrect: false },
@@ -524,7 +524,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Either…or" → verb agrees with the closer subject. "Teachers" is plural → "lead".',
       },
       {
-        questionText: 'Several of my classmates ( is / are ) planning a study group.',
+        questionText: 'Several of my classmates __________ planning a study group.',
         choices: [
           { text: 'are', isCorrect: true },
           { text: 'is', isCorrect: false },
@@ -533,7 +533,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Several" is plural → "are".',
       },
       {
-        questionText: 'Each of the participants ( receives / receive ) a certificate of membership.',
+        questionText: 'Each of the participants __________ a certificate of membership.',
         choices: [
           { text: 'receives', isCorrect: true },
           { text: 'receive', isCorrect: false },
@@ -706,6 +706,9 @@ export default function AdvancedStore() {
   const [bgIndex, setBgIndex] = useState(0);
   const [bgFailed, setBgFailed] = useState(false);
 
+  // ── FIX: mountSeed ensures a fresh shuffle on every new tab/mount ────────
+  const mountSeed = useRef(Date.now());
+
   // ── FIX 1: retryKey forces useMemo to re-shuffle on every retry ──────────
   const [retryKey, setRetryKey] = useState(0);
 
@@ -716,7 +719,7 @@ export default function AdvancedStore() {
       choices: shuffleChoices(q.choices),
     })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [masteryQuiz.id, retryKey],
+    [masteryQuiz.id, retryKey, mountSeed.current],
   );
 
   const [phase, setPhase] = useState<Phase>('question');
