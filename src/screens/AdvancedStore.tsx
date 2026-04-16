@@ -32,7 +32,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
     questions: [
       // Level 1 — Easy (7)
       {
-        questionText: 'I (have / has) finished my homework for today.',
+        questionText: 'I __________ finished my homework for today.',
         choices: [
           { text: 'have', isCorrect: true },
           { text: 'has', isCorrect: false },
@@ -41,7 +41,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"I" always takes "have" — not "has". Only third-person singular (he/she/it) uses "has".',
       },
       {
-        questionText: 'The teacher (has / have) already started the lesson.',
+        questionText: 'The teacher __________ already started the lesson.',
         choices: [
           { text: 'has', isCorrect: true },
           { text: 'have', isCorrect: false },
@@ -50,7 +50,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"The teacher" is singular → use "has", not "have".',
       },
       {
-        questionText: 'We (had / have) already eaten lunch before the bell rang.',
+        questionText: 'We __________ already eaten lunch before the bell rang.',
         choices: [
           { text: 'had', isCorrect: true },
           { text: 'have', isCorrect: false },
@@ -59,7 +59,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Before the bell rang" signals a past-before-past action → use "had", not "have".',
       },
       {
-        questionText: 'By next week, I (will have / have) completed my project.',
+        questionText: 'By next week, I __________ completed my project.',
         choices: [
           { text: 'will have', isCorrect: true },
           { text: 'have', isCorrect: false },
@@ -68,7 +68,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"By next week" points to a future deadline → use "will have", not "have".',
       },
       {
-        questionText: 'They (has / have) been friends since first grade.',
+        questionText: 'They __________ been friends since first grade.',
         choices: [
           { text: 'have', isCorrect: true },
           { text: 'has', isCorrect: false },
@@ -77,7 +77,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"They" is plural → use "have", not "has".',
       },
       {
-        questionText: 'My classmate (had / has) lost his pen before the exam began.',
+        questionText: 'My classmate __________ lost his pen before the exam began.',
         choices: [
           { text: 'had', isCorrect: true },
           { text: 'has', isCorrect: false },
@@ -86,7 +86,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Before the exam began" signals past-before-past → use "had", not "has".',
       },
       {
-        questionText: '(Have / Has) you ever visited the school library?',
+        questionText: '__________ you ever visited the school library?',
         choices: [
           { text: 'Have', isCorrect: true },
           { text: 'Has', isCorrect: false },
@@ -177,7 +177,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
       },
       // Level 3 — Difficult (5)
       {
-        questionText: 'The students are happy because they __________ (clean) the whole campus.',
+        questionText: 'The students are happy because they __________ the whole campus.',
         choices: [
           { text: 'have cleaned', isCorrect: true },
           { text: 'had cleaned', isCorrect: false },
@@ -188,7 +188,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: 'Present Perfect = have/has + past participle → "have cleaned" (plural subject "they").',
       },
       {
-        questionText: 'I couldn\'t enter the room because I __________ (forget) my key.',
+        questionText: 'I couldn\'t enter the room because I __________ my key.',
         choices: [
           { text: 'had forgotten', isCorrect: true },
           { text: 'have forgotten', isCorrect: false },
@@ -199,7 +199,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: 'The forgetting happened before "couldn\'t enter" → Past Perfect "had forgotten".',
       },
       {
-        questionText: 'By the end of this semester, our class __________ (read) ten different stories.',
+        questionText: 'By the end of this semester, our class __________ ten different stories.',
         choices: [
           { text: 'will have read', isCorrect: true },
           { text: 'have read', isCorrect: false },
@@ -210,7 +210,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"By the end of this semester" is a future point → Future Perfect "will have read".',
       },
       {
-        questionText: 'The janitor __________ (lock) the gate before I arrived at school.',
+        questionText: 'The janitor __________  the gate before I arrived at school.',
         choices: [
           { text: 'had locked', isCorrect: true },
           { text: 'has locked', isCorrect: false },
@@ -221,7 +221,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Before I arrived" signals past-before-past → Past Perfect "had locked".',
       },
       {
-        questionText: 'I __________ (finish) my research paper by the time the deadline arrives.',
+        questionText: 'I __________ my research paper by the time the deadline arrives.',
         choices: [
           { text: 'will have finished', isCorrect: true },
           { text: 'have finished', isCorrect: false },
@@ -542,7 +542,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Each" is always singular → "receives".',
       },
       {
-        questionText: 'The furniture in the faculty room __________ to be dusted. (need)',
+        questionText: 'The furniture in the faculty room __________ to be dusted.',
         choices: [
           { text: 'needs', isCorrect: true },
           { text: 'need', isCorrect: false },
@@ -552,7 +552,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Furniture" is uncountable/singular → "needs".',
       },
       {
-        questionText: 'Somebody among the student leaders __________ in the new policy. (believe)',
+        questionText: 'Somebody among the student leaders __________ in the new policy.',
         choices: [
           { text: 'believes', isCorrect: true },
           { text: 'believe', isCorrect: false },
@@ -562,7 +562,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Somebody" is always singular → "believes".',
       },
       {
-        questionText: 'The goods delivered to the canteen __________ fresh. (be)',
+        questionText: 'The goods delivered to the canteen __________ fresh.',
         choices: [
           { text: 'are', isCorrect: true },
           { text: 'is', isCorrect: false },
@@ -572,7 +572,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Goods" is always plural → "are".',
       },
       {
-        questionText: 'Neither the captain nor the players __________ the new schedule. (have)',
+        questionText: 'Neither the captain nor the players __________ the new schedule.',
         choices: [
           { text: 'have', isCorrect: true },
           { text: 'has', isCorrect: false },
@@ -582,7 +582,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"Neither…nor" → agree with the closer subject. "Players" is plural → "have".',
       },
       {
-        questionText: 'The news about the upcoming holidays __________ exciting. (sound)',
+        questionText: 'The news about the upcoming holidays __________ exciting.',
         choices: [
           { text: 'sounds', isCorrect: true },
           { text: 'sound', isCorrect: false },
@@ -592,7 +592,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"News" is always singular (noncount) → "sounds".',
       },
       {
-        questionText: 'No one in the class __________ the answer to the bonus question. (do)',
+        questionText: 'No one in the class __________ the answer to the bonus question.',
         choices: [
           { text: 'does', isCorrect: true },
           { text: 'do', isCorrect: false },
@@ -602,7 +602,7 @@ const MASTERY_QUIZZES: MasteryQuiz[] = [
         feedbackWrong: '"No one" is always singular → "does".',
       },
       {
-        questionText: 'Both of the candidates __________ qualified for the position. (be)',
+        questionText: 'Both of the candidates __________ qualified for the position.',
         choices: [
           { text: 'are', isCorrect: true },
           { text: 'is', isCorrect: false },

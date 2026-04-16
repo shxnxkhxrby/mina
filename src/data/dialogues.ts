@@ -86,9 +86,9 @@ export const STORE_GREETINGS: Record<string, { lines: {speaker:string; text:stri
     { speaker:'Al', text:"Alright! Let's focus on how things were done during the ride." },
   ]},
   'C3': { lines: [
-    { speaker:'Karen', text:"Hi! I just finished the Juan Ride on the Go. What an experience!" },
+    { speaker:'Bhea', text:"Hi! I just finished the Juan Ride on the Go. What an experience!" },
     { speaker:'Student', text:"Amazing! Can I ask you about both the time and the way you joined?" },
-    { speaker:'Karen', text:"Now let's see if you can combine both time and manner!" },
+    { speaker:'Bhea', text:"Now let's see if you can combine both time and manner!" },
   ]},
 };
 
