@@ -198,10 +198,21 @@ export default function AdvancedMode() {
     setIsCorrect(false);
   };
 
+  // Shuffle choices once per question (stable across re-renders, changes only when qIdx changes)
+  const shuffledChoices = useMemo(() => {
+    const arr = (allQuestions[qIdx]?.choices ?? []).map((choice, originalIndex) => ({ choice, originalIndex }));
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qIdx]);
+
   const handleAnswer = (i: number) => {
     if (selected !== null) return;
     setSelected(i);
-    const correct = currentQ.choices[i].isCorrect;
+    const correct = shuffledChoices[i].choice.isCorrect;
     setIsCorrect(correct);
     setFeedbackText(correct ? currentQ.feedbackCorrect : currentQ.feedbackWrong);
     if (correct) {
@@ -572,7 +583,7 @@ export default function AdvancedMode() {
             </AnimatePresence>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(4px,0.9vh,8px)' }}>
-              {currentQ.choices.map((choice, i) => {
+              {shuffledChoices.map(({ choice }, i) => {
                 let cls = 'choice-bubble';
                 if (selected !== null) {
                   if (choice.isCorrect) cls += ' correct';
