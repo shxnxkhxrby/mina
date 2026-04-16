@@ -54,9 +54,13 @@ export default function AdvancedSectionView() {
     advancedLevelScores,
   } = useGameStore();
 
-  // All sections always open — no locking
+  // Passed = score >= 15
   const isLevelCompleted = (index: number): boolean =>
     (advancedLevelScores[index] ?? 0) >= 15;
+
+  // Has attempted = any score stored
+  const hasAttempted = (index: number): boolean =>
+    (advancedLevelScores[index] ?? 0) > 0;
 
   const getBestScore = (index: number): number =>
     advancedLevelScores[index] ?? 0;
@@ -166,6 +170,7 @@ export default function AdvancedSectionView() {
       >
         {MASTERY_LEVELS.map((lvl, i) => {
           const completed = isLevelCompleted(i);
+          const attempted = hasAttempted(i);
           const best = getBestScore(i);
 
           return (
@@ -188,12 +193,16 @@ export default function AdvancedSectionView() {
                 style={{
                   background: completed
                     ? 'rgba(255,248,200,0.08)'
+                    : attempted
+                    ? 'rgba(255,100,100,0.05)'
                     : 'rgba(255,255,255,0.05)',
-                  border: `2.5px solid ${completed ? lvl.color : `${lvl.color}66`}`,
+                  border: `2.5px solid ${completed ? '#28A745' : attempted ? '#DC354566' : `${lvl.color}66`}`,
                   borderRadius: '20px',
                   overflow: 'hidden',
                   boxShadow: completed
-                    ? `0 0 32px ${lvl.color}44, 0 8px 24px rgba(0,0,0,0.5)`
+                    ? `0 0 32px #28A74544, 0 8px 24px rgba(0,0,0,0.5)`
+                    : attempted
+                    ? `0 0 16px rgba(220,53,69,0.2), 0 8px 24px rgba(0,0,0,0.4)`
                     : `0 8px 24px rgba(0,0,0,0.4)`,
                   backdropFilter: 'blur(10px)',
                   position: 'relative',
@@ -226,15 +235,15 @@ export default function AdvancedSectionView() {
                     </div>
                   </div>
 
-                  {/* Completion badge */}
-                  {completed && (
+                  {/* Status badge */}
+                  {attempted && (
                     <div
                       style={{
                         position: 'absolute',
                         top: '8px',
                         right: '8px',
-                        background: '#F5C518',
-                        color: '#1A1200',
+                        background: completed ? '#28A745' : '#DC3545',
+                        color: 'white',
                         fontFamily: 'var(--font-char)',
                         fontWeight: 800,
                         fontSize: 'clamp(0.42rem,0.8vw,0.58rem)',
@@ -243,7 +252,7 @@ export default function AdvancedSectionView() {
                         letterSpacing: '0.5px',
                       }}
                     >
-                      ✓ DONE
+                      {completed ? '✓ PASSED' : '✗ RETRY'}
                     </div>
                   )}
 
@@ -271,15 +280,31 @@ export default function AdvancedSectionView() {
                     {lvl.description}
                   </div>
 
-                  {completed && (
+                  {attempted && (
                     <>
                       <div style={{
-                        fontFamily: 'var(--font-body)',
-                        fontSize: 'clamp(0.5rem,0.9vw,0.64rem)',
-                        color: best >= 15 ? '#4ade80' : 'rgba(255,255,255,0.5)',
-                        fontWeight: 700,
+                        background: best >= 15 ? 'rgba(74,222,128,0.18)' : 'rgba(255,100,100,0.15)',
+                        border: `1px solid ${best >= 15 ? 'rgba(74,222,128,0.5)' : 'rgba(255,100,100,0.4)'}`,
+                        borderRadius: '8px',
+                        padding: '6px 10px',
+                        display: 'flex', alignItems: 'center', gap: '6px',
                       }}>
-                        Best: {best}/20{best >= 15 ? ' ✓ Passed' : ` (need 15)`}
+                        <span style={{ fontSize: 'clamp(0.7rem,1.2vw,0.9rem)' }}>{best >= 15 ? '✅' : '❌'}</span>
+                        <div>
+                          <div style={{
+                            fontFamily: 'var(--font-body)',
+                            fontSize: 'clamp(0.5rem,0.9vw,0.64rem)',
+                            color: best >= 15 ? '#4ade80' : 'rgba(255,140,140,0.9)',
+                            fontWeight: 700,
+                          }}>
+                            Best: {best}/20 — {best >= 15 ? 'PASSED' : 'Failed'}
+                          </div>
+                          {best < 15 && (
+                            <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.44rem,0.8vw,0.58rem)', color: 'rgba(255,160,160,0.7)' }}>
+                              Need 15/20 to pass
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <div style={{ display: 'flex', gap: '2px' }}>
                         {[1, 2, 3, 4, 5].map(n => (
@@ -297,8 +322,8 @@ export default function AdvancedSectionView() {
                     whileTap={{ scale: 0.97 }}
                     style={{
                       marginTop: '4px',
-                      background: completed
-                        ? `linear-gradient(135deg, ${lvl.color}cc, ${lvl.color})`
+                      background: best >= 15
+                        ? `linear-gradient(135deg, #28A745cc, #28A745)`
                         : `linear-gradient(135deg, ${lvl.color}, ${lvl.color}dd)`,
                       borderRadius: '12px',
                       padding: 'clamp(8px,1.4vh,12px)',
@@ -308,15 +333,15 @@ export default function AdvancedSectionView() {
                       color: 'white',
                       fontWeight: 700,
                       letterSpacing: '0.5px',
-                      boxShadow: `0 4px 14px ${lvl.color}55`,
+                      boxShadow: `0 4px 14px ${best >= 15 ? '#28A74555' : `${lvl.color}55`}`,
                     }}
                   >
-                    {completed ? '🔄 Retry Quiz →' : '▶ Start Quiz →'}
+                    {best >= 15 ? '🔄 Retry Quiz →' : best > 0 ? '🔄 Try Again →' : '▶ Start Quiz →'}
                   </motion.div>
                 </div>
               </div>
 
-              {/* Bounce arrow when not yet completed */}
+              {/* Bounce arrow when not yet passed */}
               {!completed && (
                 <motion.div
                   animate={{ y: [0, -5, 0] }}
@@ -325,11 +350,11 @@ export default function AdvancedSectionView() {
                     textAlign: 'center',
                     fontSize: 'clamp(0.7rem,1.3vw,0.95rem)',
                     marginTop: '6px',
-                    color: 'rgba(255,255,255,0.6)',
+                    color: best > 0 ? 'rgba(255,160,100,0.8)' : 'rgba(255,255,255,0.6)',
                     filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.3))',
                   }}
                 >
-                  ▼ Tap to begin
+                  {best > 0 ? '▼ Try again to pass' : '▼ Tap to begin'}
                 </motion.div>
               )}
             </motion.div>

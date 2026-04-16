@@ -764,8 +764,19 @@ export default function AdvancedStore() {
     setPhase('question');
   };
 
-  // ── FIX 2: save progress before going back so next level unlocks ─────────
+  // Save score and go back — only allowed if score >= PASS_THRESHOLD
   const handleFinish = () => {
+    if (!quizFinished) return;
+    if (scoreRef.current < PASS_THRESHOLD) return; // blocked if failed
+    completeStore(section.id, store.id, scoreRef.current);
+    addScore(scoreRef.current, totalQ);
+    addAdvancedScore(scoreRef.current, totalQ);
+    setAdvancedLevelScore(quizIndex as 0 | 1 | 2, scoreRef.current);
+    goToScene('ADVANCED_SECTION_VIEW');
+  };
+
+  // Exit without passing — still saves the score for display purposes
+  const handleFinishAnyway = () => {
     if (!quizFinished) return;
     completeStore(section.id, store.id, scoreRef.current);
     addScore(scoreRef.current, totalQ);
@@ -775,7 +786,6 @@ export default function AdvancedStore() {
   };
 
   const handleRetry = () => {
-    // ── FIX 1 (cont): bump retryKey so questions are re-shuffled ────────────
     setRetryKey(k => k + 1);
     setQIdx(0);
     setSelected(null);
@@ -1039,11 +1049,28 @@ export default function AdvancedStore() {
             style={{
               width: 'clamp(280px,90vw,520px)', maxWidth: '94vw',
               maxHeight: '88vh', overflowY: 'auto',
-              textAlign: 'center', margin: '0 auto', border: `3px solid ${meta.color}`,
+              textAlign: 'center', margin: '0 auto', border: `3px solid ${scoreRef.current >= PASS_THRESHOLD ? '#28A745' : '#DC3545'}`,
             }}
           >
-            <div style={{ height: '6px', background: meta.color, borderRadius: '12px 12px 0 0', marginTop: '-1px', marginLeft: '-1px', marginRight: '-1px' }} />
+            <div style={{ height: '6px', background: scoreRef.current >= PASS_THRESHOLD ? '#28A745' : '#DC3545', borderRadius: '12px 12px 0 0', marginTop: '-1px', marginLeft: '-1px', marginRight: '-1px' }} />
             <div style={{ padding: 'clamp(14px,2.5vh,26px) clamp(14px,2.5vw,22px)' }}>
+
+              {/* Pass / Fail banner */}
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                background: scoreRef.current >= PASS_THRESHOLD ? 'rgba(40,167,69,0.12)' : 'rgba(220,53,69,0.12)',
+                border: `2px solid ${scoreRef.current >= PASS_THRESHOLD ? '#28A745' : '#DC3545'}`,
+                borderRadius: '50px', padding: '4px 18px', marginBottom: '10px',
+              }}>
+                <span style={{
+                  fontFamily: 'var(--font-char)', fontWeight: 800,
+                  fontSize: 'clamp(0.62rem,1.2vw,0.82rem)',
+                  color: scoreRef.current >= PASS_THRESHOLD ? '#28A745' : '#DC3545',
+                  letterSpacing: '2px',
+                }}>
+                  {scoreRef.current >= PASS_THRESHOLD ? '✅ PASSED' : '❌ FAILED'}
+                </span>
+              </div>
 
               <div style={{ marginBottom: '6px' }}>
                 <div style={{ fontFamily: 'var(--font-title)', fontSize: 'clamp(0.78rem,1.5vw,1.1rem)', color: meta.color, marginBottom: '4px' }}>
@@ -1052,13 +1079,15 @@ export default function AdvancedStore() {
                 <div style={{
                   fontFamily: 'var(--font-title)', lineHeight: 1,
                   fontSize: 'clamp(2rem,5vw,3.8rem)',
-                  color: scoreRef.current >= PASS_THRESHOLD ? '#28A745' : meta.color,
+                  color: scoreRef.current >= PASS_THRESHOLD ? '#28A745' : '#DC3545',
                 }}>
                   {scoreRef.current}/{totalQ}
                 </div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(0.6rem,1.1vw,0.76rem)', color: 'var(--text-muted)', marginTop: '2px' }}>
                   {Math.round((scoreRef.current / totalQ) * 100)}% correct
-                  {scoreRef.current >= PASS_THRESHOLD ? ' — 🎉 Passed!' : ` — Need ${PASS_THRESHOLD}/${totalQ} to pass`}
+                  {scoreRef.current >= PASS_THRESHOLD
+                    ? ' — 🎉 Great job! You can go back or retry for a higher score.'
+                    : ` — Need ${PASS_THRESHOLD}/${totalQ} to pass. Try again!`}
                 </div>
               </div>
 
@@ -1073,12 +1102,32 @@ export default function AdvancedStore() {
                 ))}
               </div>
 
+              {/* Best score display */}
+              {(() => {
+                const prevBest = advancedLevelScores[quizIndex] ?? 0;
+                const newBest = Math.max(prevBest, scoreRef.current);
+                return newBest > 0 && newBest !== scoreRef.current ? (
+                  <div style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 'clamp(0.58rem,1vw,0.72rem)',
+                    color: newBest >= PASS_THRESHOLD ? '#28A745' : 'var(--text-muted)',
+                    marginBottom: '10px',
+                    padding: '6px 14px',
+                    background: newBest >= PASS_THRESHOLD ? 'rgba(40,167,69,0.08)' : 'rgba(0,0,0,0.05)',
+                    borderRadius: '8px',
+                    display: 'inline-block',
+                  }}>
+                    🏆 Your best: {newBest}/{totalQ}{newBest >= PASS_THRESHOLD ? ' ✓ PASSED' : ''}
+                  </div>
+                ) : null;
+              })()}
+
               {/* Per-question results */}
               <div style={{
                 background: 'var(--surface)', borderRadius: '12px',
                 padding: 'clamp(8px,1.5vh,14px) clamp(10px,1.8vw,16px)',
                 marginBottom: '16px', textAlign: 'left',
-                maxHeight: '240px', overflowY: 'auto',
+                maxHeight: '220px', overflowY: 'auto',
               }}>
                 <div style={{
                   fontFamily: 'var(--font-char)', fontWeight: 700,
@@ -1103,55 +1152,55 @@ export default function AdvancedStore() {
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {/* ── FIX 2 (cont): "← Back to Sections" now saves progress first ── */}
-                <button className="btn btn-ghost btn-sm" onClick={handleFinish}>
-                  ← Back to Sections
-                </button>
-                <motion.button className="btn btn-primary btn-sm"
-                  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                  onClick={handleRetry}
-                  style={{ background: meta.color, borderColor: meta.color }}>
-                  🔄 Retry
-                </motion.button>
-                {/* Certificate button — only available after ALL 3 levels are passed (≥15/20 each) */}
-                {(() => {
-                  // Compute updated scores including current result
-                  const updatedScores: [number, number, number] = [...advancedLevelScores] as [number, number, number];
-                  updatedScores[quizIndex] = Math.max(updatedScores[quizIndex], scoreRef.current);
-                  const allPassed = updatedScores.every(s => s >= ADVANCED_PASS_SCORE);
-                  if (allPassed) {
-                    return (
-                      <motion.button className="btn btn-success"
-                        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
-                        onClick={() => {
-                          if (!quizFinished) return;
-                          completeStore(section.id, store.id, scoreRef.current);
-                          addScore(scoreRef.current, totalQ);
-                          addAdvancedScore(scoreRef.current, totalQ);
-                          setAdvancedLevelScore(quizIndex as 0 | 1 | 2, scoreRef.current);
-                          goToScene('SCORE_SUMMARY');
-                        }}>
-                        📜 Get Certificate →
-                      </motion.button>
-                    );
-                  }
-                  // Show which levels still need to be passed
-                  const remaining = updatedScores.filter(s => s < ADVANCED_PASS_SCORE).length;
-                  return (
-                    <div style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: 'clamp(0.56rem,1vw,0.7rem)',
-                      color: 'var(--text-muted)',
-                      padding: '8px 14px',
-                      background: 'rgba(0,0,0,0.06)',
-                      borderRadius: '10px',
-                      textAlign: 'center',
-                    }}>
-                      🔒 Pass all 3 levels ({remaining} remaining) to unlock certificate
-                    </div>
-                  );
-                })()}
+                {scoreRef.current >= PASS_THRESHOLD ? (
+                  /* PASSED — can go back or retry for higher score */
+                  <>
+                    <button className="btn btn-ghost btn-sm" onClick={handleFinish}>
+                      ← Back to Sections
+                    </button>
+                    <motion.button className="btn btn-primary btn-sm"
+                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+                      onClick={handleRetry}
+                      style={{ background: meta.color, borderColor: meta.color }}>
+                      🔄 Try Again
+                    </motion.button>
+                  </>
+                ) : (
+                  /* FAILED — must retry, exit option available but discouraged */
+                  <>
+                    <motion.button className="btn btn-primary btn-sm"
+                      whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+                      onClick={handleRetry}
+                      style={{ background: meta.color, borderColor: meta.color }}>
+                      🔄 Try Again
+                    </motion.button>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={handleFinishAnyway}
+                      style={{ opacity: 0.6, fontSize: 'clamp(0.58rem,1vw,0.72rem)' }}
+                    >
+                      ← Exit without passing
+                    </button>
+                  </>
+                )}
               </div>
+
+              {/* Failed warning message */}
+              {scoreRef.current < PASS_THRESHOLD && (
+                <div style={{
+                  marginTop: '12px',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(0.56rem,1vw,0.7rem)',
+                  color: '#DC3545',
+                  padding: '8px 14px',
+                  background: 'rgba(220,53,69,0.08)',
+                  borderRadius: '10px',
+                  border: '1px solid rgba(220,53,69,0.2)',
+                }}>
+                  ⚠️ You need at least {PASS_THRESHOLD}/{totalQ} to pass this section. Give it another try!
+                </div>
+              )}
+
             </div>
           </motion.div>
         </div>
