@@ -4,7 +4,7 @@ import { useGameStore } from '../store/gameStore';
 
 
 const BGM_URL =
-  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1775740394/MINASA_BGM_c1dgyc.mp3';
+  'https://res.cloudinary.com/dh2nmgq2m/video/upload/v1776356694/MINASA_rmup6q.mp3';
 
 // ── BGM behaviour per scene ───────────────────────────────────────────────
 //   'mute'  → pause BGM entirely (video scenes with their own audio/music)
