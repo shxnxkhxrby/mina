@@ -126,7 +126,7 @@ export default function FeedbackScreen() {
   }, [phase, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Guard: if currentSection is genuinely missing, redirect cleanly
-  if (!currentSection) { goToScene('SECTION_SELECT'); return null; }
+  if (!currentSection) { goToScene('MAP'); return null; }
 
   const handleCongratsClick = () => {
     stopVoice();
