@@ -311,7 +311,7 @@ export default function StoreScreen() {
     </motion.div>
   );
 
-  // Dialogue panel — positioned to the right of NPC sprite
+  // Dialogue panel — NPC lines: positioned to the right of NPC sprite (upper area)
   const renderDialoguePanel = (children: React.ReactNode, phaseKey: string | number) => (
     <div style={{
       position: 'absolute',
@@ -323,6 +323,30 @@ export default function StoreScreen() {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
+    }}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={phaseKey}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.28, ease: 'easeOut' }}
+        >
+          {children}
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+
+  // Student dialogue panel — pinned to the bottom of the screen, full width minus NPC area
+  // Gives a conversational "player reply" feel
+  const renderStudentPanel = (children: React.ReactNode, phaseKey: string | number) => (
+    <div style={{
+      position: 'absolute',
+      bottom: 'clamp(12px,2.5vh,24px)',
+      right: 'clamp(12px,2.5vw,28px)',
+      left: 'clamp(130px,28vw,360px)',
+      zIndex: 20,
     }}>
       <AnimatePresence mode="wait">
         <motion.div
@@ -457,44 +481,54 @@ export default function StoreScreen() {
       {phase !== 'mina_closing' && renderNpcSprite()}
 
       {/* GREETING PHASE */}
-      {phase === 'greeting' && (
-        <div style={{ position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 15 }} onClick={advanceGreeting}>
-          {renderDialoguePanel(
-            <>
-              <SpeakerBadge label={currentGreet?.speaker || store.npcName} gradStart={badgeGradStart} gradEnd={badgeGradEnd} />
-              <ScallopedBubble>
+      {phase === 'greeting' && (() => {
+        const isStudent = currentGreet?.speaker === 'Student';
+        const bubbleContent = (
+          <>
+            <SpeakerBadge
+              label={currentGreet?.speaker || store.npcName}
+              gradStart={isStudent ? '#3A7BD5' : badgeGradStart}
+              gradEnd={isStudent ? '#1A55A0' : badgeGradEnd}
+            />
+            <ScallopedBubble color={isStudent ? '#3A7BD5' : '#F5C84A'}>
+              <div style={{
+                fontFamily: 'var(--font-title)',
+                fontSize: 'clamp(0.9rem,2.2vw,1.35rem)',
+                color: '#2A1800', lineHeight: 1.55, fontWeight: 800,
+              }}>
+                {currentGreet?.text}
+                <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: isStudent ? '#3A7BD5' : badgeGradStart }}>▌</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                <div style={{ display: 'flex', gap: '5px' }}>
+                  {greetings.map((_, i) => (
+                    <motion.div key={i} animate={{ scale: i === greetIdx ? 1.3 : 1 }}
+                      style={{
+                        width: i === greetIdx ? '20px' : '7px', height: '7px', borderRadius: '4px',
+                        background: i <= greetIdx ? (isStudent ? '#3A7BD5' : badgeGradStart) : 'rgba(180,120,0,0.3)',
+                        transition: 'all 0.3s',
+                      }} />
+                  ))}
+                </div>
                 <div style={{
-                  fontFamily: 'var(--font-title)',
-                  fontSize: 'clamp(0.9rem,2.2vw,1.35rem)',
-                  color: '#2A1800', lineHeight: 1.55, fontWeight: 800,
+                  fontFamily: 'var(--font-body)', fontSize: 'clamp(0.54rem,1vw,0.72rem)',
+                  color: '#8A6000', marginLeft: 'auto',
                 }}>
-                  {currentGreet?.text}
-                  <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>
+                  {greetIdx + 1 < greetings.length ? 'Click to continue ▶' : 'Click to start →'}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                  <div style={{ display: 'flex', gap: '5px' }}>
-                    {greetings.map((_, i) => (
-                      <motion.div key={i} animate={{ scale: i === greetIdx ? 1.3 : 1 }}
-                        style={{
-                          width: i === greetIdx ? '20px' : '7px', height: '7px', borderRadius: '4px',
-                          background: i <= greetIdx ? badgeGradStart : 'rgba(180,120,0,0.3)',
-                          transition: 'all 0.3s',
-                        }} />
-                    ))}
-                  </div>
-                  <div style={{
-                    fontFamily: 'var(--font-body)', fontSize: 'clamp(0.54rem,1vw,0.72rem)',
-                    color: '#8A6000', marginLeft: 'auto',
-                  }}>
-                    {greetIdx + 1 < greetings.length ? 'Click to continue ▶' : 'Click to start →'}
-                  </div>
-                </div>
-              </ScallopedBubble>
-            </>,
-            `greet-${greetIdx}`
-          )}
-        </div>
-      )}
+              </div>
+            </ScallopedBubble>
+          </>
+        );
+        return (
+          <div style={{ position: 'absolute', inset: 0, cursor: 'pointer', zIndex: 15 }} onClick={advanceGreeting}>
+            {isStudent
+              ? renderStudentPanel(bubbleContent, `greet-${greetIdx}`)
+              : renderDialoguePanel(bubbleContent, `greet-${greetIdx}`)
+            }
+          </div>
+        );
+      })()}
 
       {/* INTRO PHASE */}
       {phase === 'intro' && renderDialoguePanel(
