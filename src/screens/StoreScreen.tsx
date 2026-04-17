@@ -152,6 +152,10 @@ export default function StoreScreen() {
   const theme = getLevelTheme(currentStoreIndex);
   const [badgeGradStart, badgeGradEnd] = THEME_BADGE[currentStoreIndex] ?? THEME_BADGE[0];
 
+  // retryKey: bumped on every retry to reshuffle the SAME question set.
+  // Must be declared before useMemo so the dependency is in scope.
+  const [retryKey, setRetryKey] = useState(0);
+
   // Shuffle questions + choices on mount and on each retry (retryKey bump).
   // Always uses the SAME question set — no more A/B alternating.
   const shuffledQuestions = useMemo<ShuffledQuestion[]>(() => {
@@ -173,10 +177,6 @@ export default function StoreScreen() {
   const [showCursor, setShowCursor] = useState(true);
   const [minaLineIdx, setMinaLineIdx] = useState(0);
   const { play: playVoice, stop: stopVoice } = useVoiceAudio();
-
-  // ── retryKey: bumped on every retry to reshuffle the SAME question set.
-  //    Never switches to set B, so question count is always consistent.
-  const [retryKey, setRetryKey] = useState(0);
 
   // ── Tap-rate lock: prevents rapid multi-tap from firing the same handler
   //    more than once per 350 ms.
