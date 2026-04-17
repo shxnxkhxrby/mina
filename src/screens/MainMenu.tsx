@@ -17,8 +17,8 @@ const LESSON_SECTIONS = [
     gradient: 'linear-gradient(135deg,#FF9A5C,#E85D26)',
     emoji: '⏳',
     topic: 'Perfect Tenses of the Verb',
-    // public/imgs/lessons/lesson1/ptotv1.png … ptotv7.png
-    slides: Array.from({ length: 7 }, (_, i) =>
+    // public/imgs/lessons/lesson1/ptotv1.png … ptotv9.png
+    slides: Array.from({ length: 9 }, (_, i) =>
       tryExts(`/imgs/lessons/lesson1/ptotv${i + 1}`)
     ),
   },
@@ -28,8 +28,8 @@ const LESSON_SECTIONS = [
     gradient: 'linear-gradient(135deg,#5BA3E0,#2E75B6)',
     emoji: '📍',
     topic: 'Prepositions',
-    // public/imgs/lessons/lesson2/prepositions1.png … prepositions20.png
-    slides: Array.from({ length: 20 }, (_, i) =>
+    // public/imgs/lessons/lesson2/prepositions1.png … prepositions23.png
+    slides: Array.from({ length: 23 }, (_, i) =>
       tryExts(`/imgs/lessons/lesson2/prepositions${i + 1}`)
     ),
   },
@@ -39,8 +39,8 @@ const LESSON_SECTIONS = [
     gradient: 'linear-gradient(135deg,#8BBB60,#5B7A3D)',
     emoji: '🔗',
     topic: 'Subject-Verb Agreement',
-    // public/imgs/lessons/lesson3/sva1.png … sva7.png
-    slides: Array.from({ length: 7 }, (_, i) =>
+    // public/imgs/lessons/lesson3/sva1.png … sva9.png
+    slides: Array.from({ length: 9 }, (_, i) =>
       tryExts(`/imgs/lessons/lesson3/sva${i + 1}`)
     ),
   },
