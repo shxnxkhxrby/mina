@@ -152,11 +152,8 @@ export default function StoreScreen() {
   const theme = getLevelTheme(currentStoreIndex);
   const [badgeGradStart, badgeGradEnd] = THEME_BADGE[currentStoreIndex] ?? THEME_BADGE[0];
 
-  // retryKey increments on every retry to force a fresh shuffle of the SAME
-  // question set — no more alternating between set A and set B.
-  const [retryKey, setRetryKey] = useState(0);
-
-  // Shuffle questions + choices on mount and on each retry.
+  // Shuffle questions + choices on mount and on each retry (retryKey bump).
+  // Always uses the SAME question set — no more A/B alternating.
   const shuffledQuestions = useMemo<ShuffledQuestion[]>(() => {
     return shuffle(qSet.questions).map(q => ({
       ...q,
@@ -177,7 +174,12 @@ export default function StoreScreen() {
   const [minaLineIdx, setMinaLineIdx] = useState(0);
   const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
-  // Tap-rate lock: prevents rapid multi-tap from advancing phases more than once per 350 ms.
+  // ── retryKey: bumped on every retry to reshuffle the SAME question set.
+  //    Never switches to set B, so question count is always consistent.
+  const [retryKey, setRetryKey] = useState(0);
+
+  // ── Tap-rate lock: prevents rapid multi-tap from firing the same handler
+  //    more than once per 350 ms.
   const advanceLocked = useRef(false);
   const withLock = (fn: () => void) => {
     if (advanceLocked.current) return;
@@ -186,10 +188,12 @@ export default function StoreScreen() {
     setTimeout(() => { advanceLocked.current = false; }, 350);
   };
 
-  // Keep a ref in sync with qIdx so handleNext always reads the current value.
+  // ── qIdxRef: always holds the true current question index so handleNext
+  //    never reads a stale closure value.
   const qIdxRef = useRef(0);
 
-  // Synchronously blocks a second answer on the same question before React re-renders.
+  // ── answeredRef: synchronously blocks a second answer on the same question
+  //    before React has re-rendered and disabled the choice buttons.
   const answeredRef = useRef(false);
 
   const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
@@ -215,7 +219,7 @@ export default function StoreScreen() {
     return () => clearInterval(t);
   }, []);
 
-  // Keep qIdxRef in sync whenever qIdx state changes.
+  // Keep qIdxRef in sync with qIdx state (guards against stale closures).
   useEffect(() => { qIdxRef.current = qIdx; }, [qIdx]);
 
   useEffect(() => {
@@ -233,6 +237,8 @@ export default function StoreScreen() {
   });
 
   const handleAnswer = (i: number) => {
+    // answeredRef is a synchronous guard — checked before any re-render,
+    // so a rapid second tap cannot slip through before React disables buttons.
     if (answeredRef.current) return;
     answeredRef.current = true;
     setSelected(i);
@@ -246,11 +252,12 @@ export default function StoreScreen() {
   };
 
   const handleNext = () => withLock(() => {
+    // Read from ref — always the real current index, never a stale closure.
     const nextIdx = qIdxRef.current + 1;
     if (nextIdx >= totalQ) { setPhase('done'); return; }
     qIdxRef.current = nextIdx;
     setQIdx(nextIdx);
-    answeredRef.current = false;
+    answeredRef.current = false;  // reset for the incoming question
     setSelected(null); setFeedbackText('');
     setIsCorrect(false); setPhase('question');
   });
@@ -269,7 +276,7 @@ export default function StoreScreen() {
   });
 
   const handleRetry = () => {
-    // Bump retryKey to reshuffle the SAME question set — never switches to B.
+    // Bump retryKey to reshuffle the SAME set — never switches to set B.
     setRetryKey(k => k + 1);
     qIdxRef.current = 0;
     answeredRef.current = false;
