@@ -141,7 +141,7 @@ const THEME_BADGE: Record<number, [string, string]> = {
 export default function StoreScreen() {
   const {
     currentSection, currentStoreIndex, currentQuestionSet,
-    completeStore, addScore, goToScene, setQuestionSet,
+    completeStore, addScore, goToScene,
   } = useGameStore();
 
   const section = ALL_SECTIONS.find(s => s.id === currentSection) ?? ALL_SECTIONS[0];
@@ -152,14 +152,17 @@ export default function StoreScreen() {
   const theme = getLevelTheme(currentStoreIndex);
   const [badgeGradStart, badgeGradEnd] = THEME_BADGE[currentStoreIndex] ?? THEME_BADGE[0];
 
-  // Shuffle questions once, and shuffle each question's choices once.
-  // useMemo re-runs whenever the question set changes (e.g. on retry with set B).
+  // retryKey increments on every retry to force a fresh shuffle of the SAME
+  // question set — no more alternating between set A and set B.
+  const [retryKey, setRetryKey] = useState(0);
+
+  // Shuffle questions + choices on mount and on each retry.
   const shuffledQuestions = useMemo<ShuffledQuestion[]>(() => {
     return shuffle(qSet.questions).map(q => ({
       ...q,
       choices: shuffle(q.choices),
     }));
-  }, [qSet]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [qSet, retryKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [phase, setPhase] = useState<Phase>(greetings.length > 0 ? 'greeting' : 'intro');
   const [greetIdx, setGreetIdx] = useState(0);
@@ -174,8 +177,7 @@ export default function StoreScreen() {
   const [minaLineIdx, setMinaLineIdx] = useState(0);
   const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
-  // ── Tap-rate lock: prevents rapid multi-tap from advancing dialogue or
-  //    phases more than once per 350 ms.
+  // Tap-rate lock: prevents rapid multi-tap from advancing phases more than once per 350 ms.
   const advanceLocked = useRef(false);
   const withLock = (fn: () => void) => {
     if (advanceLocked.current) return;
@@ -184,12 +186,10 @@ export default function StoreScreen() {
     setTimeout(() => { advanceLocked.current = false; }, 350);
   };
 
-  // ── Keep a ref in sync with qIdx so handleNext always reads the current
-  //    value even inside closures created before the last re-render.
+  // Keep a ref in sync with qIdx so handleNext always reads the current value.
   const qIdxRef = useRef(0);
 
-  // ── Synchronously blocks a second answer attempt on the same question
-  //    before React has had a chance to re-render and disable the buttons.
+  // Synchronously blocks a second answer on the same question before React re-renders.
   const answeredRef = useRef(false);
 
   const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
@@ -215,7 +215,7 @@ export default function StoreScreen() {
     return () => clearInterval(t);
   }, []);
 
-  // Keep qIdxRef in sync whenever qIdx state changes (e.g. from external resets).
+  // Keep qIdxRef in sync whenever qIdx state changes.
   useEffect(() => { qIdxRef.current = qIdx; }, [qIdx]);
 
   useEffect(() => {
@@ -233,11 +233,8 @@ export default function StoreScreen() {
   });
 
   const handleAnswer = (i: number) => {
-    // Block if already answered — checked via ref so it's synchronous,
-    // not dependent on React re-rendering selected state first.
     if (answeredRef.current) return;
     answeredRef.current = true;
-
     setSelected(i);
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
@@ -249,12 +246,11 @@ export default function StoreScreen() {
   };
 
   const handleNext = () => withLock(() => {
-    // Read from ref so we always have the up-to-date index, never a stale closure.
     const nextIdx = qIdxRef.current + 1;
     if (nextIdx >= totalQ) { setPhase('done'); return; }
     qIdxRef.current = nextIdx;
     setQIdx(nextIdx);
-    answeredRef.current = false;   // reset for the incoming question
+    answeredRef.current = false;
     setSelected(null); setFeedbackText('');
     setIsCorrect(false); setPhase('question');
   });
@@ -273,8 +269,8 @@ export default function StoreScreen() {
   });
 
   const handleRetry = () => {
-    const next = currentQuestionSet === 'A' ? 'B' : 'A';
-    setQuestionSet(next);
+    // Bump retryKey to reshuffle the SAME question set — never switches to B.
+    setRetryKey(k => k + 1);
     qIdxRef.current = 0;
     answeredRef.current = false;
     setQIdx(0); setSelected(null);
