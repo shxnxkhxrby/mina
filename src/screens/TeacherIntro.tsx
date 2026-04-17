@@ -30,10 +30,21 @@ export default function TeacherIntro() {
     playVoice(TEACHER_AUDIO[idx]);
   }, [idx]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Stop audio on unmount
+  useEffect(() => {
+    return () => stopVoice();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const advance = () => {
-    stopVoice();
-    if (isLast) goToScene('MINA_INTRO');
-    else setIdx(i => i + 1);
+    if (isLast) {
+      // FIX: do NOT call stopVoice() here before navigating to MINA_INTRO.
+      // The unmount cleanup above handles stopping. Calling stop then immediately
+      // mounting MinaIntro (which also plays on mount) caused the double-play.
+      goToScene('MINA_INTRO');
+    } else {
+      stopVoice();
+      setIdx(i => i + 1);
+    }
   };
 
   return (

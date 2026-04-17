@@ -473,10 +473,22 @@ export default function GrammarLesson() {
     return () => clearInterval(t);
   }, []);
 
+  // FIX: delay 120ms on first page (page === 0) so MinaIntro's audio finishes
+  // stopping before we start playing — prevents the "hey hey" double-play on
+  // the MINA_INTRO → GRAMMAR_LESSON scene transition.
   useEffect(() => {
     const sectionAudio = GRAMMAR_LESSON_AUDIO[currentSection as string] ?? GRAMMAR_LESSON_AUDIO.A;
-    playVoice(sectionAudio[page]);
+    const delay = page === 0 ? 120 : 0;
+    const timer = setTimeout(() => {
+      playVoice(sectionAudio[page]);
+    }, delay);
+    return () => clearTimeout(timer);
   }, [page, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Stop audio on unmount
+  useEffect(() => {
+    return () => stopVoice();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const advance = () => {
     stopVoice();

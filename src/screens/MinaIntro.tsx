@@ -4,7 +4,7 @@ import { useGameStore } from '../store/gameStore';
 import { MINA_INTRO_DIALOGUES } from '../data/dialogues';
 import { ASSETS } from '../data/assets';
 import { useMinaBg } from '../hooks/useMinaBg';
-import { useVoiceAudio } from '../components/AudioManager'; // ← FIX: use the hook
+import { useVoiceAudio } from '../components/AudioManager';
 
 // ── Floating particle ──────────────────────────────────────────────────────
 function Particle({ delay, x, size }: { delay: number; x: string; size: number }) {
@@ -65,7 +65,6 @@ export default function MinaIntro() {
   const minaBg = useMinaBg();
   const [bgSrcIdx, setBgSrcIdx] = useState(0);
 
-  // ✅ FIX: use the hook instead of raw new Audio() — this respects voiceVolume
   const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
   const current = MINA_INTRO_DIALOGUES[idx];
@@ -77,9 +76,14 @@ export default function MinaIntro() {
     return () => clearInterval(t);
   }, []);
 
-  // Play audio for the current line using the hook (voiceVolume-aware)
+  // FIX: delay 120ms on first line (idx === 0) so TeacherIntro's audio
+  // finishes stopping before we start playing — prevents the "hey hey" double.
   useEffect(() => {
-    playVoice(MINA_INTRO_DIALOGUES[idx].audio);
+    const delay = idx === 0 ? 120 : 0;
+    const timer = setTimeout(() => {
+      playVoice(MINA_INTRO_DIALOGUES[idx].audio);
+    }, delay);
+    return () => clearTimeout(timer);
   }, [idx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Stop audio on unmount
@@ -88,11 +92,14 @@ export default function MinaIntro() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const advance = () => {
-    stopVoice();
     if (isLast) {
+      // FIX: do NOT call stopVoice() here before navigating to GRAMMAR_LESSON.
+      // The unmount cleanup above handles stopping. Calling stop then immediately
+      // mounting GrammarLesson (which also plays on mount) caused the double-play.
       useGameStore.getState().setSection('A');
       goToScene('GRAMMAR_LESSON');
     } else {
+      stopVoice();
       setIdx(i => i + 1);
     }
   };
