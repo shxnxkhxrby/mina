@@ -174,8 +174,8 @@ export default function StoreScreen() {
   const [minaLineIdx, setMinaLineIdx] = useState(0);
   const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
-  // ── Tap-rate lock: prevents rapid multi-tap from skipping multiple dialogue
-  //    lines or phases in a single burst. Each advance call locks for 350ms.
+  // ── Tap-rate lock: prevents rapid multi-tap from advancing dialogue or
+  //    phases more than once per 350 ms.
   const advanceLocked = useRef(false);
   const withLock = (fn: () => void) => {
     if (advanceLocked.current) return;
@@ -183,6 +183,14 @@ export default function StoreScreen() {
     fn();
     setTimeout(() => { advanceLocked.current = false; }, 350);
   };
+
+  // ── Keep a ref in sync with qIdx so handleNext always reads the current
+  //    value even inside closures created before the last re-render.
+  const qIdxRef = useRef(0);
+
+  // ── Synchronously blocks a second answer attempt on the same question
+  //    before React has had a chance to re-render and disable the buttons.
+  const answeredRef = useRef(false);
 
   const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
   const [bgIndex, setBgIndex] = useState(0);
@@ -207,6 +215,9 @@ export default function StoreScreen() {
     return () => clearInterval(t);
   }, []);
 
+  // Keep qIdxRef in sync whenever qIdx state changes (e.g. from external resets).
+  useEffect(() => { qIdxRef.current = qIdx; }, [qIdx]);
+
   useEffect(() => {
     if (phase !== 'mina_closing') return;
     playVoice(MINA_CLOSING_AUDIO[minaLineIdx]);
@@ -222,7 +233,11 @@ export default function StoreScreen() {
   });
 
   const handleAnswer = (i: number) => {
-    if (selected !== null) return;
+    // Block if already answered — checked via ref so it's synchronous,
+    // not dependent on React re-rendering selected state first.
+    if (answeredRef.current) return;
+    answeredRef.current = true;
+
     setSelected(i);
     const correct = currentQ.choices[i].isCorrect;
     setIsCorrect(correct);
@@ -234,8 +249,12 @@ export default function StoreScreen() {
   };
 
   const handleNext = () => withLock(() => {
-    if (qIdx + 1 >= totalQ) { setPhase('done'); return; }
-    setQIdx(i => i + 1);
+    // Read from ref so we always have the up-to-date index, never a stale closure.
+    const nextIdx = qIdxRef.current + 1;
+    if (nextIdx >= totalQ) { setPhase('done'); return; }
+    qIdxRef.current = nextIdx;
+    setQIdx(nextIdx);
+    answeredRef.current = false;   // reset for the incoming question
     setSelected(null); setFeedbackText('');
     setIsCorrect(false); setPhase('question');
   });
@@ -256,6 +275,8 @@ export default function StoreScreen() {
   const handleRetry = () => {
     const next = currentQuestionSet === 'A' ? 'B' : 'A';
     setQuestionSet(next);
+    qIdxRef.current = 0;
+    answeredRef.current = false;
     setQIdx(0); setSelected(null);
     scoreRef.current = 0; setScoreDisplay(0);
     setFeedbackText(''); setResults([]);
