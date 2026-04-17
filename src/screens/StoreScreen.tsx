@@ -174,6 +174,16 @@ export default function StoreScreen() {
   const [minaLineIdx, setMinaLineIdx] = useState(0);
   const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
+  // ── Tap-rate lock: prevents rapid multi-tap from skipping multiple dialogue
+  //    lines or phases in a single burst. Each advance call locks for 350ms.
+  const advanceLocked = useRef(false);
+  const withLock = (fn: () => void) => {
+    if (advanceLocked.current) return;
+    advanceLocked.current = true;
+    fn();
+    setTimeout(() => { advanceLocked.current = false; }, 350);
+  };
+
   const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
   const [bgIndex, setBgIndex] = useState(0);
   const [bgFailed, setBgFailed] = useState(false);
@@ -206,10 +216,10 @@ export default function StoreScreen() {
 
   const isLastSectionDStore = currentSection === 'D' && currentStoreIndex === section.stores.length - 1;
 
-  const advanceGreeting = () => {
+  const advanceGreeting = () => withLock(() => {
     if (greetIdx + 1 < greetings.length) setGreetIdx(i => i + 1);
     else setPhase('intro');
-  };
+  });
 
   const handleAnswer = (i: number) => {
     if (selected !== null) return;
@@ -223,12 +233,12 @@ export default function StoreScreen() {
     setPhase('answered');
   };
 
-  const handleNext = () => {
+  const handleNext = () => withLock(() => {
     if (qIdx + 1 >= totalQ) { setPhase('done'); return; }
     setQIdx(i => i + 1);
     setSelected(null); setFeedbackText('');
     setIsCorrect(false); setPhase('question');
-  };
+  });
 
   const handleFinish = () => {
     completeStore(section.id, store.id, scoreRef.current);
@@ -237,11 +247,11 @@ export default function StoreScreen() {
     else goToScene('FEEDBACK');
   };
 
-  const handleMinaNext = () => {
+  const handleMinaNext = () => withLock(() => {
     stopAudio();
     if (minaLineIdx + 1 < MINA_LINES.length) setMinaLineIdx(l => l + 1);
     else goToScene('SCORE_SUMMARY');
-  };
+  });
 
   const handleRetry = () => {
     const next = currentQuestionSet === 'A' ? 'B' : 'A';
