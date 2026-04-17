@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { SECTIONS } from '../data/sections';
@@ -11,6 +11,26 @@ import { getLevelTheme } from '../data/levelThemes';
 import { useVoiceAudio } from '../components/AudioManager';
 
 type Phase = 'greeting' | 'intro' | 'question' | 'answered' | 'done' | 'mina_closing';
+
+// ── Fisher-Yates shuffle (returns a new array, never mutates) ──────────────
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+type ShuffledQuestion = {
+  id: string;
+  npcDialogueBefore: string;
+  questionText: string;
+  grammarRule: string;
+  feedbackCorrect: string;
+  feedbackWrong: string;
+  choices: { text: string; isCorrect: boolean }[];
+};
 
 const MINA_LINES = [
   "Congratulations! 🎉 You have completed learning the three major grammar areas: subject-verb agreement, prepositions of time and manner, and perfect tenses. That is not a small achievement—it's a big step forward in your journey as a learner.",
@@ -135,6 +155,15 @@ export default function StoreScreen() {
   const theme = getLevelTheme(currentStoreIndex);
   const [badgeGradStart, badgeGradEnd] = THEME_BADGE[currentStoreIndex] ?? THEME_BADGE[0];
 
+  // Shuffle questions once, and shuffle each question's choices once.
+  // useMemo re-runs whenever the question set changes (e.g. on retry with set B).
+  const shuffledQuestions = useMemo<ShuffledQuestion[]>(() => {
+    return shuffle(qSet.questions).map(q => ({
+      ...q,
+      choices: shuffle(q.choices),
+    }));
+  }, [qSet]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const [phase, setPhase] = useState<Phase>(greetings.length > 0 ? 'greeting' : 'intro');
   const [greetIdx, setGreetIdx] = useState(0);
   const [qIdx, setQIdx] = useState(0);
@@ -162,8 +191,8 @@ export default function StoreScreen() {
     D: 'linear-gradient(160deg,#F0D0FF 0%,#E0A0F0 50%,#B060D0 100%)',
   };
 
-  const currentQ = qSet.questions[qIdx];
-  const totalQ = qSet.questions.length;
+  const currentQ = shuffledQuestions[qIdx];
+  const totalQ = shuffledQuestions.length;
   const currentGreet = greetings[greetIdx];
 
   useEffect(() => {
