@@ -21,7 +21,7 @@ export const SECTIONS: Section[] = [
     },
     stores: [
       {
-        id: 'A1', name: "Aling Liling's", npcName: 'Aling Liling', emoji: '👵', description: 'Past Perfect Tense',
+        id: 'A1', name: "Store 1", npcName: 'Aling Liling', emoji: '👵', description: 'Past Perfect Tense',
         questionSets: [
           { id: 'A', questions: [
             { id:'A1A1', npcDialogueBefore:"Before the festival became popular, our ancestors had already created special recipes. Let's see if you understand.", questionText:'"Before Minasa spread, people ____ it in villages."', choices:[{text:'A. will have made',isCorrect:false},{text:'B. make',isCorrect:false},{text:'C. have made',isCorrect:false},{text:'D. had made',isCorrect:true}], feedbackCorrect:"That's right! Past perfect shows what was already done before another action. Long before the parade and festivities, the villagers had already baked these cookies as part of their daily lives.", feedbackWrong:"That's not quite correct, my dear, but that's alright. These things can be tricky at first — you'll get the hang of it as you go. The answer is D. 'had made.'", grammarRule:"Past Perfect: had + past participle" },
@@ -40,7 +40,7 @@ export const SECTIONS: Section[] = [
         ]
       },
       {
-        id: 'A2', name: "Zeny's", npcName: 'Zeny', emoji: '👩‍🍳', description: 'Present Perfect Tense',
+        id: 'A2', name: "Store 2", npcName: 'Zeny', emoji: '👩‍🍳', description: 'Present Perfect Tense',
         questionSets: [
           { id: 'A', questions: [
             { id:'A2A1', npcDialogueBefore:"Hello! Looking for ingredients? I have used fresh coconut for many years. Let's test your knowledge.", questionText:'"Which is correct?"', choices:[{text:'A. She had used coconut.',isCorrect:false},{text:'B. She will have used coconut.',isCorrect:false},{text:'C. She has used coconut.',isCorrect:true},{text:'D. She have used coconut.',isCorrect:false}], feedbackCorrect:"Perfect! Present perfect shows something that started before and continues now. Coconut has always been part of the recipe.", feedbackWrong:"The answer is C. 'She has used coconut.' With he/she/it, use HAS + past participle.", grammarRule:"Present Perfect: have/has + past participle." },
@@ -59,7 +59,7 @@ export const SECTIONS: Section[] = [
         ]
       },
       {
-        id: 'A3', name: "Elsa's", npcName: 'Elsa', emoji: '🌸', description: 'Future Perfect Tense',
+        id: 'A3', name: "Store 3", npcName: 'Elsa', emoji: '🌸', description: 'Future Perfect Tense',
         questionSets: [
           { id: 'A', questions: [
             { id:'A3A1', npcDialogueBefore:"Welcome! Timing is everything in baking. By tomorrow, I will have completed all preparations. Let's see if you can apply future perfect.", questionText:'"Before the festival starts, we ____ everything."', choices:[{text:'A. have prepared',isCorrect:false},{text:'B. prepare',isCorrect:false},{text:'C. had prepared',isCorrect:false},{text:'D. will have prepared',isCorrect:true}], feedbackCorrect:"Excellent! Future perfect shows what will already be done before another future event.", feedbackWrong:"D — 'will have prepared.' Future Perfect = will have + past participle.", grammarRule:"Future Perfect: will have + past participle." },
@@ -117,7 +117,7 @@ export const SECTIONS: Section[] = [
         ]
       },
       {
-        id: 'B2', name: 'Gatas Tindhan', npcName: 'Milk Shopkeeper', emoji: '🥛', description: 'SVA Rule 4: Quantifiers',
+        id: 'B2', name: 'Gatas Tindahan', npcName: 'Milk Shopkeeper', emoji: '🥛', description: 'SVA Rule 4: Quantifiers',
         questionSets: [
           { id: 'A', questions: [
             { id:'B2A1', npcDialogueBefore:"Good day! Looking for milk? Let's check Rule 4.", questionText:'"Each of the cows ____ healthy today."', choices:[{text:'A. are',isCorrect:false},{text:'B. is',isCorrect:true}], feedbackCorrect:"That's right! 'Each' is singular, so the verb is 'is.'", feedbackWrong:"B — 'is.' 'Each' is always singular → 'is.'", grammarRule:"'Each' always takes a singular verb." },
@@ -177,7 +177,7 @@ export const SECTIONS: Section[] = [
     },
     stores: [
       {
-        id: 'C1', name: 'John Ray', npcName: 'John Ray', emoji: '🧑‍🦱', description: 'Prepositions of Time',
+        id: 'C1', name: 'Rider 1', npcName: 'John Ray', emoji: '🧑‍🦱', description: 'Prepositions of Time',
         questionSets: [
           { id: 'A', questions: [
             { id:'C1A1', npcDialogueBefore:"Let's see if you remember the schedule of the ride!", questionText:'"At what time did the ride start?"', choices:[{text:'A. It started in 5:30 AM.',isCorrect:false},{text:'B. It started at 5:30 AM.',isCorrect:true}], feedbackCorrect:"Great! You got it. Remember, 'at' is always for exact times.", feedbackWrong:"Almost! The correct answer is 'at 5:30 AM.' AT = exact clock time.", grammarRule:"AT + exact clock time" },
@@ -196,7 +196,7 @@ export const SECTIONS: Section[] = [
         ]
       },
       {
-        id: 'C2', name: 'Al', npcName: 'Al', emoji: '👨‍🔧', description: 'Prepositions of Manner',
+        id: 'C2', name: 'Rider 2', npcName: 'Al', emoji: '👨‍🔧', description: 'Prepositions of Manner',
         questionSets: [
           { id: 'A', questions: [
             { id:'C2A1', npcDialogueBefore:"Alright! Let's focus on how things were done during the ride.", questionText:'"How did we travel during the ride?"', choices:[{text:'A. We traveled on bike.',isCorrect:false},{text:'B. We traveled in bike.',isCorrect:false},{text:'C. We traveled bike with.',isCorrect:false},{text:'D. We traveled by bike.',isCorrect:true}], feedbackCorrect:"Exactly! 'By' shows the mode of travel. Great job!", feedbackWrong:"The answer is 'by bike.' BY = mode of travel.", grammarRule:"BY + mode of travel or action" },
@@ -215,7 +215,7 @@ export const SECTIONS: Section[] = [
         ]
       },
       {
-        id: 'C3', name: 'Bhea', npcName: 'Bhea', emoji: '👩‍🎤', description: 'Integrated: Time & Manner',
+        id: 'C3', name: 'Rider 3', npcName: 'Bhea', emoji: '👩‍🎤', description: 'Integrated: Time & Manner',
         questionSets: [
           { id: 'A', questions: [
             { id:'C3A1', npcDialogueBefore:"Now let's see if you can combine both time and manner!", questionText:'"What time did the ride begin and how did the riders travel?"', choices:[{text:'A. It began in 6 AM by bike.',isCorrect:false},{text:'B. It began on 6 AM by bike.',isCorrect:false},{text:'C. It began at 6 AM in bike.',isCorrect:false},{text:'D. It began at 6 AM by bike.',isCorrect:true}], feedbackCorrect:"Exactly! You combined time and manner perfectly. AT = exact time, BY = mode of travel.", feedbackWrong:"The correct answer is 'at 6 AM by bike.' AT = exact time; BY = mode of travel.", grammarRule:"AT + exact time; BY + mode of travel" },
