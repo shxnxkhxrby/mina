@@ -692,17 +692,17 @@ export default function AdvancedStore() {
     advancedLevelScores, goToScene,
   } = useGameStore();
 
-  const section = SECTIONS.find(s => s.id === currentSection);
-  if (!section) return null;
-  const store = section.stores[currentStoreIndex];
-  if (!store) return null;
+  // Safe derived values — never null so hooks always run
+  const safeStoreIndex = Math.min(Math.max(currentStoreIndex ?? 0, 0), MASTERY_QUIZZES.length - 1);
+  const section = SECTIONS.find(s => s.id === currentSection) ?? SECTIONS[0];
+  const store = section.stores[safeStoreIndex] ?? section.stores[0];
 
   // storeIndex 0 → Perfect Tenses, 1 → Prepositions, 2 → SVA
-  const quizIndex = currentStoreIndex;
+  const quizIndex = safeStoreIndex;
   const masteryQuiz = MASTERY_QUIZZES[quizIndex] ?? MASTERY_QUIZZES[0];
   const meta = LEVEL_META[quizIndex] ?? LEVEL_META[0];
 
-  const bgCandidates = getLevelBgCandidates(section.id, currentStoreIndex);
+  const bgCandidates = getLevelBgCandidates(section.id, safeStoreIndex);
   const [bgIndex, setBgIndex] = useState(0);
   const [bgFailed, setBgFailed] = useState(false);
 
@@ -795,6 +795,8 @@ export default function AdvancedStore() {
     setResults([]);
     setIsCorrect(false);
     setQuizFinished(false);
+    setBgIndex(0);
+    setBgFailed(false);
     setPhase('question');
   };
 
@@ -809,7 +811,7 @@ export default function AdvancedStore() {
 
       {!bgFailed && (
         <img
-          key={`${currentStoreIndex}-${bgIndex}`}
+          key={`${safeStoreIndex}-${bgIndex}`}
           src={bgCandidates[bgIndex]}
           alt=""
           style={{

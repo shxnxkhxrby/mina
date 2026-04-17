@@ -144,12 +144,9 @@ export default function StoreScreen() {
     completeStore, addScore, goToScene, setQuestionSet,
   } = useGameStore();
 
-  const section = ALL_SECTIONS.find(s => s.id === currentSection);
-  if (!section) return null;
-  const store = section.stores[currentStoreIndex];
-  if (!store) return null;
+  const section = ALL_SECTIONS.find(s => s.id === currentSection) ?? ALL_SECTIONS[0];
+  const store = section.stores[Math.min(currentStoreIndex, section.stores.length - 1)] ?? section.stores[0];
   const qSet = store.questionSets.find(qs => qs.id === currentQuestionSet) ?? store.questionSets[0];
-  if (!qSet) return null;
 
   const greetings = STORE_GREETINGS[store.id]?.lines || [];
   const theme = getLevelTheme(currentStoreIndex);

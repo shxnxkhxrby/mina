@@ -86,16 +86,15 @@ export default function FeedbackScreen() {
   const { play: playVoice, stop: stopVoice } = useVoiceAudio();
 
   const ALL_SECTIONS = [...SECTIONS, SECTION_D];
-  const section = ALL_SECTIONS.find(s => s.id === currentSection);
-  if (!section) return null;
-
-  const store = section.stores[currentStoreIndex];
-  if (!store) return null;
+  // Safe fallbacks — never null so hooks always run before any guard
+  const section = ALL_SECTIONS.find(s => s.id === currentSection) ?? ALL_SECTIONS[0];
+  const safeStoreIndex = Math.min(currentStoreIndex, section.stores.length - 1);
+  const store = section.stores[safeStoreIndex] ?? section.stores[0];
 
   const prog = sectionProgress[currentSection!] || {};
   const score = prog[store.id]?.bestScore || 0;
   const passed = score >= 4;
-  const nextStoreIndex = currentStoreIndex + 1;
+  const nextStoreIndex = safeStoreIndex + 1;
   const hasNextStore = nextStoreIndex < section.stores.length;
   const isSectionComplete = passed && !hasNextStore;
   const isSectionD = currentSection === 'D';
@@ -125,6 +124,9 @@ export default function FeedbackScreen() {
     const src = SECTION_CONGRATS_AUDIO[currentSection ?? 'A'];
     playVoice(src);
   }, [phase, currentSection]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Guard: if currentSection is genuinely missing, redirect cleanly
+  if (!currentSection) { goToScene('SECTION_SELECT'); return null; }
 
   const handleCongratsClick = () => {
     stopVoice();
