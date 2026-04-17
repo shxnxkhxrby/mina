@@ -522,37 +522,106 @@ export default function StoreScreen() {
       )}
 
       {/* QUESTION / ANSWERED PHASE */}
-      {(phase === 'question' || phase === 'answered') && renderDialoguePanel(
-        <div style={{
-          background: 'linear-gradient(180deg, #FFF8D6 0%, #FFEEA0 100%)',
-          border: '3px solid #F5C84A',
-          borderRadius: '18px',
-          padding: 'clamp(14px,2.5vh,24px) clamp(14px,2.5vw,26px)',
-          boxShadow: '0 6px 28px rgba(180,120,0,0.2)',
-        }}>
-          {currentQ.npcDialogueBefore && (
-            <div style={{
-              fontFamily: 'var(--font-body)',
-              fontSize: 'clamp(0.82rem,1.6vw,1rem)',
-              color: '#5A3E00', lineHeight: 1.5,
-              marginBottom: '8px', fontStyle: 'italic',
-            }}>{currentQ.npcDialogueBefore}</div>
-          )}
-          {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
-            <div style={{
-              fontFamily: 'var(--font-title)',
-              fontSize: 'clamp(0.9rem,1.8vw,1.15rem)',
-              color: '#2A1800', fontWeight: 800, lineHeight: 1.4,
-              marginBottom: '10px',
-            }}>
-              {currentQ.questionText}
-              <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>
-            </div>
-          )}
-          {renderChoices()}
-          {renderProgressStrip()}
-        </div>,
-        qIdx
+      {/* ── CONVERSATIONAL LAYOUT: NPC bubble top, student choices bottom ── */}
+      {(phase === 'question' || phase === 'answered') && (
+        <>
+          {/* NPC speech bubble — top-right, aligned with sprite */}
+          <div style={{
+            position: 'absolute',
+            top: 'clamp(48px,9vh,80px)',
+            right: 'clamp(12px,2.5vw,28px)',
+            left: 'clamp(130px,28vw,360px)',
+            zIndex: 20,
+          }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`npc-${qIdx}`}
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.26, ease: 'easeOut' }}
+              >
+                {/* NPC name tag */}
+                <div style={{ marginBottom: '6px' }}>
+                  <SpeakerBadge label={store.npcName} gradStart={badgeGradStart} gradEnd={badgeGradEnd} />
+                </div>
+                <ScallopedBubble>
+                  {/* NPC dialogue line */}
+                  {currentQ.npcDialogueBefore && (
+                    <div style={{
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 'clamp(0.78rem,1.5vw,0.95rem)',
+                      color: '#5A3E00', lineHeight: 1.55,
+                      marginBottom: currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore ? '10px' : 0,
+                      fontStyle: 'italic',
+                    }}>{currentQ.npcDialogueBefore}</div>
+                  )}
+                  {/* Question text (shown as NPC's actual question) */}
+                  {currentQ.questionText && currentQ.questionText !== currentQ.npcDialogueBefore && (
+                    <div style={{
+                      fontFamily: 'var(--font-title)',
+                      fontSize: 'clamp(0.88rem,1.75vw,1.12rem)',
+                      color: '#2A1800', fontWeight: 800, lineHeight: 1.4,
+                    }}>
+                      {currentQ.questionText}
+                      <span style={{ opacity: showCursor ? 1 : 0, marginLeft: '3px', color: badgeGradStart }}>▌</span>
+                    </div>
+                  )}
+                </ScallopedBubble>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Student reply panel — anchored to the bottom, right-aligned to feel like "your" side */}
+          <div style={{
+            position: 'absolute',
+            bottom: 'clamp(14px,3vh,32px)',
+            right: 'clamp(12px,2.5vw,28px)',
+            left: 'clamp(130px,28vw,360px)',
+            zIndex: 20,
+          }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`student-${qIdx}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ duration: 0.28, ease: 'easeOut', delay: 0.08 }}
+              >
+                {/* "You" label — right-aligned to signal student side */}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '6px' }}>
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    background: 'linear-gradient(135deg,#2E75B6,#1A5A9A)',
+                    border: '2px solid #FFD700',
+                    borderRadius: '10px',
+                    padding: '3px 14px 3px 18px',
+                    clipPath: 'polygon(0% 0%, calc(100% - 8px) 0%, 100% 50%, calc(100% - 8px) 100%, 0% 100%)',
+                    boxShadow: '0 3px 10px rgba(0,0,0,0.28)',
+                  }}>
+                    <span style={{
+                      fontFamily: 'var(--font-title)', fontSize: 'clamp(0.72rem,1.4vw,0.92rem)',
+                      color: 'white', fontWeight: 900, letterSpacing: '2px',
+                      textShadow: '1px 2px 0 rgba(0,0,0,0.3)',
+                    }}>YOU 🎓</span>
+                  </div>
+                </div>
+
+                {/* Choice buttons */}
+                <div style={{
+                  background: 'linear-gradient(180deg,rgba(210,235,255,0.97) 0%,rgba(185,218,255,0.97) 100%)',
+                  border: '3px solid #2E75B6',
+                  borderRadius: '18px',
+                  padding: 'clamp(10px,1.8vh,18px) clamp(12px,2vw,20px)',
+                  boxShadow: '0 6px 24px rgba(46,117,182,0.22)',
+                }}>
+                  {renderChoices()}
+                  {renderProgressStrip()}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </>
       )}
 
       {/* ANSWER RESULT OVERLAY */}
